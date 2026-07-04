@@ -12,6 +12,9 @@ window.YAKO_STRINGS.en = {
   countIntro: "The next number is {num}. First, find the number {digit}!",
   sound: "{letter} says {sound}. {letter} is for {word}! Find the letter {letter}!",
   howMany: "How many {creatures}? Count them, then press the number!",
+  // recorded math clips are creature-generic (the creatures are shown on screen)
+  mathAddClip: "There are {a}, and {b} more come along! How many all together?",
+  mathSubClip: "There are {a}, and {b} swim away. How many are left?",
   doneSpellClip: "You spelled the word! Amazing!",
   doneNumClip:   "You made the number! Amazing!",
   makeNumber:    "Let's make a big number!",

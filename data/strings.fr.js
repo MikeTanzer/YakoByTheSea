@@ -20,6 +20,8 @@ window.YAKO_STRINGS.fr = {
     octopuses: "Combien de poulpes ? Compte-les, puis appuie sur le chiffre !",
     dolphins:  "Combien de dauphins ? Compte-les, puis appuie sur le chiffre !"
   },
+  mathAddClip: "Il y en a {a}, et {b} de plus ! Combien en tout ?",
+  mathSubClip: "Il y en a {a}, et {b} s'en vont. Combien en reste-t-il ?",
   doneSpellClip: "Tu as épelé le mot ! Super !",
   doneNumClip:   "Tu as formé le nombre ! Super !",
   makeNumber:    "Formons un grand nombre !",

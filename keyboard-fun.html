@@ -1278,18 +1278,22 @@
     if (s === 'letter') { playPersona('find_for_' + challenge.itemKey, t.findFor(cname, ans), { rate: 0.95 }); return; }
     // spelling: say the word first — "Let's spell CAR. Find the letter C!"
     if (s === 'seq' && mode === 'spelling') { playPersona('spell_' + challenge.word, t.spell(challenge.word, ans), { rate: 0.95 }); return; }
-    // counting: speak the FULL multi-digit number, then the first digit (dynamic → synth)
-    if (s === 'seq')   { speakName(t.countIntro(challenge.word, ans), { rate: 0.95 }); return; }
+    // counting: speak the FULL multi-digit number, then the first digit
+    // (all 90 two-digit numbers are recorded; longer numbers fall back to synth)
+    if (s === 'seq')   { playPersona('count_' + challenge.word, t.countIntro(challenge.word, ans), { rate: 0.95 }); return; }
     if (s === 'sound') { playPersona('sound_' + ans, t.sound(ans, challenge.word, challenge.sound), { rate: 0.95 }); return; }
     if (s === 'listen'){ playPersona('sound_' + ans, t.sound(ans, challenge.word, challenge.sound), { rate: 0.95 }); return; }
     if (s === 'count') { playPersona('howmany_' + challenge.creatures, t.howMany(locCreat(challenge.creatures)), { rate: 0.95 }); return; }
     if (s === 'number'){ playPersona('which_one', t.prompt.catNum, { rate: 0.95 }); return; }               // multiple-choice picker
-    // Add & Subtract stays synth: the story problem contains random numbers ("3 crabs and 4 more…").
-    let phrase;
-    if (s === 'math')  phrase = (challenge.op === '+') ? t.mathAdd(challenge.a, challenge.b, locCreat(challenge.creature))
-                                                       : t.mathSub(challenge.a, challenge.b, locCreat(challenge.creature));
-    else phrase = t.find(ans);
-    speakName(phrase, { rate: 0.95 });
+    // Add & Subtract: every possible problem has a recorded clip (creatures shown on screen).
+    if (s === 'math') {
+      const key = 'math_' + (challenge.op === '+' ? 'add' : 'sub') + '_' + challenge.a + '_' + challenge.b;
+      const phrase = (challenge.op === '+') ? t.mathAdd(challenge.a, challenge.b, locCreat(challenge.creature))
+                                            : t.mathSub(challenge.a, challenge.b, locCreat(challenge.creature));
+      playPersona(key, phrase, { rate: 0.95 });
+      return;
+    }
+    speakName(t.find(ans), { rate: 0.95 });
   }
 
   // ---------- On-screen keyboard ----------

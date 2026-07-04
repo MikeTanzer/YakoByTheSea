@@ -72,6 +72,14 @@ function expectedClips(lang) {
   for (const w of new Set([].concat(...Object.values(LSN.WORDS)))) {
     clips[`spell_${w}`] = fmt(c.spell, { word: w, letter: w[0] });
   }
+  // Add & Subtract: every possible problem (sum ≤ 9, result ≥ 1); audio is creature-generic
+  for (let a = 1; a <= 8; a++) for (let b = 1; b <= 9 - a; b++)
+    clips[`math_add_${a}_${b}`] = fmt(c.mathAddClip, { a, b });
+  for (let a = 2; a <= 9; a++) for (let b = 1; b <= a - 1; b++)
+    clips[`math_sub_${a}_${b}`] = fmt(c.mathSubClip, { a, b });
+  // counting intros for every two-digit number (longer numbers stay synth)
+  for (let n = 10; n <= 99; n++)
+    clips[`count_${n}`] = fmt(c.countIntro, { num: n, digit: String(n)[0] });
   return clips;
 }
 

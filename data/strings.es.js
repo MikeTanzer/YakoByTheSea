@@ -20,6 +20,8 @@ window.YAKO_STRINGS.es = {
     octopuses: "¿Cuántos pulpos hay? ¡Cuéntalos y aprieta el número!",
     dolphins:  "¿Cuántos delfines hay? ¡Cuéntalos y aprieta el número!"
   },
+  mathAddClip: "¡Hay {a}, y {b} más! ¿Cuántos hay en total?",
+  mathSubClip: "Hay {a}, y {b} se van nadando. ¿Cuántos quedan?",
   doneSpellClip: "¡Deletreaste la palabra! ¡Increíble!",
   doneNumClip:   "¡Formaste el número! ¡Increíble!",
   makeNumber:    "¡Vamos a formar un número grande!",
