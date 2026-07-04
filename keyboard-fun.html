@@ -713,7 +713,16 @@
     #startBtn .title { font-size: 8.5vw; }
     #startBtn .sub { font-size: 3.6vw; }
     #chooseBtn { font-size: 4.2vw; padding: 1.2vh 6vw; }
-    .winBtn { font-size: 4.4vw; padding: 1.4vh 6vw; }
+
+    /* win card sized for phones: everything fits, long content scrolls */
+    .winCard { max-width: 92vw; max-height: 88vh; overflow-y: auto; padding: 2vh 4vw; box-sizing: border-box; }
+    .winYako { width: 34vw; max-width: none; margin-top: 0; }
+    .winTitle { font-size: 5.5vw; }
+    .winStars { font-size: 8vw; }
+    .winTime, .winBest, .winMist, .winImprove { font-size: 3.6vw; }
+    .winVerdict { font-size: 4vw; max-width: 100%; }
+    .winBtns { flex-direction: column; width: 100%; gap: 1.2vh; }
+    .winBtn { font-size: 4.4vw; padding: 1.4vh 6vw; width: 100%; box-sizing: border-box; }
 
     /* name field: centered label over a full-width input */
     .homeCard .nameRow { flex-direction: column; gap: 1vh; width: 100%; font-size: 5vw; }
@@ -971,13 +980,7 @@
   const yakoEl    = document.getElementById('yako');
   const freeLetterEl = document.getElementById('freeLetter');
 
-  // Carmel scene backgrounds used in Free Play (rotate through them)
-  const FREE_SCENES = ['scene1.png','scene2.png','scene3.png','scene4.png','scene5.png','scene6.png'];
-  let freeSceneIdx = 0, freeKeyCount = 0;
-  function setFreeScene(i) {
-    freeSceneIdx = ((i % FREE_SCENES.length) + FREE_SCENES.length) % FREE_SCENES.length;
-    game.style.background = "url('" + FREE_SCENES[freeSceneIdx] + "') center / cover no-repeat";
-  }
+  let freeKeyCount = 0;
 
   // Use the real Yako artwork if present; otherwise fall back to an emoji.
   function makeImg(src, cls, emoji) {
@@ -1030,6 +1033,7 @@
   let totalStars = 0;
   let winTimer = null, fbTimer = null;
   let hintTimer = null, hintStage = 0;   // 0 = hidden, 1 = 9-key cluster, 2 = exact key revealed
+  const HINT_DELAYS = { cluster: 5000, exact: 4000 };   // idle ms before each help stage
 
   // ---------- localStorage helpers ----------
   function getNum(k) { try { const v = localStorage.getItem(k); return v == null ? null : parseFloat(v); } catch (e) { return null; } }
@@ -1354,7 +1358,7 @@
   function scheduleHint() {
     clearHintTimer();
     if (!challenge || mode === 'free' || challenge.style === 'number' || locked || hintStage >= 2) return;
-    const delay = hintStage === 0 ? 5000 : 4000;
+    const delay = hintStage === 0 ? HINT_DELAYS.cluster : HINT_DELAYS.exact;
     hintTimer = setTimeout(() => {
       if (hintStage === 0) { hintStage = 1; nearKeysHint(); scheduleHint(); }
       else if (hintStage === 1) { hintStage = 2; revealAnswerKey(); }
@@ -1528,7 +1532,6 @@
     }, dur * 1000 + 300);
   }
 
-  function describeKey(k) { return /[0-9]/.test(k) ? "the number " + k : "the letter " + k; }
   function wrongPhrase(pressed) {
     const t = L();
     if (challenge.style === 'count')  return t.wrongCount(locCreat(challenge.creatures));
@@ -1627,13 +1630,16 @@
     playPersonaChain(chain, L().level(level) + ' ' + V[vKey], { rate: 1.0 });
 
     clearTimeout(winTimer);
-    winTimer = setTimeout(() => finishWin(defaultWinAct), 10000);
+    // idle fallback only — a tap still continues instantly. Long enough for the
+    // full spoken chain (level + verdict + what's-next) to finish uncut.
+    winTimer = setTimeout(() => finishWin(defaultWinAct), isCampaign ? 13000 : 11000);
   }
   function finishWin(act) {
     clearTimeout(winTimer);
     if (!winEl.classList.contains('show')) return;
     winEl.classList.remove('show');
     if (act === 'finish') { finishCampaign(); return; }
+    if (act === 'home')   { backToMenu(); return; }         // campaign-finale card → menu
     if (act === 'advance' || act === 'nextlesson') {
       const ni = lessonIdx(mode) + 1;
       if (ni >= LESSONS.length) { finishCampaign(); return; }
@@ -1651,8 +1657,21 @@
   }
   function finishCampaign() {
     setNum('yako_campaign', 0);                             // next START begins at Numbers again
-    playPersona(['cheer_6', 'cheer_8'], L().verdicts.perfect, { rate: 1.0 });
-    backToMenu();
+    defaultWinAct = 'home';
+    winEl.innerHTML =
+      '<div class="winCard">' +
+        '<img class="winYako" src="yako_cheer.png" alt="" onerror="this.style.display=\'none\'">' +
+        '<div class="winTitle">🏆 You finished EVERY lesson!</div>' +
+        '<div class="winStars">★★★★★</div>' +
+        '<div class="winVerdict">' + L().verdicts.perfect + '</div>' +
+        '<div class="winBtns"><button class="winBtn" data-act="home">🏖️ Back to the beach</button></div>' +
+      '</div>';
+    winEl.classList.add('show');
+    winEl.querySelector('.winBtn').addEventListener('click', e => { e.stopPropagation(); finishWin('home'); });
+    confetti(); showBuddy(); playChime(); playApplause(5);
+    playPersonaChain(['level', 'cheer_8', 'verdict_perfect'], L().verdicts.perfect, { rate: 1.0 });
+    clearTimeout(winTimer);
+    winTimer = setTimeout(() => finishWin('home'), 14000);
   }
   winEl.addEventListener('click', () => finishWin(defaultWinAct));
 
@@ -1862,6 +1881,7 @@
     A.setMuted(!A.isMuted());                             // muting also stops all sounds
     soundBtn.classList.toggle('muted', A.isMuted());      // green (on) / red (off)
   });
+  soundBtn.classList.toggle('muted', A.isMuted());        // reflect the persisted mute on load
 
   // ---- Narrator language + character toggles (home menu) ----
   function refreshVoiceUI() {

@@ -10,9 +10,14 @@ window.YAKO = window.YAKO || {};
 window.YAKO.audio = (function () {
   const I = () => window.YAKO.i18n;
 
-  // ----- mute switch -----
+  // ----- mute switch (persisted, like language and persona) -----
   let muted = false;
-  function setMuted(m) { muted = !!m; if (muted) stopAllSounds(); }
+  try { muted = localStorage.getItem('yako_muted') === 'true'; } catch (e) {}
+  function setMuted(m) {
+    muted = !!m;
+    try { localStorage.setItem('yako_muted', String(muted)); } catch (e) {}
+    if (muted) stopAllSounds();
+  }
   function isMuted() { return muted; }
 
   // ----- Web Audio context -----
