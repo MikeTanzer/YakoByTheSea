@@ -5,7 +5,9 @@
 # --- the game ---
 !/.gitignore
 !/README.md
+!/index.html
 !/keyboard-fun.html
+!/.github/
 !/manifest.webmanifest
 !/sw.js
 
