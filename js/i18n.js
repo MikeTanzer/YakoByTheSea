@@ -39,6 +39,7 @@ window.YAKO.i18n = (function () {
       dk: dk,
       find:       a => fmt(c.find, { key: dk(a) }),
       starts:     (n, l) => fmt(c.starts, { name: n, letter: l }),
+      findFor:    (n, l) => fmt(c.findFor, { name: n, letter: l }),
       spell:      (w, l) => fmt(c.spell, { word: w, letter: l }),
       next:       a => fmt(c.next, { key: dk(a) }),
       countIntro: (num, d) => fmt(c.countIntro, { num: num, digit: d }),
@@ -55,7 +56,8 @@ window.YAKO.i18n = (function () {
       level:      lv => fmt(c.level, { level: lv }),
       cheers: c.cheers,
       greet:  c.greet,
-      prompt: c.prompt
+      prompt: c.prompt,
+      verdicts: c.verdicts
     };
   }
   const TR = {};

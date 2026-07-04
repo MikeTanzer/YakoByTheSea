@@ -22,7 +22,9 @@ globalThis.window = globalThis;
 for (const lang of ['en', 'fr', 'es']) {
   await import(pathToFileURL(join(ROOT, 'data', `strings.${lang}.js`)));
 }
+await import(pathToFileURL(join(ROOT, 'data', 'lessons.js')));
 const S = globalThis.YAKO_STRINGS;
+const LSN = globalThis.YAKO_LESSONS;
 
 const LANGS    = ['en', 'fr', 'es'];
 const PERSONAS = ['mom', 'dad', 'grandpa', 'grandma'];   // Isabella / Mark / Brooks / Mabel
@@ -58,6 +60,18 @@ function expectedClips(lang) {
   clips.done_spell  = c.doneSpellClip;
   clips.done_num    = c.doneNumClip;
   clips.make_number = c.makeNumber;
+  // performance-coaching verdicts
+  for (const [k, text] of Object.entries(c.verdicts)) clips[`verdict_${k}`] = text;
+  // "Find the letter R, for Rabbit!" — localized name + localized first letter
+  const deacc = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
+  for (const n of LSN.CATEGORY_NAMES) {
+    const ln = lang === 'en' ? n : (c.names[n] || n);
+    clips[`find_for_${n.toLowerCase()}`] = fmt(c.findFor, { letter: deacc(ln).charAt(0).toUpperCase(), name: ln });
+  }
+  // "Let's spell CAT. Find the letter C!" — one per unique word
+  for (const w of new Set([].concat(...Object.values(LSN.WORDS)))) {
+    clips[`spell_${w}`] = fmt(c.spell, { word: w, letter: w[0] });
+  }
   return clips;
 }
 

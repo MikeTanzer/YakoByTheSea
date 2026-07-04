@@ -5,6 +5,7 @@ window.YAKO_STRINGS.fr = {
   numberKey: "le chiffre {k}",
   find: "Trouve {key} !",
   starts: "{name} commence par {letter}. Trouve {letter} !",
+  findFor: "Trouve la lettre {letter}, comme {name} !",
   spell: "Épelons {word}. Trouve la lettre {letter} !",
   next: "Bravo ! Maintenant trouve {key}.",
   countIntro: "Le prochain nombre est {num}. D'abord, trouve le chiffre {digit} !",
@@ -38,7 +39,17 @@ window.YAKO_STRINGS.fr = {
     cat: "Trouve la première lettre !", catNum: "Lequel est-ce ? Appuie sur le chiffre !",
     spelling: "Épelle le mot !", counting: "Forme le nombre !",
     sounds: "Quel son ? Trouve la lettre !", countobj: "Combien ? Appuie sur le chiffre !",
-    math: "Additionne ! Appuie sur le chiffre !"
+    math: "Additionne ! Appuie sur le chiffre !", listen: "Écoute ! Trouve la lettre !"
+  },
+  verdicts: {
+    best:     "Ouah ! Ton meilleur temps !",
+    perfect:  "Parfait ! Aucune erreur !",
+    faster:   "Tu deviens plus rapide !",
+    good:     "Bon travail ! Encore un peu d'entraînement et ce sera parfait !",
+    slower:   "Un peu plus lent cette fois, mais tu as réussi !",
+    practice: "C'est normal de faire des erreurs ! Prends ton temps et réessaie — tu peux le faire !",
+    next:     "Prépare-toi pour la prochaine leçon !",
+    repeat:   "On s'entraîne encore une fois !"
   },
   names: {
     Red:'Rouge', Orange:'Orange', Yellow:'Jaune', Green:'Vert', Blue:'Bleu', Purple:'Violet',

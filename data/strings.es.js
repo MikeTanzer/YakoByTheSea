@@ -5,6 +5,7 @@ window.YAKO_STRINGS.es = {
   numberKey: "el número {k}",
   find: "¡Encuentra {key}!",
   starts: "{name} empieza con {letter}. ¡Encuentra {letter}!",
+  findFor: "¡Encuentra la letra {letter}, de {name}!",
   spell: "Vamos a deletrear {word}. ¡Encuentra la letra {letter}!",
   next: "¡Muy bien! Ahora encuentra {key}.",
   countIntro: "El siguiente número es {num}. ¡Primero, encuentra el número {digit}!",
@@ -38,7 +39,17 @@ window.YAKO_STRINGS.es = {
     cat: "¡Encuentra la primera letra!", catNum: "¿Cuál es? ¡Aprieta el número!",
     spelling: "¡Deletrea la palabra!", counting: "¡Forma el número!",
     sounds: "¿Qué sonido? ¡Encuentra la letra!", countobj: "¿Cuántos? ¡Aprieta el número!",
-    math: "¡Suma! ¡Aprieta el número!"
+    math: "¡Suma! ¡Aprieta el número!", listen: "¡Escucha! ¡Encuentra la letra!"
+  },
+  verdicts: {
+    best:     "¡Guau! ¡Tu mejor tiempo!",
+    perfect:  "¡Perfecto! ¡Sin errores!",
+    faster:   "¡Cada vez eres más rápido!",
+    good:     "¡Buen trabajo! ¡Un poco más de práctica y será perfecto!",
+    slower:   "¡Un poco más lento esta vez, pero lo lograste!",
+    practice: "¡Está bien equivocarse! Tómate tu tiempo y vuelve a intentarlo — ¡tú puedes!",
+    next:     "¡Prepárate para la próxima lección!",
+    repeat:   "¡Practiquemos una vez más!"
   },
   names: {
     Red:'Rojo', Orange:'Naranja', Yellow:'Amarillo', Green:'Verde', Blue:'Azul', Purple:'Morado',

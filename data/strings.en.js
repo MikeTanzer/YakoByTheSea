@@ -6,6 +6,7 @@ window.YAKO_STRINGS.en = {
   numberKey: "the number {k}",
   find: "Find {key}!",
   starts: "{name} starts with {letter}. Find {letter}!",
+  findFor: "Find the letter {letter}, for {name}!",
   spell: "Let's spell {word}. Find the letter {letter}!",
   next: "Great! Now find {key}.",
   countIntro: "The next number is {num}. First, find the number {digit}!",
@@ -30,7 +31,18 @@ window.YAKO_STRINGS.en = {
     cat: "Find the key it starts with!", catNum: "Which one is it? Press the number!",
     spelling: "Spell the word!", counting: "Build the number!",
     sounds: "What sound? Find the letter!", countobj: "How many? Press the number!",
-    math: "Add it up! Press the number!"
+    math: "Add it up! Press the number!", listen: "Listen! Find the letter!"
+  },
+  // spoken + on-screen performance feedback at the end of a level
+  verdicts: {
+    best:     "Wow! Your best time ever!",
+    perfect:  "Perfect! No mistakes at all!",
+    faster:   "You're getting faster!",
+    good:     "Great work! A little more practice and it'll be perfect!",
+    slower:   "A little slower this time, but you did it!",
+    practice: "It's okay to make mistakes! Take your time and try again — you can do it!",
+    next:     "Get ready for the next lesson!",
+    repeat:   "Let's practice this one more time!"
   },
   // English is the canonical key language — no name translations needed.
   names: {},

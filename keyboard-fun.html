@@ -122,6 +122,61 @@
   #start .modeBtn[data-mode="sounds"]   { --bg: #c2487e; }
   #start .modeBtn[data-mode="countobj"] { --bg: #d98324; }
   #start .modeBtn[data-mode="math"]     { --bg: #4a8f8a; }
+  #start .modeBtn[data-mode="listen"]   { --bg: #7a63d0; }
+  #start .modeBtn[data-mode="listen"] .title { font-size: clamp(15px, 1.5vw, 23px); }
+
+  /* ===== START (campaign) button + lesson chooser ===== */
+  #startBtn {
+    --bg: #e0a11c; position: relative; width: min(840px, 88vw); min-height: clamp(88px, 11vh, 120px);
+    border: 4px solid #f2d274; border-radius: 24px; padding: 1.4vh 1vw 1.1vh; cursor: pointer; text-align: center;
+    color: #fff7e5; font-family: Georgia, serif; overflow: hidden;
+    background:
+      radial-gradient(circle at 20% 15%, rgba(255,255,255,.25), transparent 30%),
+      linear-gradient(180deg, color-mix(in srgb, var(--bg), #fff 16%), var(--bg));
+    box-shadow: 0 9px 0 color-mix(in srgb, var(--bg), #000 38%), 0 16px 22px rgba(34,21,4,.28);
+    outline: 3px solid color-mix(in srgb, var(--bg), #000 30%);
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  #startBtn::before { content: ''; position: absolute; inset: 6px; pointer-events: none;
+    border: 2px solid rgba(255,255,255,.7); border-radius: 18px; }
+  #startBtn:hover { transform: translateY(-2px); }
+  #startBtn:active { transform: translateY(5px);
+    box-shadow: 0 3px 0 color-mix(in srgb, var(--bg), #000 38%), 0 6px 10px rgba(34,21,4,.18); }
+  #startBtn .title { display: block; font-weight: 900; line-height: 1; font-size: clamp(28px, 3vw, 44px);
+    letter-spacing: .1em; margin-bottom: .6vh; text-shadow: 2px 2px 0 rgba(35,22,8,.85); }
+  #startBtn .sub { display: block; font-weight: 900; font-size: clamp(13px, 1.3vw, 20px);
+    font-family: 'Trebuchet MS', Georgia, serif; letter-spacing: .06em; text-shadow: 1px 1px 0 rgba(35,22,8,.7); }
+  #chooseBtn { cursor: pointer; border: 3px solid var(--gold); border-radius: 999px;
+    background: #fff7df; color: #7a5a2e; font-family: 'Baloo 2', Georgia, serif; font-weight: 800;
+    font-size: clamp(14px, 1.3vw, 20px); padding: .8vh 2.4vw; box-shadow: 0 4px 10px rgba(60,45,15,.25);
+    transition: transform .12s ease; }
+  #chooseBtn:hover { transform: translateY(-2px); }
+  #chooseBtn .chev { display: inline-block; transition: transform .2s ease; }
+  .homeCard:not(.lessonsOpen) .btnGrid { display: none; }
+  .homeCard.lessonsOpen #chooseBtn .chev { transform: rotate(180deg); }
+
+  /* ===== In-card challenge layouts: target on top, its picture underneath ===== */
+  .itemCol, .phonCol { display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: .4vh; max-width: 100%; text-align: center; }
+  .itemCol .bigletter { line-height: 1; }
+  .itemCol .swatch, .itemCol .glyph { margin-top: .4vh; }
+  .phonCol .phonLetter { line-height: 1; }
+  .phonCol .phonWord { max-width: 100%; white-space: normal; text-align: center; line-height: 1.15; }
+  .spellPic { text-align: center; line-height: 1; margin-top: .6vh; font-size: 8vh; }
+  .listenPic { font-size: 16vh; }
+
+  /* ===== Level-complete buttons + performance lines ===== */
+  .winMist { font-weight: 800; color: #7a5a2e; }
+  .winVerdict { font-weight: 800; color: var(--blue); max-width: 34em; line-height: 1.25; }
+  .winBtns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 1vh; }
+  .winBtn { cursor: pointer; border: 3px solid var(--gold); border-radius: 999px;
+    background: linear-gradient(180deg, #ffd977, #f0b73c); color: #5b4327;
+    font-family: 'Baloo 2', Georgia, serif; font-weight: 800; font-size: clamp(15px, 1.5vw, 22px);
+    padding: 1vh 2.6vw; box-shadow: 0 5px 0 #b8862a, 0 8px 14px rgba(60,45,15,.3);
+    transition: transform .12s ease, box-shadow .12s ease; }
+  .winBtn:hover { transform: translateY(-2px); }
+  .winBtn:active { transform: translateY(3px); box-shadow: 0 2px 0 #b8862a; }
+  .winBtn.alt { background: linear-gradient(180deg, #9ecdf0, #5ea0d6); border-color: #cfe6f7; box-shadow: 0 5px 0 #2f6fb0, 0 8px 14px rgba(20,45,75,.3); color: #123a5e; }
   /* Language + voice-character toggles */
   .langBar { display: flex; align-items: center; justify-content: center; gap: clamp(12px, 2.4vw, 32px);
     flex-wrap: wrap; margin-top: 1.6vh; }
@@ -377,7 +432,7 @@
   .spellRow .sl.done { color: #2bb673; }
   .spellRow .sl.now  { color: var(--blue); transform: scale(1.14); text-shadow: 0 0 14px rgba(47,111,176,.5); }
   /* give the multi-tile word room inside the painted desktop card */
-  #game.seq-mode .gameStage #target { left: 29%; width: 46%; top: 30%; height: 22%; font-size: inherit; }
+  #game.seq-mode .gameStage #target { left: 27%; width: 50%; top: 26%; height: 32%; font-size: inherit; }
 
   /* Letter Sounds (phonics) */
   .phonRow { display: flex; align-items: center; justify-content: center; gap: .35em; }
@@ -653,6 +708,13 @@
     .homeRibbon { font-size: 3.6vw; padding: .6vh 3.2vw; border-width: 2px; }
     .homeCard { width: 92vw; max-width: 92vw; box-sizing: border-box; padding: 2.4vh 4vw; gap: 1.6vh; border-width: 4px; }
 
+    /* START + lesson chooser sized for phones */
+    #startBtn { width: 100%; min-height: 14vh; border-radius: 22px; }
+    #startBtn .title { font-size: 8.5vw; }
+    #startBtn .sub { font-size: 3.6vw; }
+    #chooseBtn { font-size: 4.2vw; padding: 1.2vh 6vw; }
+    .winBtn { font-size: 4.4vw; padding: 1.4vh 6vw; }
+
     /* name field: centered label over a full-width input */
     .homeCard .nameRow { flex-direction: column; gap: 1vh; width: 100%; font-size: 5vw; }
     .homeCard .nameRow label::before { content: "✦ "; color: var(--gold-d); }
@@ -716,6 +778,8 @@
     #game #panel #target .swatch { width: 22vw; height: 22vw; }
     #game #panel #target .spellRow { gap: 2vw; }
     #game #panel #target .spellRow .sl { font-size: 12vw; }
+    #game #panel #target .spellPic { font-size: 15vw; }
+    #game #panel #target .listenPic { font-size: 30vw; }
     #game.seq-mode #panel #prompt { font-size: 5.4vw; }
 
     /* keyboard: letters-only (or numbers-only) — no number row / modifier keys */
@@ -779,6 +843,11 @@
           <label for="nameInput">My name is</label>
           <input id="nameInput" type="text" maxlength="20" autocomplete="off" spellcheck="false" placeholder="type your name">
         </div>
+        <button id="startBtn" aria-label="Start the lessons">
+          <span class="title">▶ START</span>
+          <span class="sub" id="startSub">Play all the lessons in order</span>
+        </button>
+        <button id="chooseBtn" aria-expanded="false">📚 Choose a lesson <span class="chev">▾</span></button>
         <div class="btnGrid">
           <button class="modeBtn" data-mode="letters" aria-label="Letters"><span class="title">Letters</span><span class="sub">A B C</span></button>
           <button class="modeBtn" data-mode="numbers" aria-label="Numbers"><span class="title">Numbers</span><span class="sub">1 2 3</span></button>
@@ -790,6 +859,7 @@
           <button class="modeBtn" data-mode="free"    aria-label="Free Play"><span class="title">Free Play</span><span class="sub">🎉</span></button>
           <button class="modeBtn" data-mode="counting" aria-label="Counting"><span class="title">Counting</span><span class="sub">1 2 3</span></button>
           <button class="modeBtn" data-mode="sounds"   aria-label="Letter Sounds"><span class="title">Letter Sounds</span><span class="icons">🔊 A a</span></button>
+          <button class="modeBtn" data-mode="listen"   aria-label="Listen and Find"><span class="title">Listen &amp; Find</span><span class="icons">👂 🔊 ❓</span></button>
           <button class="modeBtn" data-mode="countobj" aria-label="How Many"><span class="title">How Many?</span><span class="icons">🐚 🐚 🐚</span></button>
           <button class="modeBtn" data-mode="math"     aria-label="Add and Subtract"><span class="title">Add &amp; Subtract</span><span class="icons">🦀 ➕ 🦀</span></button>
         </div>
@@ -846,6 +916,7 @@
 <script src="data/strings.en.js"></script>
 <script src="data/strings.fr.js"></script>
 <script src="data/strings.es.js"></script>
+<script src="data/lessons.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/audio.js"></script>
 <script>
@@ -922,8 +993,27 @@
                   '#30B0C7','#007AFF','#5856D6','#AF52DE','#FF2D55'];
   const pick = a => a[Math.floor(Math.random() * a.length)];
 
+  // ---------- Lessons (campaign order: easiest → hardest) ----------
+  const LESSONS = [
+    ['numbers',  'Numbers'],
+    ['letters',  'Letters'],
+    ['both',     'Letters & Numbers'],
+    ['shapes',   'Shapes'],
+    ['colors',   'Colors'],
+    ['animals',  'Animals'],
+    ['sounds',   'Letter Sounds'],
+    ['listen',   'Listen & Find'],
+    ['countobj', 'How Many?'],
+    ['spelling', 'Spelling'],
+    ['counting', 'Counting'],
+    ['math',     'Add & Subtract'],
+  ];
+  const lessonIdx  = m => LESSONS.findIndex(l => l[0] === m);
+  const lessonName = m => { const l = LESSONS[lessonIdx(m)]; return l ? l[1] : m; };
+
   // ---------- State ----------
   let mode = 'letters';
+  let playMode = 'practice';    // 'campaign' (START button, auto-advance) | 'practice' (picked one lesson)
   let locked = false;
   let roundTimer = null;
   let lastTarget = null;
@@ -934,6 +1024,7 @@
   const STARS_PER_LEVEL = 5;
   let level = 1;
   let levelStars = 0;
+  let levelMistakes = 0;        // wrong presses this level — drives the coaching verdicts
   let levelStartTime = 0;
   let levelElapsed = 0;
   let totalStars = 0;
@@ -996,13 +1087,9 @@
     {name:'Zebra',   letter:'Z', glyph:'🦓'},
   ];
 
-  // Spelling words grouped by length (used by the Spelling sub-game)
-  const WORDS = {
-    3: ['CAT','DOG','PIG','BAT','SUN','HAT','BED','CUP','BUS','FOX','COW','HEN','BEE','ANT','OWL','BUG','MAP','NET','PEN','TOP','CAR','CAP','JAR','BOX'],
-    4: ['FISH','BIRD','FROG','STAR','MOON','TREE','CAKE','DUCK','BOAT','LION','BEAR','BALL','DOOR','SHIP','GOAT','FROG','KITE','LEAF','NEST','RAIN'],
-    5: ['APPLE','HOUSE','TIGER','HORSE','TRAIN','MOUSE','SNAKE','BREAD','CLOUD','SHEEP','PLANT','BEACH','WHALE','CHAIR','GRAPE'],
-    6: ['BANANA','FLOWER','ORANGE','PURPLE','TURTLE','MONKEY','ROCKET','PARROT','RABBIT','PENCIL','GARDEN','PUPPET']
-  };
+  // Spelling words + their pictures live in data/lessons.js (shared with tools/)
+  const WORDS = window.YAKO_LESSONS.WORDS;
+  const WORD_EMOJI = window.YAKO_LESSONS.WORD_EMOJI;
   // difficulty grows every 3 levels
   function spellLenForLevel() { return Math.min(3 + Math.floor((level - 1) / 3), 6); }
   function countLenForLevel() { return Math.min(2 + Math.floor((level - 1) / 3), 5); }
@@ -1026,14 +1113,14 @@
       : '<span class="glyph">' + item.glyph + '</span>';
   }
   function renderItemWithLetter(item, kind, letter) {
-    // Show the picture AND its starting letter (in the current language) right away.
+    // The letter to find on top, the picture it stands for right underneath.
     letter = letter || item.letter;
     targetEl.style.color = '';
     targetEl.innerHTML =
-      '<div class="itemRow">' + picHTML(item, kind) +
-      '<span class="arrow">&#10142;</span>' +
-      '<span class="bigletter" style="color:' + (kind === 'color' ? item.hex : 'var(--blue)') + '">' +
-      letter + '</span></div>';
+      '<div class="itemCol">' +
+      '<span class="bigletter" style="color:' + (kind === 'color' ? item.hex : 'var(--blue)') + '">' + letter + '</span>' +
+      picHTML(item, kind) +
+      '</div>';
   }
   function renderChoices(opts, kind) {
     game.classList.add('choices-mode');
@@ -1063,7 +1150,7 @@
         render() { targetEl.style.color = ''; targetEl.innerHTML = picHTML(item, kind); renderChoices(opts, kind); },
         revealAnswer() {} };
     }
-    return { answer: lletter, kind, name: lname, style: 'letter',
+    return { answer: lletter, kind, name: lname, style: 'letter', itemKey: item.name.toLowerCase(),
       render() { renderItemWithLetter(item, kind, lletter); },
       revealAnswer() {
         const bl = targetEl.querySelector('.bigletter');
@@ -1072,19 +1159,21 @@
       } };
   }
   // ----- Sequence games (Spelling / Counting): find each letter/digit in order -----
-  function renderSeqCard(seq, revealed) {
+  function renderSeqCard(seq, revealed, pic) {
     targetEl.style.color = '';
-    targetEl.innerHTML = '<div class="spellRow">' + seq.map((ch, i) => {
+    targetEl.innerHTML = '<div class="itemCol"><div class="spellRow">' + seq.map((ch, i) => {
       const cls = i < revealed ? 'sl done' : (i === revealed ? 'sl now' : 'sl');
       return '<span class="' + cls + '">' + ch + '</span>';
-    }).join('') + '</div>';
+    }).join('') + '</div>' +
+    (pic ? '<div class="spellPic">' + pic + '</div>' : '') + '</div>';   // the thing being spelled, under the word
   }
   function seqChallenge(word, kind) {
     const seq = word.split('');
+    const pic = kind === 'letter' ? (WORD_EMOJI[word] || '') : '';
     return {
-      style: 'seq', word: word, seq: seq, idx: 0, answer: seq[0], kind: kind, name: word,
-      render() { renderSeqCard(this.seq, this.idx); },
-      revealAll() { renderSeqCard(this.seq, this.seq.length); }
+      style: 'seq', word: word, seq: seq, idx: 0, answer: seq[0], kind: kind, name: word, pic: pic,
+      render() { renderSeqCard(this.seq, this.idx, this.pic); },
+      revealAll() { renderSeqCard(this.seq, this.seq.length, this.pic); }
     };
   }
   function buildSpell() { return seqChallenge(pick(WORDS[spellLenForLevel()] || WORDS[3]), 'letter'); }
@@ -1102,10 +1191,22 @@
     const connector = langPrefix() === 'fr' ? ' comme ' : (langPrefix() === 'es' ? ' — ' : ' is for ');
     return { answer: Lr, kind: 'letter', name: 'snd_' + Lr, style: 'sound', sound: snd, word: word, emoji: emoji,
       render() { targetEl.style.color = '';
-        targetEl.innerHTML = '<div class="phonRow"><span class="phonLetter">' + Lr + '</span>' +
-          '<span class="phonPic">' + emoji + '</span></div>' +
-          '<div class="phonWord">' + Lr + connector + word + '</div>'; },
+        targetEl.innerHTML = '<div class="phonCol"><span class="phonLetter">' + Lr + '</span>' +
+          '<span class="phonPic">' + emoji + '</span>' +
+          '<div class="phonWord">' + Lr + connector + word + '</div></div>'; },
       revealAnswer() {} };
+  }
+  // ----- Listen & Find: the child only HEARS the letter (plus a picture clue) -----
+  function buildListen() {
+    const Lr = pick(LETTERS); const pf = phonFor(Lr);
+    const word = pf[0], emoji = pf[1], snd = pf[2] || '';
+    return { answer: Lr, kind: 'letter', name: 'lsn_' + Lr, style: 'listen', sound: snd, word: word, emoji: emoji,
+      render() { targetEl.style.color = '';
+        targetEl.innerHTML = '<div class="phonCol"><span class="phonPic listenPic">' + emoji + '</span></div>'; },
+      revealAnswer() {   // hint stage 2: reveal the letter above the picture
+        targetEl.innerHTML = '<div class="phonCol"><span class="phonLetter">' + Lr + '</span>' +
+          '<span class="phonPic">' + emoji + '</span></div>';
+      } };
   }
   // ----- How Many? (count the sea creatures) and Add & Subtract -----
   const SEA = [['🐚','shells'],['🦀','crabs'],['⭐','starfish'],['🐟','fish'],['🐙','octopuses'],['🐬','dolphins']];
@@ -1135,6 +1236,7 @@
 
   function buildChallenge() {
     if (mode === 'sounds')   return buildSounds();
+    if (mode === 'listen')   return buildListen();
     if (mode === 'countobj') return buildCountObjects();
     if (mode === 'math')     return buildMath();
     if (mode === 'spelling') return buildSpell();
@@ -1155,6 +1257,8 @@
     lastTarget = next.name;
     challenge = next;
     game.classList.toggle('num-answer', /^[0-9]$/.test(String(challenge.answer)));
+    // wide centered target box for every picture-based challenge
+    game.classList.toggle('big-target', ['sound', 'listen', 'count', 'math', 'letter'].includes(challenge.style));
     choicesEl.innerHTML = '';
     game.classList.remove('choices-mode');
     clearFeedback();                 // both cards dim until they answer
@@ -1170,10 +1274,14 @@
     const t = L(), cname = challenge.name, ans = challenge.answer, s = challenge.style;
     // Recorded persona clips wherever the phrase is enumerable; synth is only the fallback.
     if (s === 'plain') { playPersona(isNum(ans) ? 'find_num_' + ans : 'find_let_' + ans, t.find(ans), { rate: 0.95 }); return; }
-    if (s === 'letter') { playPersona('find_let_' + ans, t.starts(cname, ans), { rate: 0.95 }); return; }   // shapes/colors/animals
-    if (s === 'seq' && mode === 'spelling') { playPersona('find_let_' + ans, t.spell(challenge.word, ans), { rate: 0.95 }); return; }
-    if (s === 'seq')   { playPersonaChain(['make_number', 'find_num_' + ans], t.countIntro(challenge.word, ans), { rate: 0.95 }); return; }  // counting
+    // shapes/colors/animals: name the thing — "Find the letter R, for Rabbit!"
+    if (s === 'letter') { playPersona('find_for_' + challenge.itemKey, t.findFor(cname, ans), { rate: 0.95 }); return; }
+    // spelling: say the word first — "Let's spell CAR. Find the letter C!"
+    if (s === 'seq' && mode === 'spelling') { playPersona('spell_' + challenge.word, t.spell(challenge.word, ans), { rate: 0.95 }); return; }
+    // counting: speak the FULL multi-digit number, then the first digit (dynamic → synth)
+    if (s === 'seq')   { speakName(t.countIntro(challenge.word, ans), { rate: 0.95 }); return; }
     if (s === 'sound') { playPersona('sound_' + ans, t.sound(ans, challenge.word, challenge.sound), { rate: 0.95 }); return; }
+    if (s === 'listen'){ playPersona('sound_' + ans, t.sound(ans, challenge.word, challenge.sound), { rate: 0.95 }); return; }
     if (s === 'count') { playPersona('howmany_' + challenge.creatures, t.howMany(locCreat(challenge.creatures)), { rate: 0.95 }); return; }
     if (s === 'number'){ playPersona('which_one', t.prompt.catNum, { rate: 0.95 }); return; }               // multiple-choice picker
     // Add & Subtract stays synth: the story problem contains random numbers ("3 crabs and 4 more…").
@@ -1426,6 +1534,7 @@
   }
   function wrong(keyPressed) {
     stopAllSounds();
+    levelMistakes++;
     popChar(keyPressed, '#e0466b');
     if (challenge.style === 'number') highlightChoice(keyPressed, false);
     showFeedback(false);
@@ -1437,60 +1546,111 @@
     scheduleHint();   // restart the idle countdown toward the next hint
   }
 
-  // ---------- Level complete ----------
+  // ---------- Level complete: stats, coaching verdict, and what happens next ----------
+  let defaultWinAct = 'level';   // what a tap / the timeout does on the win card
   function completeLevel() {
     stopAllSounds();
     const bestKey = 'yako_best_' + mode, lastKey = 'yako_last_' + mode, cntKey = 'yako_count_' + mode;
     const prevBest = getNum(bestKey), prevLast = getNum(lastKey);
-    const count = (getNum(cntKey) || 0) + 1;
+    setNum(cntKey, (getNum(cntKey) || 0) + 1);
     const isBest = (prevBest == null) || (levelElapsed < prevBest);
     if (isBest) setNum(bestKey, levelElapsed);
     setNum(lastKey, levelElapsed);
-    setNum(cntKey, count);
     const bestShown = isBest ? levelElapsed : prevBest;
+    const faster = prevLast != null && (prevLast - levelElapsed) > 0.05;
+    const slower = prevLast != null && (levelElapsed - prevLast) > 0.05;
 
     let improve = '';
     if (prevLast != null) {
       const d = prevLast - levelElapsed;
       if (d > 0.05) improve = "That's " + fmt(d) + " seconds faster than last time!";
-      else if (d < -0.05) improve = "A little slower — keep practicing!";
+      else if (d < -0.05) improve = "A little slower than last time — keep practicing!";
       else improve = "About the same as last time!";
     }
     if (isBest && prevBest != null) improve = "New best time! " + improve;
 
+    // Coaching verdict: mistakes matter most, then speed vs their own last run.
+    const V = L().verdicts;
+    let vKey;
+    if (levelMistakes === 0 && isBest && prevBest != null) vKey = 'best';
+    else if (levelMistakes === 0) vKey = 'perfect';
+    else if (levelMistakes > 2)   vKey = 'practice';
+    else if (faster)              vKey = 'faster';
+    else if (slower)              vKey = 'slower';
+    else                          vKey = 'good';
+    const gated = levelMistakes > 2;                    // too many misses → practice this one again
+    const nextIdx = lessonIdx(mode) + 1;
+    const isCampaign = playMode === 'campaign';
+    const lastLesson = nextIdx >= LESSONS.length;
+
+    let buttons;
+    if (isCampaign) {
+      defaultWinAct = gated ? 'repeat' : (lastLesson ? 'finish' : 'advance');
+      buttons = gated
+        ? '<button class="winBtn" data-act="repeat">💪 Try this lesson again</button>'
+        : (lastLesson
+            ? '<button class="winBtn" data-act="finish">🏆 You did every lesson!</button>'
+            : '<button class="winBtn" data-act="advance">▶ Next lesson: ' + LESSONS[nextIdx][1] + '</button>');
+    } else {
+      defaultWinAct = 'level';
+      buttons = '<button class="winBtn alt" data-act="level">🔁 Keep playing ' + lessonName(mode) + '</button>' +
+        (lastLesson ? '' : '<button class="winBtn" data-act="nextlesson">▶ Next lesson: ' + LESSONS[nextIdx][1] + '</button>');
+    }
+
     winEl.innerHTML =
       '<div class="winCard">' +
         '<img class="winYako" src="yako_cheer.png" alt="" onerror="this.style.display=\'none\'">' +
-        '<div class="winTitle">Level ' + level + ' complete!</div>' +
+        '<div class="winTitle">' + lessonName(mode) + ' — Level ' + level + ' complete!</div>' +
         '<div class="winStars">★★★★★</div>' +
         '<div class="winTime">Time: ' + fmt(levelElapsed) + 's</div>' +
         '<div class="winBest">Best: ' + fmt(bestShown) + 's</div>' +
+        '<div class="winMist">' + (levelMistakes === 0 ? 'No mistakes! 🌟' : 'Mistakes: ' + levelMistakes) + '</div>' +
         (improve ? '<div class="winImprove">' + improve + '</div>' : '') +
-        '<div class="winGo">Tap anywhere for the next level →</div>' +
+        '<div class="winVerdict">' + V[vKey] + '</div>' +
+        '<div class="winBtns">' + buttons + '</div>' +
       '</div>';
     winEl.classList.add('show');
+    winEl.querySelectorAll('.winBtn').forEach(b =>
+      b.addEventListener('click', e => { e.stopPropagation(); finishWin(b.dataset.act); }));
 
     confetti();
     showBuddy();
     playChime();
     playApplause(4.5);
-    playPersona('level', L().level(level), { rate: 1.0 });   // real-voice level-up (synth fallback)
+    // spoken: level fanfare → performance verdict → (campaign) what's next
+    const chain = ['level', 'verdict_' + vKey];
+    if (isCampaign && !lastLesson) chain.push(gated ? 'verdict_repeat' : 'verdict_next');
+    playPersonaChain(chain, L().level(level) + ' ' + V[vKey], { rate: 1.0 });
 
     clearTimeout(winTimer);
-    winTimer = setTimeout(nextLevel, 8000);
+    winTimer = setTimeout(() => finishWin(defaultWinAct), 10000);
   }
-  function nextLevel() {
+  function finishWin(act) {
     clearTimeout(winTimer);
     if (!winEl.classList.contains('show')) return;
     winEl.classList.remove('show');
-    level++;
-    levelStars = 0;
+    if (act === 'finish') { finishCampaign(); return; }
+    if (act === 'advance' || act === 'nextlesson') {
+      const ni = lessonIdx(mode) + 1;
+      if (ni >= LESSONS.length) { finishCampaign(); return; }
+      if (act === 'advance') setNum('yako_campaign', ni);   // remember campaign progress
+      startGame(LESSONS[ni][0]);                            // playMode carries over
+      return;
+    }
+    // 'level' → next level of the same lesson; 'repeat' → SAME level again until it's solid
+    if (act === 'level') level++;
+    levelStars = 0; levelMistakes = 0;
     updateStarbar();
     levelStartTime = performance.now();
     locked = false;
     newTarget();
   }
-  winEl.addEventListener('click', nextLevel);
+  function finishCampaign() {
+    setNum('yako_campaign', 0);                             // next START begins at Numbers again
+    playPersona(['cheer_6', 'cheer_8'], L().verdicts.perfect, { rate: 1.0 });
+    backToMenu();
+  }
+  winEl.addEventListener('click', () => finishWin(defaultWinAct));
 
   // ---------- Free play ----------
   const freeLabels = {
@@ -1537,7 +1697,7 @@
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') { backToMenu(); return; }
     if (startScreen.style.display !== 'none') return;
-    if (winEl.classList.contains('show')) { e.preventDefault(); nextLevel(); return; }
+    if (winEl.classList.contains('show')) { e.preventDefault(); finishWin(defaultWinAct); return; }
     e.preventDefault();
     if (mode === 'free') { freePlayKey(e); return; }
     if (e.key.length !== 1) return;
@@ -1593,12 +1753,12 @@
         const gb = document.getElementById('gameBg');   // desktop: the living painted scene
         if (gb) { gb.play().catch(() => {}); }
       }
-      level = 1; levelStars = 0; levelElapsed = 0;
+      level = 1; levelStars = 0; levelElapsed = 0; levelMistakes = 0;
       updateStarbar();
       levelStartTime = performance.now();
       const cat = (mode === 'colors' || mode === 'shapes' || mode === 'animals');
       game.classList.toggle('seq-mode', mode === 'spelling' || mode === 'counting');
-      game.classList.toggle('big-target', mode === 'sounds' || mode === 'countobj' || mode === 'math');
+      game.classList.toggle('big-target', mode === 'sounds' || mode === 'listen' || mode === 'countobj' || mode === 'math');
       const pr = L().prompt;
       promptEl.textContent = cat ? (answerStyle === 'number' ? pr.catNum : pr.cat) : (pr[mode] || pr.both);
       hintEl.textContent = 'Look closely and find the key!';
@@ -1619,7 +1779,8 @@
     game.classList.remove('free-mode');
     startScreen.style.display = 'flex';
     targetEl.textContent = '';
-    startBarkLoop();   // Yako's pup barks while on the menu
+    if (typeof refreshStartSub === 'function') refreshStartSub();   // START shows where the campaign resumes
+    startBarkLoop();
   }
 
   // ---------- Background video: constant, bulletproof looping (home + in-game) ----------
@@ -1670,8 +1831,27 @@
     });
   });
   document.querySelectorAll('.modeBtn').forEach(btn => {
-    btn.addEventListener('click', () => startGame(btn.dataset.mode));
+    btn.addEventListener('click', () => { playMode = 'practice'; startGame(btn.dataset.mode); });
   });
+  // START = play every lesson in order (resumes where the child left off)
+  const startBtnEl = document.getElementById('startBtn'), chooseBtnEl = document.getElementById('chooseBtn');
+  function refreshStartSub() {
+    const idx = Math.min(getNum('yako_campaign') || 0, LESSONS.length - 1);
+    const el = document.getElementById('startSub');
+    if (el) el.textContent = idx > 0 ? ('Continue at lesson ' + (idx + 1) + ': ' + LESSONS[idx][1])
+                                     : 'Play all the lessons in order';
+  }
+  if (startBtnEl) startBtnEl.addEventListener('click', () => {
+    playMode = 'campaign';
+    const idx = Math.min(getNum('yako_campaign') || 0, LESSONS.length - 1);
+    startGame(LESSONS[idx][0]);
+  });
+  if (chooseBtnEl) chooseBtnEl.addEventListener('click', () => {
+    const card = document.querySelector('.homeCard');
+    const open = card.classList.toggle('lessonsOpen');
+    chooseBtnEl.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  refreshStartSub();
   exitBtn.addEventListener('click', backToMenu);
   document.getElementById('logo').addEventListener('click', backToMenu);
   soundBtn.addEventListener('click', () => {
