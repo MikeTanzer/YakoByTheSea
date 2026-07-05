@@ -87,6 +87,7 @@ function expectedClips(lang) {
   for (const [name, tr] of Object.entries(VOC.WORDS)) clips[`word_${name.toLowerCase()}`] = tr[lang] || tr.en;
   for (let n = 1; n <= 10; n++) clips[`numword_${n}`] = VOC.NUMS[n][lang] || VOC.NUMS[n].en;
   clips['hello'] = VOC.HELLO[lang] || VOC.HELLO.en;
+  clips['count_any'] = c.countAny;   // Monterey Adventures — generic "How many? Count them!"
   return clips;
 }
 

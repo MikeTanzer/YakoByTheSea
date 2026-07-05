@@ -12,6 +12,7 @@ window.YAKO_STRINGS.en = {
   countIntro: "The next number is {num}. First, find the number {digit}!",
   sound: "{letter} says {sound}. {letter} is for {word}! Find the letter {letter}!",
   howMany: "How many {creatures}? Count them, then press the number!",
+  countAny: "How many? Count them, then press the number!",
   // recorded math clips are creature-generic (the creatures are shown on screen)
   mathAddClip: "There are {a}, and {b} more come along! How many all together?",
   mathSubClip: "There are {a}, and {b} swim away. How many are left?",
@@ -37,7 +38,8 @@ window.YAKO_STRINGS.en = {
     math: "Add it up! Press the number!", listen: "Listen! Find the letter!",
     hello: "Which language says hello?", wordsafari: "Listen and tap the picture!",
     colormix: "Listen and tap the right one!", countlang: "Listen! Which group is it?",
-    guesslang: "Which language is it?", samediff: "Same language or different?"
+    guesslang: "Which language is it?", samediff: "Same language or different?",
+    adventures: "Count the animals!"
   },
   // spoken + on-screen performance feedback at the end of a level
   verdicts: {

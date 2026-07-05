@@ -11,6 +11,7 @@ window.YAKO_STRINGS.fr = {
   countIntro: "Le prochain nombre est {num}. D'abord, trouve le chiffre {digit} !",
   sound: "{letter}... comme {word} ! Trouve la lettre {letter} !",
   howMany: "Regarde bien ! Combien y en a-t-il ? Appuie sur le chiffre !",
+  countAny: "Combien y en a-t-il ? Compte-les, puis appuie sur le chiffre !",
   // exact per-creature questions for the recorded clips (correct elision: "d'étoiles")
   howManyClips: {
     shells:    "Combien de coquillages ? Compte-les, puis appuie sur le chiffre !",
@@ -44,7 +45,8 @@ window.YAKO_STRINGS.fr = {
     math: "Additionne ! Appuie sur le chiffre !", listen: "Écoute ! Trouve la lettre !",
     hello: "Quelle langue dit bonjour ?", wordsafari: "Écoute et touche l'image !",
     colormix: "Écoute et touche le bon !", countlang: "Écoute ! Quel groupe est-ce ?",
-    guesslang: "Quelle langue est-ce ?", samediff: "Même langue ou différente ?"
+    guesslang: "Quelle langue est-ce ?", samediff: "Même langue ou différente ?",
+    adventures: "Compte les animaux !"
   },
   verdicts: {
     best:     "Ouah ! Ton meilleur temps !",

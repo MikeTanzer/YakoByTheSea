@@ -13,6 +13,7 @@ window.YAKO_STRINGS.tl = {
   countIntro: "Ang susunod na numero ay {num}. Una, hanapin ang numerong {digit}!",
   sound: "Ang {letter} ay para sa {word}! Hanapin ang letrang {letter}!",
   howMany: "Ilan ang {creatures}? Bilangin mo, tapos pindutin ang numero!",
+  countAny: "Ilan ang mga ito? Bilangin mo, tapos pindutin ang numero!",
   mathAdd: "{a} {creatures} at {b} pa. Ilan lahat?",
   mathSub: "May {a} {creatures}. {b} ang lumangoy palayo. Ilan ang natira?",
   mathAddClip: "May {a}, at {b} pa ang dumating! Ilan lahat?",
@@ -37,7 +38,8 @@ window.YAKO_STRINGS.tl = {
     math: "Pagsamahin! Pindutin ang numero!", listen: "Makinig! Hanapin ang letra!",
     hello: "Aling wika ang bumabati?", wordsafari: "Makinig at pindutin ang larawan!",
     colormix: "Makinig at pindutin ang tama!", countlang: "Makinig! Aling grupo ito?",
-    guesslang: "Aling wika ito?", samediff: "Pareho o magkaiba ang wika?"
+    guesslang: "Aling wika ito?", samediff: "Pareho o magkaiba ang wika?",
+    adventures: "Bilangin ang mga hayop!"
   },
   verdicts: {
     best:     "Wow! Pinakamabilis mong oras!",

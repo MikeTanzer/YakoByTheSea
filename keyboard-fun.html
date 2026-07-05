@@ -152,7 +152,20 @@
     transition: transform .12s ease; }
   #chooseBtn:hover { transform: translateY(-2px); }
   #chooseBtn .chev { display: inline-block; transition: transform .2s ease; }
-  .homeCard:not(.lessonsOpen) .btnGrid { display: none; }
+  .homeCard:not(.lessonsOpen) .lessonGroups { display: none; }
+  /* ===== Collapsible lesson groups (scales as levels grow) ===== */
+  .lessonGroups { display: flex; flex-direction: column; gap: 1vh; width: min(840px, 88vw); }
+  .lgroup { border: 3px solid var(--gold); border-radius: 18px; background: rgba(255,255,255,.42); overflow: hidden; }
+  .groupHead { width: 100%; display: flex; align-items: center; gap: .8vw; cursor: pointer;
+    background: linear-gradient(#f7e4b4, #eccf88); border: none; border-radius: 15px;
+    padding: 1.1vh 1.4vw; font-family: 'Baloo 2', sans-serif; font-weight: 800; color: #6e4f24;
+    font-size: clamp(15px, 1.5vw, 21px); text-align: left; }
+  .groupHead .ghIcon { font-size: 1.4em; line-height: 1; }
+  .groupHead .ghName { flex: 1; }
+  .groupHead .chev { transition: transform .2s ease; font-size: 1.1em; }
+  .lgroup.open .groupHead .chev { transform: rotate(180deg); }
+  .lgroup .btnGrid { width: auto; padding: 1.2vh; gap: 1.2vh 1vw; }
+  .lgroup:not(.open) .btnGrid { display: none; }
   .homeCard.lessonsOpen #chooseBtn .chev { transform: rotate(180deg); }
 
   /* ===== In-card challenge layouts: target on top, its picture underneath ===== */
@@ -520,6 +533,41 @@
   @keyframes speakerPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
   /* the six Language Island lesson buttons share a teal hue */
   #start .modeBtn.lang { --bg: #0f9aa6; }
+  #start .modeBtn.adv  { --bg: #4a8c4f; }
+
+  /* ---------- Monterey Adventures: a painted location scene as the backdrop ---------- */
+  #sceneBg { position: fixed; inset: 0; z-index: 0; display: none;
+    background-size: cover; background-position: center bottom; background-repeat: no-repeat; }
+  #game.adv #sceneBg { display: block; }
+  #game.adv .gameStage .bg { display: none; }                 /* hide the painted desk frame */
+  #game.adv #gameRibbon, #game.adv #reactionBox { display: none; }
+  /* readable cream card centered over the scene (works at every width) */
+  #game.adv #panel { position: absolute; left: 50%; top: 13%; transform: translateX(-50%);
+    width: min(560px, 88vw); height: auto; min-height: 26vh; max-height: 52vh; padding: 2.4vh 2.4vw;
+    background: linear-gradient(rgba(247,233,197,.95), rgba(239,220,171,.95));
+    border: 6px solid var(--gold); border-radius: 26px; overflow: hidden;
+    box-shadow: 0 16px 34px rgba(40,30,10,.5), inset 0 0 0 3px rgba(255,255,255,.55);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.4vh; pointer-events: none; }
+  #game.adv #panel #prompt { position: static; left: auto; top: auto; width: auto; transform: none;
+    font-family: 'Baloo 2'; font-weight: 800; font-size: min(3.8vh, 6.6vw); line-height: 1.1;
+    color: #5b4327; text-shadow: 0 2px 2px rgba(255,255,255,.6); z-index: 2; }
+  #game.adv #panel #target { position: static; left: auto; top: auto; width: 100%; height: auto; transform: none;
+    display: flex; align-items: center; justify-content: center; font-size: inherit; text-shadow: none; }
+  #game.adv .advCount { display: flex; flex-wrap: wrap; gap: 1vh 1.2vw; align-items: center; justify-content: center; max-width: 100%; }
+  #game.adv .advCount .cobj { font-size: min(8.5vh, 12vw); line-height: 1; }
+  #game.adv #choices { position: fixed; top: auto; bottom: 11vh; left: 0; width: 100%; }
+  #game.adv #choices .choice .num { font-size: min(5.5vh, 8vw); font-weight: 900; }
+  #game.adv #choices .choice { min-width: min(16vh, 22vw); padding: 1.4vh 2vw; }
+  /* visible round Home + Sound buttons (the painted hotspots are hidden with the frame) */
+  #game.adv #exit, #game.adv #sound { position: fixed; bottom: 2.5vh; top: auto; width: min(8vh,13vw); height: min(8vh,13vw);
+    border-radius: 50%; background: var(--blue); border: 3px solid var(--blue-d); box-shadow: 0 5px 12px rgba(0,0,0,.4);
+    display: flex; align-items: center; justify-content: center; font-size: min(4vh,6vw); z-index: 12; }
+  #game.adv #exit  { left: 3vw; right: auto; }
+  #game.adv #sound { right: 3vw; left: auto; }
+  #game.adv #exit::after  { content: '🏠'; }
+  #game.adv #sound::after { content: '🔊'; }
+  #game.adv #sound.muted { background: #c0392b; border-color: #9a261a; }
+  #game.adv #sound.muted::after { content: '🔇'; }
 
   /* ---------- On-screen keyboard ---------- */
   #keyboard {
@@ -929,26 +977,57 @@
             </div>
           </div>
         </div>
-        <div class="btnGrid">
-          <button class="modeBtn" data-mode="letters" aria-label="Letters"><span class="title">Letters</span><span class="sub">A B C</span></button>
-          <button class="modeBtn" data-mode="numbers" aria-label="Numbers"><span class="title">Numbers</span><span class="sub">1 2 3</span></button>
-          <button class="modeBtn" data-mode="both"    aria-label="Letters and Numbers"><span class="title">Letters &amp; Numbers</span><span class="sub">A 1 B 2</span></button>
-          <button class="modeBtn" data-mode="shapes"  aria-label="Shapes"><span class="title">Shapes</span><span class="icons">🔺 ■ ♥</span></button>
-          <button class="modeBtn" data-mode="colors"  aria-label="Colors"><span class="title">Colors</span><span class="icons">🔴 🟢 🔵</span></button>
-          <button class="modeBtn" data-mode="animals" aria-label="Animals"><span class="title">Animals</span><span class="icons">🐶 🐼 🦁</span></button>
-          <button class="modeBtn" data-mode="spelling" aria-label="Spelling"><span class="title">Spelling</span><span class="sub">CAT DOG</span></button>
-          <button class="modeBtn" data-mode="free"    aria-label="Free Play"><span class="title">Free Play</span><span class="sub">🎉</span></button>
-          <button class="modeBtn" data-mode="counting" aria-label="Counting"><span class="title">Counting</span><span class="sub">1 2 3</span></button>
-          <button class="modeBtn" data-mode="sounds"   aria-label="Letter Sounds"><span class="title">Letter Sounds</span><span class="icons">🔊 A a</span></button>
-          <button class="modeBtn" data-mode="listen"   aria-label="Listen and Find"><span class="title">Listen &amp; Find</span><span class="icons">👂 🔊 ❓</span></button>
-          <button class="modeBtn" data-mode="countobj" aria-label="How Many"><span class="title">How Many?</span><span class="icons">🐚 🐚 🐚</span></button>
-          <button class="modeBtn" data-mode="math"     aria-label="Add and Subtract"><span class="title">Add &amp; Subtract</span><span class="icons">🦀 ➕ 🦀</span></button>
-          <button class="modeBtn lang" data-mode="hello"      aria-label="Hello Around the World"><span class="title">Hello World</span><span class="icons">🌍 👋</span></button>
-          <button class="modeBtn lang" data-mode="wordsafari" aria-label="Word Safari"><span class="title">Word Safari</span><span class="icons">👂 🐶 🦁</span></button>
-          <button class="modeBtn lang" data-mode="colormix"   aria-label="Color Words"><span class="title">Color Words</span><span class="icons">🔴 🔺 🔵</span></button>
-          <button class="modeBtn lang" data-mode="countlang"  aria-label="Number Words"><span class="title">Number Words</span><span class="icons">👂 1 2 3</span></button>
-          <button class="modeBtn lang" data-mode="guesslang"  aria-label="Guess the Language"><span class="title">Guess Language</span><span class="icons">🇬🇧 🇫🇷 🇵🇭</span></button>
-          <button class="modeBtn lang" data-mode="samediff"   aria-label="Same or Different"><span class="title">Same or Different?</span><span class="icons">🟰 ↔️</span></button>
+        <div class="lessonGroups">
+          <section class="lgroup open" data-group="basics">
+            <button class="groupHead" type="button" aria-expanded="true"><span class="ghIcon">🔤</span><span class="ghName">Letters &amp; Numbers</span><span class="chev">▾</span></button>
+            <div class="btnGrid">
+              <button class="modeBtn" data-mode="letters" aria-label="Letters"><span class="title">Letters</span><span class="sub">A B C</span></button>
+              <button class="modeBtn" data-mode="numbers" aria-label="Numbers"><span class="title">Numbers</span><span class="sub">1 2 3</span></button>
+              <button class="modeBtn" data-mode="both"    aria-label="Letters and Numbers"><span class="title">Letters &amp; Numbers</span><span class="sub">A 1 B 2</span></button>
+            </div>
+          </section>
+          <section class="lgroup" data-group="match">
+            <button class="groupHead" type="button" aria-expanded="false"><span class="ghIcon">🎨</span><span class="ghName">Shapes, Colors &amp; Animals</span><span class="chev">▾</span></button>
+            <div class="btnGrid">
+              <button class="modeBtn" data-mode="shapes"  aria-label="Shapes"><span class="title">Shapes</span><span class="icons">🔺 ■ ♥</span></button>
+              <button class="modeBtn" data-mode="colors"  aria-label="Colors"><span class="title">Colors</span><span class="icons">🔴 🟢 🔵</span></button>
+              <button class="modeBtn" data-mode="animals" aria-label="Animals"><span class="title">Animals</span><span class="icons">🐶 🐼 🦁</span></button>
+            </div>
+          </section>
+          <section class="lgroup" data-group="reading">
+            <button class="groupHead" type="button" aria-expanded="false"><span class="ghIcon">📖</span><span class="ghName">Reading &amp; Counting</span><span class="chev">▾</span></button>
+            <div class="btnGrid">
+              <button class="modeBtn" data-mode="spelling" aria-label="Spelling"><span class="title">Spelling</span><span class="sub">CAT DOG</span></button>
+              <button class="modeBtn" data-mode="sounds"   aria-label="Letter Sounds"><span class="title">Letter Sounds</span><span class="icons">🔊 A a</span></button>
+              <button class="modeBtn" data-mode="listen"   aria-label="Listen and Find"><span class="title">Listen &amp; Find</span><span class="icons">👂 🔊 ❓</span></button>
+              <button class="modeBtn" data-mode="counting" aria-label="Counting"><span class="title">Counting</span><span class="sub">1 2 3</span></button>
+              <button class="modeBtn" data-mode="countobj" aria-label="How Many"><span class="title">How Many?</span><span class="icons">🐚 🐚 🐚</span></button>
+              <button class="modeBtn" data-mode="math"     aria-label="Add and Subtract"><span class="title">Add &amp; Subtract</span><span class="icons">🦀 ➕ 🦀</span></button>
+            </div>
+          </section>
+          <section class="lgroup" data-group="lang">
+            <button class="groupHead" type="button" aria-expanded="false"><span class="ghIcon">🌍</span><span class="ghName">Language Island</span><span class="chev">▾</span></button>
+            <div class="btnGrid">
+              <button class="modeBtn lang" data-mode="hello"      aria-label="Hello Around the World"><span class="title">Hello World</span><span class="icons">🌍 👋</span></button>
+              <button class="modeBtn lang" data-mode="wordsafari" aria-label="Word Safari"><span class="title">Word Safari</span><span class="icons">👂 🐶 🦁</span></button>
+              <button class="modeBtn lang" data-mode="colormix"   aria-label="Color Words"><span class="title">Color Words</span><span class="icons">🔴 🔺 🔵</span></button>
+              <button class="modeBtn lang" data-mode="countlang"  aria-label="Number Words"><span class="title">Number Words</span><span class="icons">👂 1 2 3</span></button>
+              <button class="modeBtn lang" data-mode="guesslang"  aria-label="Guess the Language"><span class="title">Guess Language</span><span class="icons">🇬🇧 🇫🇷 🇵🇭</span></button>
+              <button class="modeBtn lang" data-mode="samediff"   aria-label="Same or Different"><span class="title">Same or Different?</span><span class="icons">🟰 ↔️</span></button>
+            </div>
+          </section>
+          <section class="lgroup" data-group="monterey">
+            <button class="groupHead" type="button" aria-expanded="false"><span class="ghIcon">🏞️</span><span class="ghName">Monterey Adventures</span><span class="chev">▾</span></button>
+            <div class="btnGrid">
+              <button class="modeBtn adv" data-mode="adventures" aria-label="Monterey Adventures"><span class="title">Count with Yako</span><span class="icons">🐑 🦌 🐋</span></button>
+            </div>
+          </section>
+          <section class="lgroup" data-group="fun">
+            <button class="groupHead" type="button" aria-expanded="false"><span class="ghIcon">🎉</span><span class="ghName">Just for Fun</span><span class="chev">▾</span></button>
+            <div class="btnGrid">
+              <button class="modeBtn" data-mode="free" aria-label="Free Play"><span class="title">Free Play</span><span class="sub">🎉</span></button>
+            </div>
+          </section>
         </div>
       </div>
     </div>
@@ -961,6 +1040,7 @@
     <video id="freeBg" src="home_bg.mp4" muted loop playsinline preload="auto"></video>
     <div id="freeVignette"></div>
     <div id="flash"></div>
+    <div id="sceneBg"></div>
     <div class="gameStage">
       <video id="gameBg" class="bg" src="gameui_anim.mp4" poster="gameui.png" muted loop autoplay playsinline preload="auto"></video>
       <div id="starbar"></div>
@@ -1086,6 +1166,8 @@
     ['countlang',  'Number Words'],
     ['guesslang',  'Guess the Language'],
     ['samediff',   'Same or Different?'],
+    // ----- Monterey Adventures: count local animals around Yako's home peninsula -----
+    ['adventures', 'Monterey Adventures'],
   ];
   const LANG_MODES = ['hello', 'wordsafari', 'colormix', 'countlang', 'guesslang', 'samediff'];
   const lessonIdx  = m => LESSONS.findIndex(l => l[0] === m);
@@ -1428,7 +1510,35 @@
     };
   }
 
+  // ================= Monterey Adventures: count local animals around the peninsula =================
+  const MONT = window.YAKO_MONTEREY;
+  function setSceneBg(scene) { const el = document.getElementById('sceneBg'); if (el) el.style.backgroundImage = "url('" + scene + "')"; }
+  function buildAdventure() {
+    const place = MONT.PLACES[(level - 1) % MONT.PLACES.length];   // tour the peninsula, a new place each level
+    const key = pick(place.animals);
+    const a = MONT.ANIMALS[key];
+    const n = 1 + Math.floor(Math.random() * 9);
+    const wrongs = shuffle([1,2,3,4,5,6,7,8,9].filter(d => d !== n)).slice(0, 2);
+    // the choice IS the digit (number = the digit itself), so tapping a card or
+    // pressing that number key both answer; the right card is the true count.
+    const opts = shuffle([n].concat(wrongs)).map(d => ({ number: d }));
+    return {
+      answer: String(n), kind: 'number', style: 'adventure', choices: opts,
+      name: 'adv_' + place.id + '_' + n + key, place: place, animalKey: key,
+      render() {
+        setSceneBg(place.scene);
+        promptEl.textContent = '🏞️ ' + place.name;
+        targetEl.style.color = '';
+        targetEl.innerHTML = '<div class="advCount">' + objs(a.emoji, n) + '</div>';
+        renderPickChoices(opts.map(o => ({ number: o.number, html: '' })));
+      },
+      play() { playPersona('count_any', L().countAny, { rate: 0.95 }); },   // recorded "How many? Count them!"
+      revealAnswer() {}
+    };
+  }
+
   function buildChallenge() {
+    if (mode === 'adventures') return buildAdventure();
     if (mode === 'hello')      return buildLangPick(true);
     if (mode === 'guesslang')  return buildLangPick(false);
     if (mode === 'wordsafari') return buildWordPick(ANIMALS_DATA);
@@ -1946,6 +2056,7 @@
     locked = false; clearTimeout(roundTimer);   // never carry a lock/celebration timer into a new game
     choicesEl.innerHTML = '';
     game.classList.remove('choices-mode');
+    game.classList.remove('adv');                // cleared here; re-added below only for Monterey Adventures
     clearKeyHighlights();
     clearHintTimer(); hintStage = 0;
     hideBuddy();
@@ -1981,9 +2092,10 @@
       const cat = (mode === 'colors' || mode === 'shapes' || mode === 'animals');
       game.classList.toggle('seq-mode', mode === 'spelling' || mode === 'counting');
       game.classList.toggle('big-target', mode === 'sounds' || mode === 'listen' || mode === 'countobj' || mode === 'math');
+      game.classList.toggle('adv', mode === 'adventures');   // full-scene Monterey layout
       const pr = L().prompt;
       promptEl.textContent = cat ? (answerStyle === 'number' ? pr.catNum : pr.cat) : (pr[mode] || pr.both);
-      hintEl.textContent = LANG_MODES.includes(mode) ? 'Listen, then tap your answer! 👂' : 'Look closely and find the key!';
+      hintEl.textContent = (LANG_MODES.includes(mode) || mode === 'adventures') ? 'Listen, then tap your answer! 👂' : 'Look closely and find the key!';
       setTimeout(newTarget, 500);
     }
   }
@@ -2084,6 +2196,14 @@
     const card = document.querySelector('.homeCard');
     const open = card.classList.toggle('lessonsOpen');
     chooseBtnEl.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  // Accordion: tap a group header to expand its lessons (others stay as they are).
+  document.querySelectorAll('.groupHead').forEach(h => {
+    h.addEventListener('click', () => {
+      const g = h.closest('.lgroup');
+      const open = g.classList.toggle('open');
+      h.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
   });
   refreshStartSub();
   exitBtn.addEventListener('click', backToMenu);

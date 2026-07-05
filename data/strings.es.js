@@ -11,6 +11,7 @@ window.YAKO_STRINGS.es = {
   countIntro: "El siguiente número es {num}. ¡Primero, encuentra el número {digit}!",
   sound: "{letter}... de {word}. ¡Encuentra la letra {letter}!",
   howMany: "¿Cuántos hay? ¡Cuéntalos y aprieta el número!",
+  countAny: "¿Cuántos hay? ¡Cuéntalos y aprieta el número!",
   // exact per-creature questions for the recorded clips (correct gender: cuántas conchas/estrellas)
   howManyClips: {
     shells:    "¿Cuántas conchas hay? ¡Cuéntalas y aprieta el número!",
@@ -44,7 +45,8 @@ window.YAKO_STRINGS.es = {
     math: "¡Suma! ¡Aprieta el número!", listen: "¡Escucha! ¡Encuentra la letra!",
     hello: "¿Qué idioma dice hola?", wordsafari: "¡Escucha y toca la imagen!",
     colormix: "¡Escucha y toca el correcto!", countlang: "¡Escucha! ¿Qué grupo es?",
-    guesslang: "¿Qué idioma es?", samediff: "¿Mismo idioma o diferente?"
+    guesslang: "¿Qué idioma es?", samediff: "¿Mismo idioma o diferente?",
+    adventures: "¡Cuenta los animales!"
   },
   verdicts: {
     best:     "¡Guau! ¡Tu mejor tiempo!",

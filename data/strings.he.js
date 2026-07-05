@@ -14,6 +14,7 @@ window.YAKO_STRINGS.he = {
   countIntro: "המספר הבא הוא {num}. קודם, מצאו את הספרה {digit}!",
   sound: "{letter} כמו {word}! מצאו את האות {letter}!",
   howMany: "כמה {creatures}? ספרו אותם ולחצו על המספר!",
+  countAny: "כמה יש? ספרו אותם ולחצו על המספר!",
   mathAdd: "{a} {creatures} ועוד {b} {creatures}. כמה ביחד?",
   mathSub: "יש {a} {creatures}. {b} שוחים משם. כמה נשארו?",
   mathAddClip: "יש {a}, ועוד {b} מגיעים! כמה יש ביחד?",
@@ -38,7 +39,8 @@ window.YAKO_STRINGS.he = {
     math: "חברו! לחצו על המספר!", listen: "הקשיבו! מצאו את האות!",
     hello: "איזו שפה אומרת שלום?", wordsafari: "הקשיבו וגעו בתמונה!",
     colormix: "הקשיבו וגעו בנכון!", countlang: "הקשיבו! איזו קבוצה זו?",
-    guesslang: "איזו שפה זו?", samediff: "אותה שפה או שפה שונה?"
+    guesslang: "איזו שפה זו?", samediff: "אותה שפה או שפה שונה?",
+    adventures: "ספרו את החיות!"
   },
   verdicts: {
     best:     "וואו! הזמן הכי טוב שלכם!",

@@ -62,3 +62,25 @@ window.YAKO_VOCAB = {
   // greeting per language
   HELLO: { en: 'Hello!', fr: 'Bonjour !', es: '¡Hola!', he: 'שלום!', tl: 'Kumusta!' }
 };
+
+// Monterey Adventures — Yako learns to count in his own backyard: the Monterey
+// Peninsula. Each place has a painted backdrop (scenes/) and its local animals.
+window.YAKO_MONTEREY = {
+  ANIMALS: {
+    sheep: { emoji: '🐑', name: 'sheep' },  cow:      { emoji: '🐮', name: 'cows' },
+    bird:  { emoji: '🐦', name: 'birds' },  deer:     { emoji: '🦌', name: 'deer' },
+    quail: { emoji: '🐦', name: 'quail' },  rabbit:   { emoji: '🐰', name: 'rabbits' },
+    squirrel: { emoji: '🐿️', name: 'squirrels' }, whale: { emoji: '🐋', name: 'whales' },
+    seal:  { emoji: '🦭', name: 'seals' },  otter:    { emoji: '🦦', name: 'sea otters' },
+    pelican: { emoji: '🐦', name: 'pelicans' }, fish: { emoji: '🐟', name: 'fish' }
+  },
+  // ordered peninsula tour (campaign advances through these by level)
+  PLACES: [
+    { id: 'mission',      name: 'Mission Ranch',  scene: 'scenes/mission.png',      animals: ['sheep', 'cow', 'bird'] },
+    { id: 'bigsur',       name: 'Big Sur',        scene: 'scenes/bigsur.png',       animals: ['deer', 'cow', 'bird', 'squirrel'] },
+    { id: 'carmelvalley', name: 'Carmel Valley',  scene: 'scenes/carmelvalley.png', animals: ['quail', 'rabbit', 'deer', 'squirrel'] },
+    { id: 'pebble',       name: 'Pebble Beach',   scene: 'scenes/pebble.png',       animals: ['whale', 'deer', 'seal'] },
+    { id: 'pacificgrove', name: 'Pacific Grove',  scene: 'scenes/pacificgrove.png', animals: ['bird', 'seal', 'whale'] },
+    { id: 'montereybay',  name: 'Monterey Bay',   scene: 'scenes/montereybay.png',  animals: ['otter', 'pelican', 'whale', 'fish'] }
+  ]
+};
