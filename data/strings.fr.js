@@ -41,7 +41,10 @@ window.YAKO_STRINGS.fr = {
     cat: "Trouve la première lettre !", catNum: "Lequel est-ce ? Appuie sur le chiffre !",
     spelling: "Épelle le mot !", counting: "Forme le nombre !",
     sounds: "Quel son ? Trouve la lettre !", countobj: "Combien ? Appuie sur le chiffre !",
-    math: "Additionne ! Appuie sur le chiffre !", listen: "Écoute ! Trouve la lettre !"
+    math: "Additionne ! Appuie sur le chiffre !", listen: "Écoute ! Trouve la lettre !",
+    hello: "Quelle langue dit bonjour ?", wordsafari: "Écoute et touche l'image !",
+    colormix: "Écoute et touche le bon !", countlang: "Écoute ! Quel groupe est-ce ?",
+    guesslang: "Quelle langue est-ce ?", samediff: "Même langue ou différente ?"
   },
   verdicts: {
     best:     "Ouah ! Ton meilleur temps !",

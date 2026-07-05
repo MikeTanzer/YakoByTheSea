@@ -1,5 +1,5 @@
 /* Yako by the Sea — service worker (offline + installable PWA) */
-const CACHE = 'yako-v4';
+const CACHE = 'yako-v5';
 const CORE = [
   './',
   './index.html',
@@ -8,6 +8,7 @@ const CORE = [
   './js/i18n.js',
   './js/audio.js',
   './data/lessons.js',
+  './data/vocab.js',
   './data/strings.en.js',
   './data/strings.fr.js',
   './data/strings.es.js',

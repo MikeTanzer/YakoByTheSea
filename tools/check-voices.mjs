@@ -23,8 +23,10 @@ for (const lang of ['en', 'fr', 'es', 'he', 'tl']) {
   await import(pathToFileURL(join(ROOT, 'data', `strings.${lang}.js`)));
 }
 await import(pathToFileURL(join(ROOT, 'data', 'lessons.js')));
+await import(pathToFileURL(join(ROOT, 'data', 'vocab.js')));
 const S = globalThis.YAKO_STRINGS;
 const LSN = globalThis.YAKO_LESSONS;
+const VOC = globalThis.YAKO_VOCAB;
 
 const LANGS    = ['en', 'fr', 'es', 'he', 'tl'];
 const PERSONAS = ['mom', 'dad', 'grandpa', 'grandma'];   // Isabella / Mark / Brooks / Mabel
@@ -80,6 +82,11 @@ function expectedClips(lang) {
   // counting intros for every two-digit number (longer numbers stay synth)
   for (let n = 10; n <= 99; n++)
     clips[`count_${n}`] = fmt(c.countIntro, { num: n, digit: String(n)[0] });
+  // Language Island: bare vocabulary words, number words 1-10, and the greeting.
+  // Same key in each language folder holds THAT language's word (word_dog = "Aso" in tl).
+  for (const [name, tr] of Object.entries(VOC.WORDS)) clips[`word_${name.toLowerCase()}`] = tr[lang] || tr.en;
+  for (let n = 1; n <= 10; n++) clips[`numword_${n}`] = VOC.NUMS[n][lang] || VOC.NUMS[n].en;
+  clips['hello'] = VOC.HELLO[lang] || VOC.HELLO.en;
   return clips;
 }
 

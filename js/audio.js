@@ -246,6 +246,54 @@ window.YAKO.audio = (function () {
   }
   function nextCheer() { const a = I().L().cheers; return a[(Math.random() * a.length) | 0]; }
 
+  // ----- language lessons: play a clip in a SPECIFIC language (not the UI language) -----
+  // Used by "Guess the Language", "Word Safari", etc. where the narrator says a word
+  // in a chosen tongue. Falls back to synth speech (in that language) if the clip is absent.
+  function speakIn(lang, text, opts) {
+    if (muted || !text || !('speechSynthesis' in window)) return;
+    const p = PERSONA[voicePersona] || PERSONA.mom;
+    const u = new SpeechSynthesisUtterance(text);
+    const voices = speechSynthesis.getVoices();
+    const pre = String(lang).slice(0, 2);
+    const pool = voices.filter(v => v.lang && v.lang.toLowerCase().slice(0, 2) === pre);
+    const re = p.gender === 'female' ? VOICE_FEM : VOICE_MAS;
+    u.voice = (pool.find(v => re.test(v.name)) || pool[0] || voice) || null;
+    u.lang = pre;
+    u.rate = (opts && opts.rate || 1) * p.rate;
+    u.pitch = p.pitch;
+    speechSynthesis.speak(u);
+  }
+  function playPersonaLang(lang, key, fallback, opts) {
+    if (muted) return;
+    stopVoice();
+    const pre = String(lang).slice(0, 2);
+    const my = ++VOICE.token, a = VOICE.a;
+    let fell = false;                                        // fall back at most once
+    const fb = () => { if (!fell && my === VOICE.token) { fell = true; speakIn(pre, fallback, opts); } };
+    a.src = VOICE.dir + pre + '/' + voicePersona + '/' + key + '.mp3';
+    a.onended = null;
+    a.onerror = fb;
+    const pl = a.play();
+    if (pl && pl.catch) pl.catch(fb);
+  }
+  // Play several clips in sequence, each in its own language: items = [{lang, key, fallback}].
+  function playPersonaLangChain(items, opts) {
+    if (muted) return;
+    stopVoice();
+    const my = ++VOICE.token, a = VOICE.a;
+    let i = 0;
+    function step() {
+      if (my !== VOICE.token || i >= items.length) return;
+      const it = items[i++]; const pre = String(it.lang).slice(0, 2);
+      a.src = VOICE.dir + pre + '/' + voicePersona + '/' + it.key + '.mp3';
+      a.onended = () => { if (my === VOICE.token) setTimeout(step, 260); };
+      a.onerror = () => { if (my === VOICE.token) { speakIn(pre, it.fallback, opts); setTimeout(step, 900); } };
+      const pl = a.play();
+      if (pl && pl.catch) pl.catch(() => { if (my === VOICE.token) { speakIn(pre, it.fallback, opts); } });
+    }
+    step();
+  }
+
   return {
     setMuted: setMuted, isMuted: isMuted,
     ensureAudio: ensureAudio, stopAllSounds: stopAllSounds,
@@ -254,6 +302,7 @@ window.YAKO.audio = (function () {
     setPersona: setPersona, getPersona: getPersona, pickVoice: pickVoice,
     speak: speak, speakName: speakName,
     say: say, playPersona: playPersona, playPersonaChain: playPersonaChain, stopVoice: stopVoice,
+    playPersonaLang: playPersonaLang, playPersonaLangChain: playPersonaLangChain, speakIn: speakIn,
     chClip: chClip, isNum: isNum, nextCheer: nextCheer
   };
 })();

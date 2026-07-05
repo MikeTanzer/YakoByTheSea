@@ -41,7 +41,10 @@ window.YAKO_STRINGS.es = {
     cat: "¡Encuentra la primera letra!", catNum: "¿Cuál es? ¡Aprieta el número!",
     spelling: "¡Deletrea la palabra!", counting: "¡Forma el número!",
     sounds: "¿Qué sonido? ¡Encuentra la letra!", countobj: "¿Cuántos? ¡Aprieta el número!",
-    math: "¡Suma! ¡Aprieta el número!", listen: "¡Escucha! ¡Encuentra la letra!"
+    math: "¡Suma! ¡Aprieta el número!", listen: "¡Escucha! ¡Encuentra la letra!",
+    hello: "¿Qué idioma dice hola?", wordsafari: "¡Escucha y toca la imagen!",
+    colormix: "¡Escucha y toca el correcto!", countlang: "¡Escucha! ¿Qué grupo es?",
+    guesslang: "¿Qué idioma es?", samediff: "¿Mismo idioma o diferente?"
   },
   verdicts: {
     best:     "¡Guau! ¡Tu mejor tiempo!",

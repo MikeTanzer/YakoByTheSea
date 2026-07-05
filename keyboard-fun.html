@@ -205,6 +205,19 @@
                yakoWave 3.4s steps(39) .8s infinite alternate,
                charBob 4.5s ease-in-out .8s infinite; }
   .homeUI { margin-left: 0; }
+  /* Desktop: menu sits left-of-center so Yako + puppy have the right third to
+     themselves (never clipped by the card). The lesson grid can get tall, so the
+     card scrolls inside the viewport rather than overflowing behind the character. */
+  @media (min-width: 761px) {
+    /* reserve the right ~28% for Yako; the menu centers itself in what's left */
+    #start { padding-right: 28vw; box-sizing: border-box; }
+    .homeUI { max-width: 68vw; }
+    .homeCard { max-height: 86vh; overflow-y: auto; overflow-x: hidden; }
+    .homeChar { height: 60vh; width: calc(60vh * 0.7037); right: 0; }
+  }
+  @media (min-width: 761px) and (min-aspect-ratio: 16/9) {
+    .homeChar { height: 66vh; width: calc(66vh * 0.7037); }
+  }
 
   /* ---- Living storybook: gentle idle animations + an intro on load ---- */
   @keyframes charIn   { from { transform: translateX(45%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
@@ -469,7 +482,7 @@
   /* numbered multiple-choice chips */
   #choices {
     position: fixed; bottom: 13vh; width: 100%; display: none; gap: 2.2vw;
-    justify-content: center; flex-wrap: wrap; z-index: 5;
+    justify-content: center; align-items: center; flex-wrap: wrap; z-index: 5;
   }
   #game.choices-mode #choices { display: flex; }
   .choice {
@@ -487,6 +500,26 @@
   #game.choices-mode #target { top: 38%; min-height: 16vh; font-size: 16vh; }
   #game.choices-mode #target .swatch { width: min(15vh,18vw); height: min(15vh,18vw); }
   #game.choices-mode #target .glyph { font-size: min(15vh,18vw); }
+
+  /* ---------- Language Island: flags, digit clusters, and the listen-again speaker ---------- */
+  .choice .flagBig { font-size: 4.6vw; line-height: 1; }
+  .choice .sdBig   { font-size: 4vw; line-height: 1; }
+  .choice .clusterChoice { display: flex; flex-wrap: wrap; gap: .25vw; justify-content: center;
+    align-items: center; max-width: 15vw; font-size: 2.2vw; line-height: 1.05; }
+  .listenCol { display: flex; flex-direction: column; align-items: center; gap: 1.2vh; }
+  .listenObj { font-size: min(13vh,16vw); line-height: 1; }
+  .listenObj .swatch { width: min(13vh,16vw); height: min(13vh,16vw); border-radius: 20px; }
+  .listenObj .glyph { font-size: min(13vh,16vw); }
+  .listenObj .bigGlobe, .listenObj .bigEar, .listenObj .bigCount { font-size: min(12vh,15vw); }
+  .speakerBtn { cursor: pointer; border: 5px solid var(--gold); border-radius: 999px;
+    background: radial-gradient(circle at 40% 35%, #fff8e6, #f2dca0); color: #6e4f24;
+    width: min(13vh,16vw); height: min(13vh,16vw); font-size: min(6.5vh,8vw); line-height: 1;
+    box-shadow: 0 8px 20px rgba(60,45,15,.32), inset 0 0 0 3px rgba(255,255,255,.5);
+    transition: transform .1s ease; animation: speakerPulse 1.8s ease-in-out infinite; }
+  .speakerBtn:active { transform: scale(.92); }
+  @keyframes speakerPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+  /* the six Language Island lesson buttons share a teal hue */
+  #start .modeBtn.lang { --bg: #0f9aa6; }
 
   /* ---------- On-screen keyboard ---------- */
   #keyboard {
@@ -815,7 +848,14 @@
     #game.num-answer #keyboard .krow:nth-child(4) { display: none; }              /* hide letters for number rounds */
 
     /* number/category choice chips sit just above the band */
-    #game #choices { position: absolute; bottom: 16%; left: 2%; width: 96%; gap: 3vw; }
+    #game #choices { position: absolute; top: auto; bottom: 16%; height: auto; left: 2%; width: 96%; gap: 3vw; }
+    /* bigger flags/labels so little fingers can tap on a phone */
+    .choice .flagBig { font-size: 12vw; } .choice .sdBig { font-size: 11vw; }
+    .choice .nm { font-size: 3.4vw; } .choice .num { font-size: 5vw; }
+    .choice .clusterChoice { max-width: 26vw; font-size: 5vw; }
+    .listenObj, .listenObj .glyph, .listenObj .bigGlobe, .listenObj .bigEar, .listenObj .bigCount { font-size: 22vw; }
+    .listenObj .swatch { width: 22vw; height: 22vw; }
+    .speakerBtn { width: 20vw; height: 20vw; font-size: 10vw; }
 
     /* bottom feedback / hint band */
     #mfb { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
@@ -903,6 +943,12 @@
           <button class="modeBtn" data-mode="listen"   aria-label="Listen and Find"><span class="title">Listen &amp; Find</span><span class="icons">👂 🔊 ❓</span></button>
           <button class="modeBtn" data-mode="countobj" aria-label="How Many"><span class="title">How Many?</span><span class="icons">🐚 🐚 🐚</span></button>
           <button class="modeBtn" data-mode="math"     aria-label="Add and Subtract"><span class="title">Add &amp; Subtract</span><span class="icons">🦀 ➕ 🦀</span></button>
+          <button class="modeBtn lang" data-mode="hello"      aria-label="Hello Around the World"><span class="title">Hello World</span><span class="icons">🌍 👋</span></button>
+          <button class="modeBtn lang" data-mode="wordsafari" aria-label="Word Safari"><span class="title">Word Safari</span><span class="icons">👂 🐶 🦁</span></button>
+          <button class="modeBtn lang" data-mode="colormix"   aria-label="Color Words"><span class="title">Color Words</span><span class="icons">🔴 🔺 🔵</span></button>
+          <button class="modeBtn lang" data-mode="countlang"  aria-label="Number Words"><span class="title">Number Words</span><span class="icons">👂 1 2 3</span></button>
+          <button class="modeBtn lang" data-mode="guesslang"  aria-label="Guess the Language"><span class="title">Guess Language</span><span class="icons">🇬🇧 🇫🇷 🇵🇭</span></button>
+          <button class="modeBtn lang" data-mode="samediff"   aria-label="Same or Different"><span class="title">Same or Different?</span><span class="icons">🟰 ↔️</span></button>
         </div>
       </div>
     </div>
@@ -947,6 +993,7 @@
 <script src="data/strings.he.js"></script>
 <script src="data/strings.tl.js"></script>
 <script src="data/lessons.js"></script>
+<script src="data/vocab.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/audio.js"></script>
 <script>
@@ -976,7 +1023,8 @@
   const reactionBox = document.getElementById('reactionBox');
   const reactionCaption = document.getElementById('reactionCaption');
   const mfb = document.getElementById('mfb');
-  function mfbHint() { if (mfb) { mfb.className = ''; mfb.innerHTML = '<b class="hintline">Look closely and find the key!</b>'; } }
+  function mfbHint() { if (mfb) { mfb.className = ''; mfb.innerHTML = '<b class="hintline">' +
+    (LANG_MODES.includes(mode) ? 'Listen, then tap your answer! 👂' : 'Look closely and find the key!') + '</b>'; } }
   function playReaction(ok) {
     if (mfb) {
       mfb.className = 'show ' + (ok ? 'good' : 'bad');
@@ -1031,7 +1079,15 @@
     ['spelling', 'Spelling'],
     ['counting', 'Counting'],
     ['math',     'Add & Subtract'],
+    // ----- Language Island: teach a new language by ear (tap-to-answer, no keyboard) -----
+    ['hello',      'Hello Around the World'],
+    ['wordsafari', 'Word Safari'],
+    ['colormix',   'Color Words'],
+    ['countlang',  'Number Words'],
+    ['guesslang',  'Guess the Language'],
+    ['samediff',   'Same or Different?'],
   ];
+  const LANG_MODES = ['hello', 'wordsafari', 'colormix', 'countlang', 'guesslang', 'samediff'];
   const lessonIdx  = m => LESSONS.findIndex(l => l[0] === m);
   const lessonName = m => { const l = LESSONS[lessonIdx(m)]; return l ? l[1] : m; };
 
@@ -1071,7 +1127,7 @@
         playTryAgainTone = A.playTryAgainTone, playNote = A.playNote,
         startBarkLoop = A.startBarkLoop, stopBarkLoop = A.stopBarkLoop,
         speak = A.speak, speakName = A.speakName, say = A.say, playPersona = A.playPersona,
-        playPersonaChain = A.playPersonaChain,
+        playPersonaChain = A.playPersonaChain, playPersonaLang = A.playPersonaLang,
         chClip = A.chClip, isNum = A.isNum, nextCheer = A.nextCheer, pickVoice = A.pickVoice;
 
   // ---------- Challenge data ----------
@@ -1259,7 +1315,126 @@
       revealAnswer() { const q = targetEl.querySelector('.mq'); if (q) { q.textContent = res; q.style.color = '#2bb673'; } } };
   }
 
+  // ================= Language Island (tap-to-answer, learn a tongue by ear) =================
+  const VOCAB  = window.YAKO_VOCAB;
+  const LANGS  = VOCAB.LANGS;
+  const CATALL = ANIMALS_DATA.concat(COLORS_DATA, SHAPES_DATA);   // every pictured object
+  function wordFor(name, p) { const w = VOCAB.WORDS[name]; return w ? (w[p] || w.en) : name; }
+  function numFor(n, p)     { const w = VOCAB.NUMS[n];     return w ? (w[p] || w.en) : String(n); }
+  function picHTMLItem(it)  { return it.hex ? '<div class="swatch" style="background:' + it.hex + '"></div>'
+                                            : '<span class="glyph">' + it.glyph + '</span>'; }
+  // A row of tappable numbered cards; each opt = { number, html }.
+  function renderPickChoices(opts) {
+    game.classList.add('choices-mode');
+    choicesEl.innerHTML = '';
+    opts.forEach(o => {
+      const div = document.createElement('div');
+      div.className = 'choice'; div.dataset.number = o.number;
+      div.innerHTML = '<div class="num">' + o.number + '</div>' + o.html;
+      div.addEventListener('click', () => tryAnswer(String(o.number)));
+      choicesEl.appendChild(div);
+    });
+  }
+  // The listening target: an optional picture + a big speaker the child taps to hear it again.
+  function renderSpeakerTarget(objHTML) {
+    targetEl.style.color = '';
+    targetEl.innerHTML = '<div class="listenCol">' +
+      (objHTML ? '<div class="listenObj">' + objHTML + '</div>' : '') +
+      '<button type="button" class="speakerBtn" aria-label="Hear it again">🔊</button></div>';
+    const sb = targetEl.querySelector('.speakerBtn');
+    if (sb) sb.addEventListener('click', e => { e.stopPropagation(); if (challenge && challenge.play) challenge.play(); });
+  }
+  // how many choices this level shows (grows with the level)
+  function langChoiceCount(max) { return Math.min(2 + Math.floor((level - 1) / 2), max); }
+  function activeLangs() { return shuffle(LANGS.slice()).slice(0, langChoiceCount(5)); }
+
+  // Hello Around the World (greeting→flag) and Guess the Language (word→flag)
+  function buildLangPick(useGreeting) {
+    const langs = activeLangs();
+    const target = pick(langs);
+    let obj = null, key, fallback;
+    if (useGreeting) { key = 'hello'; fallback = VOCAB.HELLO[target.p] || ''; }
+    else { obj = pick(CATALL); key = 'word_' + obj.name.toLowerCase(); fallback = wordFor(obj.name, target.p); }
+    const opts = shuffle(langs.slice()).map((l, i) => ({ lang: l, number: i + 1 }));
+    const right = opts.find(o => o.lang.p === target.p);
+    return {
+      answer: String(right.number), kind: 'lang', style: 'langpick', choices: opts,
+      name: 'lp_' + target.p + '_' + (obj ? obj.name : 'hi'),
+      render() {
+        renderSpeakerTarget(useGreeting ? '<span class="bigGlobe">🌍</span>' : picHTMLItem(obj));
+        renderPickChoices(opts.map(o => ({ number: o.number,
+          html: '<span class="flagBig">' + o.lang.flag + '</span><div class="nm">' + o.lang.label + '</div>' })));
+      },
+      play() { playPersonaLang(target.p, key, fallback, { rate: 0.95 }); },
+      revealAnswer() {}
+    };
+  }
+  // Word Safari / Color Words: hear a word in the CURRENT language, tap the matching picture
+  function buildWordPick(pool) {
+    const item = pick(pool);
+    const opts = pickDistinct(pool, item, langChoiceCount(4)).map((it, i) => ({ item: it, number: i + 1 }));
+    const right = opts.find(o => o.item.name === item.name);
+    const key = 'word_' + item.name.toLowerCase();
+    return {
+      answer: String(right.number), kind: 'pic', style: 'wordpick', choices: opts, name: 'wp_' + item.name,
+      render() {
+        renderSpeakerTarget('<span class="bigEar">👂</span>');
+        renderPickChoices(opts.map(o => ({ number: o.number,
+          html: picHTMLItem(o.item) + '<div class="nm">' + wordFor(o.item.name, langPrefix()) + '</div>' })));
+      },
+      play() { playPersonaLang(langPrefix(), key, wordFor(item.name, langPrefix()), { rate: 0.95 }); },
+      revealAnswer() {}
+    };
+  }
+  // Number Words: hear a number in the current language, tap the group with that many
+  function buildCountLang() {
+    const n = 1 + Math.floor(Math.random() * 9);
+    const c = pick(SEA);
+    const wrongs = shuffle([1,2,3,4,5,6,7,8,9].filter(d => d !== n)).slice(0, 2);
+    const opts = shuffle([n].concat(wrongs)).map((k, i) => ({ k: k, number: i + 1 }));
+    const right = opts.find(o => o.k === n);
+    return {
+      answer: String(right.number), kind: 'number', style: 'countlang', choices: opts, name: 'cl_' + n + c[1],
+      render() {
+        renderSpeakerTarget('<span class="bigCount">🔢</span>');
+        renderPickChoices(opts.map(o => ({ number: o.number, html: '<div class="clusterChoice">' + objs(c[0], o.k) + '</div>' })));
+      },
+      play() { playPersonaLang(langPrefix(), 'numword_' + n, numFor(n, langPrefix()), { rate: 0.95 }); },
+      revealAnswer() {}
+    };
+  }
+  // Same or Different?: hear two words; is it the same language or two different ones?
+  function buildSameDiff() {
+    const same = Math.random() < 0.5;
+    const lA = pick(LANGS);
+    const lB = same ? lA : pick(LANGS.filter(l => l.p !== lA.p));
+    const objA = pick(CATALL);
+    let objB = pick(CATALL), g = 0; while (objB.name === objA.name && g++ < 6) objB = pick(CATALL);
+    return {
+      answer: same ? '1' : '2', kind: 'lang', style: 'samediff', choices: [{ number: 1 }, { number: 2 }],
+      name: 'sd_' + lA.p + lB.p + objA.name,
+      render() {
+        renderSpeakerTarget('<span class="bigEar">👂</span>');
+        renderPickChoices([
+          { number: 1, html: '<span class="sdBig">🟰</span><div class="nm">Same</div>' },
+          { number: 2, html: '<span class="sdBig">↔️</span><div class="nm">Different</div>' }]);
+      },
+      play() {
+        A.playPersonaLangChain([
+          { lang: lA.p, key: 'word_' + objA.name.toLowerCase(), fallback: wordFor(objA.name, lA.p) },
+          { lang: lB.p, key: 'word_' + objB.name.toLowerCase(), fallback: wordFor(objB.name, lB.p) }], { rate: 0.95 });
+      },
+      revealAnswer() {}
+    };
+  }
+
   function buildChallenge() {
+    if (mode === 'hello')      return buildLangPick(true);
+    if (mode === 'guesslang')  return buildLangPick(false);
+    if (mode === 'wordsafari') return buildWordPick(ANIMALS_DATA);
+    if (mode === 'colormix')   return buildWordPick(COLORS_DATA.concat(SHAPES_DATA));
+    if (mode === 'countlang')  return buildCountLang();
+    if (mode === 'samediff')   return buildSameDiff();
     if (mode === 'sounds')   return buildSounds();
     if (mode === 'listen')   return buildListen();
     if (mode === 'countobj') return buildCountObjects();
@@ -1296,6 +1471,8 @@
   }
 
   function announce() {
+    // Language Island challenges carry their own play() (speaks a word/greeting in a chosen tongue).
+    if (challenge.play) { challenge.play(); return; }
     const t = L(), cname = challenge.name, ans = challenge.answer, s = challenge.style;
     // Recorded persona clips wherever the phrase is enumerable; synth is only the fallback.
     if (s === 'plain') { playPersona(isNum(ans) ? 'find_num_' + ans : 'find_let_' + ans, t.find(ans), { rate: 0.95 }); return; }
@@ -1378,7 +1555,7 @@
   // current countdown (so it only helps when the child is stuck, not guessing).
   function scheduleHint() {
     clearHintTimer();
-    if (!challenge || mode === 'free' || challenge.style === 'number' || locked || hintStage >= 2) return;
+    if (!challenge || mode === 'free' || challenge.choices || locked || hintStage >= 2) return;
     const delay = hintStage === 0 ? HINT_DELAYS.cluster : HINT_DELAYS.exact;
     hintTimer = setTimeout(() => {
       if (hintStage === 0) { hintStage = 1; nearKeysHint(); scheduleHint(); }
@@ -1532,7 +1709,7 @@
     if (challenge.revealAnswer) challenge.revealAnswer();   // show what it was
     clearKeyHighlights();
     popChar(pressed, '#2bb673');
-    if (challenge.style === 'number') highlightChoice(challenge.answer, true);
+    if (challenge.choices) highlightChoice(challenge.answer, true);
     targetEl.style.transform = 'scale(1.15)';
     const bl = targetEl.querySelector('.bigletter');
     if (bl) bl.style.color = '#2bb673';
@@ -1557,14 +1734,14 @@
     const t = L();
     if (challenge.style === 'count')  return t.wrongCount(locCreat(challenge.creatures));
     if (challenge.style === 'math')   return t.wrongMath();
-    if (challenge.style === 'number') return t.again();
+    if (challenge.choices)            return t.again();   // number picker + all Language Island modes
     return t.wrong(t.dk(String(pressed).toUpperCase()), challenge.answer);
   }
   function wrong(keyPressed) {
     stopAllSounds();
     levelMistakes++;
     popChar(keyPressed, '#e0466b');
-    if (challenge.style === 'number') highlightChoice(keyPressed, false);
+    if (challenge.choices) highlightChoice(keyPressed, false);
     showFeedback(false);
     playReaction(false);
     playTryAgainTone();
@@ -1806,7 +1983,7 @@
       game.classList.toggle('big-target', mode === 'sounds' || mode === 'listen' || mode === 'countobj' || mode === 'math');
       const pr = L().prompt;
       promptEl.textContent = cat ? (answerStyle === 'number' ? pr.catNum : pr.cat) : (pr[mode] || pr.both);
-      hintEl.textContent = 'Look closely and find the key!';
+      hintEl.textContent = LANG_MODES.includes(mode) ? 'Listen, then tap your answer! 👂' : 'Look closely and find the key!';
       setTimeout(newTarget, 500);
     }
   }

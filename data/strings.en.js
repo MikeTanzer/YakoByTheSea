@@ -34,7 +34,10 @@ window.YAKO_STRINGS.en = {
     cat: "Find the key it starts with!", catNum: "Which one is it? Press the number!",
     spelling: "Spell the word!", counting: "Build the number!",
     sounds: "What sound? Find the letter!", countobj: "How many? Press the number!",
-    math: "Add it up! Press the number!", listen: "Listen! Find the letter!"
+    math: "Add it up! Press the number!", listen: "Listen! Find the letter!",
+    hello: "Which language says hello?", wordsafari: "Listen and tap the picture!",
+    colormix: "Listen and tap the right one!", countlang: "Listen! Which group is it?",
+    guesslang: "Which language is it?", samediff: "Same language or different?"
   },
   // spoken + on-screen performance feedback at the end of a level
   verdicts: {

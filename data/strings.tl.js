@@ -34,7 +34,10 @@ window.YAKO_STRINGS.tl = {
     cat: "Hanapin ang unang letra!", catNum: "Alin ito? Pindutin ang numero!",
     spelling: "Baybayin ang salita!", counting: "Buuin ang numero!",
     sounds: "Anong tunog? Hanapin ang letra!", countobj: "Ilan? Pindutin ang numero!",
-    math: "Pagsamahin! Pindutin ang numero!", listen: "Makinig! Hanapin ang letra!"
+    math: "Pagsamahin! Pindutin ang numero!", listen: "Makinig! Hanapin ang letra!",
+    hello: "Aling wika ang bumabati?", wordsafari: "Makinig at pindutin ang larawan!",
+    colormix: "Makinig at pindutin ang tama!", countlang: "Makinig! Aling grupo ito?",
+    guesslang: "Aling wika ito?", samediff: "Pareho o magkaiba ang wika?"
   },
   verdicts: {
     best:     "Wow! Pinakamabilis mong oras!",
