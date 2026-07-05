@@ -177,16 +177,21 @@
   .winBtn:hover { transform: translateY(-2px); }
   .winBtn:active { transform: translateY(3px); box-shadow: 0 2px 0 #b8862a; }
   .winBtn.alt { background: linear-gradient(180deg, #9ecdf0, #5ea0d6); border-color: #cfe6f7; box-shadow: 0 5px 0 #2f6fb0, 0 8px 14px rgba(20,45,75,.3); color: #123a5e; }
-  /* Language + voice-character toggles */
-  .langBar { display: flex; align-items: center; justify-content: center; gap: clamp(12px, 2.4vw, 32px);
-    flex-wrap: wrap; margin-top: 1.6vh; }
-  .langBar .toggleRow { display: flex; gap: clamp(6px, 1vw, 14px); align-items: center; }
-  .langBar #personaRow { border-left: 2px solid rgba(120,90,40,.25); padding-left: clamp(10px, 1.6vw, 22px); }
-  .langBar button { cursor: pointer; border: 3px solid transparent; border-radius: 14px;
-    background: rgba(255,255,255,.5); line-height: 1; padding: .5vh .7vw; font-size: clamp(22px, 2.5vw, 36px);
+  /* ===== One tidy controls row: lesson chooser + language + narrator ===== */
+  .homeControls { display: flex; align-items: stretch; justify-content: center;
+    gap: clamp(10px, 1.4vw, 22px); flex-wrap: wrap; width: min(840px, 88vw); }
+  .homeControls #chooseBtn { align-self: center; }
+  .ctrlGroup { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    padding: 5px 14px 7px; background: rgba(255,255,255,.38);
+    border: 2px solid rgba(217,195,138,.8); border-radius: 18px; }
+  .ctrlLabel { font-family: 'Baloo 2', sans-serif; font-weight: 800; letter-spacing: .16em;
+    text-transform: uppercase; font-size: clamp(9px, .85vw, 11px); color: #8a6a35; }
+  .toggleRow { display: flex; gap: clamp(5px, .7vw, 10px); align-items: center; }
+  .toggleRow button { cursor: pointer; border: 3px solid transparent; border-radius: 12px;
+    background: rgba(255,255,255,.55); line-height: 1; padding: .4vh .5vw; font-size: clamp(19px, 2vw, 28px);
     transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease, background .12s ease; }
-  .langBar button:hover { transform: translateY(-2px); }
-  .langBar button.sel { border-color: var(--gold); background: #fff7df;
+  .toggleRow button:hover { transform: translateY(-2px); }
+  .toggleRow button.sel { border-color: var(--gold); background: #fff7df;
     box-shadow: 0 4px 12px rgba(60,45,15,.3), inset 0 0 0 2px rgba(255,255,255,.7); transform: translateY(-1px); }
   /* Yako (opaque, clean cutout) on the right, behind the menu so he can't overlap it */
   /* Yako waves & the puppy wags its tail — a transparent PNG sprite sheet (40 frames)
@@ -712,7 +717,13 @@
     #startBtn { width: 100%; min-height: 14vh; border-radius: 22px; }
     #startBtn .title { font-size: 8.5vw; }
     #startBtn .sub { font-size: 3.6vw; }
-    #chooseBtn { font-size: 4.2vw; padding: 1.2vh 6vw; }
+    /* controls stack neatly: chooser on top, then language + narrator cards */
+    .homeControls { flex-direction: column; align-items: stretch; width: 100%; gap: 1.2vh; }
+    #chooseBtn { font-size: 4.6vw; padding: 1.4vh 6vw; width: 100%; box-sizing: border-box; }
+    .ctrlGroup { width: 100%; box-sizing: border-box; padding: 1vh 2vw 1.2vh; }
+    .ctrlLabel { font-size: 3vw; }
+    .toggleRow { justify-content: center; gap: 2.4vw; }
+    .toggleRow button { font-size: 7.5vw; padding: .6vh 1.6vw; border-radius: 14px; }
 
     /* win card sized for phones: everything fits, long content scrolls */
     .winCard { max-width: 92vw; max-height: 88vh; overflow-y: auto; padding: 2vh 4vw; box-sizing: border-box; }
@@ -856,7 +867,28 @@
           <span class="title">▶ START</span>
           <span class="sub" id="startSub">Play all the lessons in order</span>
         </button>
-        <button id="chooseBtn" aria-expanded="false">📚 Choose a lesson <span class="chev">▾</span></button>
+        <div class="homeControls">
+          <button id="chooseBtn" aria-expanded="false">📚 Choose a lesson <span class="chev">▾</span></button>
+          <div class="ctrlGroup">
+            <span class="ctrlLabel">Language</span>
+            <div class="toggleRow" id="langRow" aria-label="Voice language">
+              <button class="flagBtn" data-lang="en-GB" title="English" aria-label="English">🇬🇧</button>
+              <button class="flagBtn" data-lang="fr-FR" title="Français" aria-label="French">🇫🇷</button>
+              <button class="flagBtn" data-lang="es-ES" title="Español" aria-label="Spanish">🇪🇸</button>
+              <button class="flagBtn" data-lang="he-IL" title="עברית" aria-label="Hebrew">🇮🇱</button>
+              <button class="flagBtn" data-lang="tl-PH" title="Tagalog" aria-label="Tagalog">🇵🇭</button>
+            </div>
+          </div>
+          <div class="ctrlGroup">
+            <span class="ctrlLabel">Narrator</span>
+            <div class="toggleRow" id="personaRow" aria-label="Voice character">
+              <button class="personaBtn" data-persona="mom" title="Mom" aria-label="Mom voice">👩</button>
+              <button class="personaBtn" data-persona="dad" title="Dad" aria-label="Dad voice">👨</button>
+              <button class="personaBtn" data-persona="grandpa" title="Grandpa" aria-label="Grandpa voice">👴</button>
+              <button class="personaBtn" data-persona="grandma" title="Grandma" aria-label="Grandma voice">👵</button>
+            </div>
+          </div>
+        </div>
         <div class="btnGrid">
           <button class="modeBtn" data-mode="letters" aria-label="Letters"><span class="title">Letters</span><span class="sub">A B C</span></button>
           <button class="modeBtn" data-mode="numbers" aria-label="Numbers"><span class="title">Numbers</span><span class="sub">1 2 3</span></button>
@@ -871,19 +903,6 @@
           <button class="modeBtn" data-mode="listen"   aria-label="Listen and Find"><span class="title">Listen &amp; Find</span><span class="icons">👂 🔊 ❓</span></button>
           <button class="modeBtn" data-mode="countobj" aria-label="How Many"><span class="title">How Many?</span><span class="icons">🐚 🐚 🐚</span></button>
           <button class="modeBtn" data-mode="math"     aria-label="Add and Subtract"><span class="title">Add &amp; Subtract</span><span class="icons">🦀 ➕ 🦀</span></button>
-        </div>
-        <div class="langBar">
-          <div class="toggleRow" id="langRow" aria-label="Voice language">
-            <button class="flagBtn" data-lang="en-GB" title="English" aria-label="English">🇬🇧</button>
-            <button class="flagBtn" data-lang="fr-FR" title="Français" aria-label="French">🇫🇷</button>
-            <button class="flagBtn" data-lang="es-ES" title="Español" aria-label="Spanish">🇪🇸</button>
-          </div>
-          <div class="toggleRow" id="personaRow" aria-label="Voice character">
-            <button class="personaBtn" data-persona="mom" title="Mom" aria-label="Mom voice">👩</button>
-            <button class="personaBtn" data-persona="dad" title="Dad" aria-label="Dad voice">👨</button>
-            <button class="personaBtn" data-persona="grandpa" title="Grandpa" aria-label="Grandpa voice">👴</button>
-            <button class="personaBtn" data-persona="grandma" title="Grandma" aria-label="Grandma voice">👵</button>
-          </div>
         </div>
       </div>
     </div>
@@ -925,6 +944,8 @@
 <script src="data/strings.en.js"></script>
 <script src="data/strings.fr.js"></script>
 <script src="data/strings.es.js"></script>
+<script src="data/strings.he.js"></script>
+<script src="data/strings.tl.js"></script>
 <script src="data/lessons.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/audio.js"></script>
@@ -1739,6 +1760,7 @@
       try { localStorage.setItem('kbfun_name', playerName); } catch (e) {}
     }
     I.setPlayerName(playerName);   // the narrator greets the child by name
+    themeMusic.pause();            // quiet during lessons — the narrator does the talking
     ensureAudio();
     speak(" ");
     startScreen.style.display = 'none';
@@ -1803,6 +1825,7 @@
     startScreen.style.display = 'flex';
     targetEl.textContent = '';
     if (typeof refreshStartSub === 'function') refreshStartSub();   // START shows where the campaign resumes
+    if (typeof updateThemeMusic === 'function') updateThemeMusic(); // theme comes back on the menu
     startBarkLoop();
   }
 
@@ -1833,6 +1856,17 @@
     document.addEventListener('pointerdown', kick);           // unblock autoplay after first tap (iOS)
     setInterval(kick, 4000);                                  // heartbeat: keep them running forever
   })();
+
+  // ---------- Theme music: plays softly on the home menu ----------
+  const themeMusic = new Audio('theme.mp3');
+  themeMusic.loop = true;
+  themeMusic.volume = 0.35;
+  function updateThemeMusic() {
+    const onHome = startScreen.style.display !== 'none';
+    if (onHome && !A.isMuted()) themeMusic.play().catch(() => {});
+    else themeMusic.pause();
+  }
+  document.addEventListener('pointerdown', updateThemeMusic);   // first tap unlocks autoplay
 
   // ---------- Wiring ----------
   buildKeyboard();
@@ -1880,6 +1914,7 @@
   soundBtn.addEventListener('click', () => {
     A.setMuted(!A.isMuted());                             // muting also stops all sounds
     soundBtn.classList.toggle('muted', A.isMuted());      // green (on) / red (off)
+    updateThemeMusic();
   });
   soundBtn.classList.toggle('muted', A.isMuted());        // reflect the persisted mute on load
 
@@ -1937,16 +1972,14 @@
   img.src = 'ui/favicon.png';
 })();
 
-// ---- Remove any old service worker + caches (they were breaking the video/asset updates) ----
-// PWA install can be re-enabled later once the game is finalized.
+// ---- PWA: register the service worker (offline core + installable) ----
+// Relative path so it works from the GitHub Pages subpath and the LAN server alike.
+// sw.js is network-first and never intercepts audio/video or ranged requests,
+// so the background-video loop and voice streaming keep working.
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(function (regs) {
-    var had = regs.length;
-    Promise.all(regs.map(function (r) { return r.unregister(); }))
-      .then(function () { return (window.caches ? caches.keys() : []); })
-      .then(function (keys) { return Promise.all((keys || []).map(function (k) { return caches.delete(k); })); })
-      .then(function () { if (had) location.reload(); });   // reload once into a clean, SW-free state
-  }).catch(function () {});
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function () {});
+  });
 }
 </script>
 </body>

@@ -1,9 +1,24 @@
 /* Yako by the Sea — service worker (offline + installable PWA) */
-const CACHE = 'yako-v3';
+const CACHE = 'yako-v4';
 const CORE = [
   './',
+  './index.html',
   './keyboard-fun.html',
   './manifest.webmanifest',
+  './js/i18n.js',
+  './js/audio.js',
+  './data/lessons.js',
+  './data/strings.en.js',
+  './data/strings.fr.js',
+  './data/strings.es.js',
+  './data/strings.he.js',
+  './data/strings.tl.js',
+  './background.jpg',
+  './gameui.png',
+  './freepanel.png',
+  './yako.png',
+  './yako_cheer.png',
+  './ui/yako_wave.png',
   './ui/favicon.png',
   './ui/icon-192.png',
   './ui/icon-512.png',

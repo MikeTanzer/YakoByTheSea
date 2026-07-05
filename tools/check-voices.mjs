@@ -19,14 +19,14 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 // data/strings.*.js are classic browser scripts writing to window.*
 globalThis.window = globalThis;
-for (const lang of ['en', 'fr', 'es']) {
+for (const lang of ['en', 'fr', 'es', 'he', 'tl']) {
   await import(pathToFileURL(join(ROOT, 'data', `strings.${lang}.js`)));
 }
 await import(pathToFileURL(join(ROOT, 'data', 'lessons.js')));
 const S = globalThis.YAKO_STRINGS;
 const LSN = globalThis.YAKO_LESSONS;
 
-const LANGS    = ['en', 'fr', 'es'];
+const LANGS    = ['en', 'fr', 'es', 'he', 'tl'];
 const PERSONAS = ['mom', 'dad', 'grandpa', 'grandma'];   // Isabella / Mark / Brooks / Mabel
 const LETTERS  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 const DIGITS   = '0123456789'.split('');
