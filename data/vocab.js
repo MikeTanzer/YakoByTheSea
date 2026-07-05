@@ -29,6 +29,18 @@ window.YAKO_VOCAB = {
     Snake:   { en: 'Snake',    fr: 'Serpent',   es: 'Serpiente', he: 'נחש',    tl: 'Ahas' },
     Tiger:   { en: 'Tiger',    fr: 'Tigre',     es: 'Tigre',     he: 'נמר',    tl: 'Tigre' },
     Zebra:   { en: 'Zebra',    fr: 'Zèbre',     es: 'Cebra',     he: 'זברה',   tl: 'Sebra' },
+    // local Monterey Peninsula animals
+    Seal:    { en: 'Seal',     fr: 'Phoque',    es: 'Foca',      he: 'כלב ים',  tl: 'Poka' },
+    Otter:   { en: 'Otter',    fr: 'Loutre',    es: 'Nutria',    he: 'לוטרה',   tl: 'Otter' },
+    Whale:   { en: 'Whale',    fr: 'Baleine',   es: 'Ballena',   he: 'לווייתן', tl: 'Balyena' },
+    Deer:    { en: 'Deer',     fr: 'Cerf',      es: 'Ciervo',    he: 'אייל',    tl: 'Usa' },
+    Quail:   { en: 'Quail',    fr: 'Caille',    es: 'Codorniz',  he: 'שליו',    tl: 'Pugo' },
+    Squirrel:{ en: 'Squirrel', fr: 'Écureuil',  es: 'Ardilla',   he: 'סנאי',    tl: 'Ardilya' },
+    Pelican: { en: 'Pelican',  fr: 'Pélican',   es: 'Pelícano',  he: 'שקנאי',   tl: 'Pelikano' },
+    Sheep:   { en: 'Sheep',    fr: 'Mouton',    es: 'Oveja',     he: 'כבשה',    tl: 'Tupa' },
+    Cow:     { en: 'Cow',      fr: 'Vache',     es: 'Vaca',      he: 'פרה',     tl: 'Baka' },
+    Bird:    { en: 'Bird',     fr: 'Oiseau',    es: 'Pájaro',    he: 'ציפור',   tl: 'Ibon' },
+    Fish:    { en: 'Fish',     fr: 'Poisson',   es: 'Pez',       he: 'דג',      tl: 'Isda' },
     // colors
     Red:     { en: 'Red',      fr: 'Rouge',     es: 'Rojo',      he: 'אדום',   tl: 'Pula' },
     Orange:  { en: 'Orange',   fr: 'Orange',    es: 'Naranja',   he: 'כתום',   tl: 'Kahel' },
@@ -60,7 +72,23 @@ window.YAKO_VOCAB = {
     10: { en: 'Ten',   fr: 'Dix',    es: 'Diez',   he: 'עשר',    tl: 'Sampu' }
   },
   // greeting per language
-  HELLO: { en: 'Hello!', fr: 'Bonjour !', es: '¡Hola!', he: 'שלום!', tl: 'Kumusta!' }
+  HELLO: { en: 'Hello!', fr: 'Bonjour !', es: '¡Hola!', he: 'שלום!', tl: 'Kumusta!' },
+  // "How many <animal>?" naming the animal in every language ({w} = the animal word)
+  HOWMANY: {
+    en: 'How many {w}? Count them, then press the number!',
+    fr: 'Combien de {w} ? Compte-les, puis appuie sur le chiffre !',
+    es: '¿Cuántos {w} hay? ¡Cuéntalos y aprieta el número!',
+    he: 'כמה {w}? ספרו אותם ולחצו על המספר!',
+    tl: 'Ilan ang {w}? Bilangin mo, tapos pindutin ang numero!'
+  },
+  // "Welcome to {place}!" for the Monterey Adventures place intros ({p} = English place name)
+  WELCOME: {
+    en: "Welcome to {p}! Let's count!",
+    fr: 'Bienvenue à {p} ! On compte !',
+    es: '¡Bienvenido a {p}! ¡A contar!',
+    he: 'ברוכים הבאים ל-{p}! בואו נספור!',
+    tl: 'Maligayang pagdating sa {p}! Bilangin natin!'
+  }
 };
 
 // Monterey Adventures — Yako learns to count in his own backyard: the Monterey

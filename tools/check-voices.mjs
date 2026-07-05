@@ -27,6 +27,8 @@ await import(pathToFileURL(join(ROOT, 'data', 'vocab.js')));
 const S = globalThis.YAKO_STRINGS;
 const LSN = globalThis.YAKO_LESSONS;
 const VOC = globalThis.YAKO_VOCAB;
+const MON = globalThis.YAKO_MONTEREY;
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 
 const LANGS    = ['en', 'fr', 'es', 'he', 'tl'];
 const PERSONAS = ['mom', 'dad', 'grandpa', 'grandma'];   // Isabella / Mark / Brooks / Mabel
@@ -88,6 +90,14 @@ function expectedClips(lang) {
   for (let n = 1; n <= 10; n++) clips[`numword_${n}`] = VOC.NUMS[n][lang] || VOC.NUMS[n].en;
   clips['hello'] = VOC.HELLO[lang] || VOC.HELLO.en;
   clips['count_any'] = c.countAny;   // Monterey Adventures — generic "How many? Count them!"
+  // Monterey Adventures: "Welcome to <place>!" intros + per-animal "How many <animal>?" prompts
+  for (const pl of MON.PLACES) clips[`place_${pl.id}`] = fmt(VOC.WELCOME[lang] || VOC.WELCOME.en, { p: pl.name });
+  for (const key of Object.keys(MON.ANIMALS)) {
+    if (key === 'fish') continue;   // howmany_fish already recorded with the sea creatures
+    const w = VOC.WORDS[cap(key)];
+    const word = lang === 'en' ? MON.ANIMALS[key].name : (w ? (w[lang] || w.en) : key).toLowerCase();
+    clips[`howmany_${key}`] = fmt(VOC.HOWMANY[lang] || VOC.HOWMANY.en, { w: word });
+  }
   return clips;
 }
 

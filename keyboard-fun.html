@@ -29,7 +29,11 @@
     margin: 0; padding: 0; height: 100%; overflow: hidden; color: var(--ink);
     font-family: 'Baloo 2', 'Fredoka', -apple-system, "Comic Sans MS", "Segoe UI", sans-serif;
     user-select: none; -webkit-user-select: none;
+    overscroll-behavior: none;                 /* no pull-to-refresh / bounce on mobile during play */
   }
+  /* snappy, flicker-free taps on touchscreens */
+  * { -webkit-tap-highlight-color: transparent; }
+  button, .hotspot, .choice, .modeBtn, .flagBtn, .personaBtn, .pickBtn { touch-action: manipulation; }
   /* Real Carmel-by-the-Sea beach photo ("background.jpg"), with a seaside
      gradient as the fallback if the photo file isn't present. */
   body {
@@ -127,7 +131,7 @@
 
   /* ===== START (campaign) button + lesson chooser ===== */
   #startBtn {
-    --bg: #e0a11c; position: relative; width: min(840px, 88vw); min-height: clamp(88px, 11vh, 120px);
+    --bg: #e0a11c; position: relative; width: 100%; box-sizing: border-box; min-height: clamp(88px, 11vh, 120px);
     border: 4px solid #f2d274; border-radius: 24px; padding: 1.4vh 1vw 1.1vh; cursor: pointer; text-align: center;
     color: #fff7e5; font-family: Georgia, serif; overflow: hidden;
     background:
@@ -154,7 +158,8 @@
   #chooseBtn .chev { display: inline-block; transition: transform .2s ease; }
   .homeCard:not(.lessonsOpen) .lessonGroups { display: none; }
   /* ===== Collapsible lesson groups (scales as levels grow) ===== */
-  .lessonGroups { display: flex; flex-direction: column; gap: 1vh; width: min(840px, 88vw); }
+  .lessonGroups { display: flex; flex-direction: column; gap: 1vh; width: 100%;
+    max-height: 46vh; overflow-y: auto; overflow-x: hidden; }   /* the list scrolls, not the whole card (so pickers can pop out) */
   .lgroup { border: 3px solid var(--gold); border-radius: 18px; background: rgba(255,255,255,.42); overflow: hidden; }
   .groupHead { width: 100%; display: flex; align-items: center; gap: .8vw; cursor: pointer;
     background: linear-gradient(#f7e4b4, #eccf88); border: none; border-radius: 15px;
@@ -190,22 +195,53 @@
   .winBtn:hover { transform: translateY(-2px); }
   .winBtn:active { transform: translateY(3px); box-shadow: 0 2px 0 #b8862a; }
   .winBtn.alt { background: linear-gradient(180deg, #9ecdf0, #5ea0d6); border-color: #cfe6f7; box-shadow: 0 5px 0 #2f6fb0, 0 8px 14px rgba(20,45,75,.3); color: #123a5e; }
-  /* ===== One tidy controls row: lesson chooser + language + narrator ===== */
-  .homeControls { display: flex; align-items: stretch; justify-content: center;
-    gap: clamp(10px, 1.4vw, 22px); flex-wrap: wrap; width: min(840px, 88vw); }
-  .homeControls #chooseBtn { align-self: center; }
-  .ctrlGroup { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-    padding: 5px 14px 7px; background: rgba(255,255,255,.38);
-    border: 2px solid rgba(217,195,138,.8); border-radius: 18px; }
-  .ctrlLabel { font-family: 'Baloo 2', sans-serif; font-weight: 800; letter-spacing: .16em;
-    text-transform: uppercase; font-size: clamp(9px, .85vw, 11px); color: #8a6a35; }
-  .toggleRow { display: flex; gap: clamp(5px, .7vw, 10px); align-items: center; }
-  .toggleRow button { cursor: pointer; border: 3px solid transparent; border-radius: 12px;
-    background: rgba(255,255,255,.55); line-height: 1; padding: .4vh .5vw; font-size: clamp(19px, 2vw, 28px);
-    transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease, background .12s ease; }
-  .toggleRow button:hover { transform: translateY(-2px); }
-  .toggleRow button.sel { border-color: var(--gold); background: #fff7df;
-    box-shadow: 0 4px 12px rgba(60,45,15,.3), inset 0 0 0 2px rgba(255,255,255,.7); transform: translateY(-1px); }
+  /* ===== Compact controls: lesson chooser, then Language + Narrator pickers on one line ===== */
+  .homeControls { display: flex; flex-direction: column; align-items: stretch; gap: 1.1vh; width: 100%; }
+  .homeControls #chooseBtn { align-self: stretch; }
+  .pickRow { display: flex; gap: clamp(8px, 1.4vw, 16px); justify-content: center; align-items: stretch; }
+  .picker { position: relative; flex: 1 1 0; min-width: 0; }
+  .pickBtn { width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: .5em;
+    background: rgba(255,255,255,.55); border: 2px solid rgba(217,195,138,.9); border-radius: 16px;
+    padding: .8vh .6em; font-family: 'Baloo 2', sans-serif; font-weight: 800; color: #8a6a35;
+    transition: transform .12s ease, box-shadow .12s ease, background .12s ease; }
+  .pickBtn:active { transform: scale(.96); }
+  .pickBtn .pkCap { text-transform: uppercase; letter-spacing: .12em; font-size: clamp(9px, .82vw, 11px); }
+  .pickBtn .pkVal { font-size: clamp(22px, 2.2vw, 30px); line-height: 1; transition: transform .18s cubic-bezier(.2,1.6,.4,1); }
+  .pickBtn .chev { font-size: .8em; transition: transform .2s ease; }
+  .pickBtn.open { background: #fff7df; box-shadow: 0 4px 12px rgba(60,45,15,.28); }
+  .pickBtn.open .chev { transform: rotate(180deg); }
+  .pkVal.bump { animation: pkPop .45s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes pkPop { 0% { transform: scale(1); } 45% { transform: scale(1.5) rotate(-8deg); } 100% { transform: scale(1); } }
+  /* the option popover under each picker */
+  /* opens UPWARD (pickers sit at the card's bottom edge) */
+  .pickPop { position: absolute; left: 50%; bottom: calc(100% + 8px); top: auto;
+    transform: translateX(-50%) scale(.8); transform-origin: bottom center;
+    z-index: 30; display: grid; grid-auto-flow: column; gap: 6px; padding: 8px;
+    background: #fff7e6; border: 3px solid var(--gold); border-radius: 16px;
+    box-shadow: 0 12px 26px rgba(60,45,15,.4); opacity: 0; pointer-events: none;
+    transition: opacity .16s ease, transform .16s cubic-bezier(.2,1.5,.4,1); }
+  .pickPop.open { opacity: 1; pointer-events: auto; transform: translateX(-50%) scale(1); }
+  .pickPop::before { content: ''; position: absolute; bottom: -8px; top: auto; left: 50%; transform: translateX(-50%);
+    border: 7px solid transparent; border-top-color: var(--gold); }
+  .pickPop button { cursor: pointer; border: 3px solid transparent; border-radius: 12px; background: rgba(255,255,255,.6);
+    line-height: 1; padding: 6px 8px; font-size: clamp(22px, 2.2vw, 30px);
+    transition: transform .12s ease, border-color .12s ease, background .12s ease; }
+  .pickPop button:hover { transform: translateY(-2px); }
+  .pickPop button:active { transform: scale(.9); }
+  .pickPop button.sel { border-color: var(--gold); background: #ffefc0; box-shadow: inset 0 0 0 2px rgba(255,255,255,.7); }
+  /* returning-player chip */
+  .profileChip { display: flex; align-items: center; gap: .6em; align-self: center;
+    background: linear-gradient(#fff7df, #f3e2b0); border: 3px solid var(--gold); border-radius: 999px;
+    padding: .5vh 1em; box-shadow: 0 4px 10px rgba(60,45,15,.25); animation: cardIn .5s ease-out both; }
+  .profileChip[hidden] { display: none; }
+  .profileChip .pcAvatar { font-size: 1.5em; line-height: 1; }
+  .profileChip .pcText { display: flex; flex-direction: column; line-height: 1.05; }
+  .profileChip .pcHi { font-size: .72em; color: #8a6a35; font-weight: 700; }
+  .profileChip .pcName { font-family: 'Baloo 2'; font-weight: 800; color: var(--blue-d); font-size: 1.05em; }
+  .profileChip .pcStars { font-weight: 800; color: #b8860b; margin-left: .2em; }
+  .profileChip .pcSwitch { cursor: pointer; border: none; background: rgba(0,0,0,.06); color: #6e4f24;
+    border-radius: 999px; padding: .3em .7em; font-size: .72em; font-weight: 700; }
+  .profileChip .pcSwitch:active { transform: scale(.94); }
   /* Yako (opaque, clean cutout) on the right, behind the menu so he can't overlap it */
   /* Yako waves & the puppy wags its tail — a transparent PNG sprite sheet (40 frames)
      stepped by CSS, ping-ponged with 'alternate' for a seamless loop. */
@@ -218,18 +254,16 @@
                yakoWave 3.4s steps(39) .8s infinite alternate,
                charBob 4.5s ease-in-out .8s infinite; }
   .homeUI { margin-left: 0; }
-  /* Desktop: menu sits left-of-center so Yako + puppy have the right third to
-     themselves (never clipped by the card). The lesson grid can get tall, so the
-     card scrolls inside the viewport rather than overflowing behind the character. */
+  /* Desktop: a single NARROW, centered card (phone-style) — START never grows
+     wider than the name field. Yako + puppy sit bottom-right, clear of the card. */
   @media (min-width: 761px) {
-    /* reserve the right ~28% for Yako; the menu centers itself in what's left */
-    #start { padding-right: 28vw; box-sizing: border-box; }
-    .homeUI { max-width: 68vw; }
-    .homeCard { max-height: 86vh; overflow-y: auto; overflow-x: hidden; }
-    .homeChar { height: 60vh; width: calc(60vh * 0.7037); right: 0; }
+    #start { justify-content: center; }
+    .homeUI { max-width: none; }
+    .homeCard { width: min(440px, 92vw); overflow: visible; }   /* visible so language/narrator popovers escape the card */
+    .homeChar { height: 58vh; width: calc(58vh * 0.7037); right: 1vw; }
   }
   @media (min-width: 761px) and (min-aspect-ratio: 16/9) {
-    .homeChar { height: 66vh; width: calc(66vh * 0.7037); }
+    .homeChar { height: 64vh; width: calc(64vh * 0.7037); }
   }
 
   /* ---- Living storybook: gentle idle animations + an intro on load ---- */
@@ -947,6 +981,12 @@
       <div class="homeTitle">Yako <span>by the Sea</span></div>
       <div class="homeRibbon">🐚 Have fun counting &amp; spelling! ⭐</div>
       <div class="homeCard">
+        <div class="profileChip" id="profileChip" hidden>
+          <span class="pcAvatar" id="pcAvatar">🙂</span>
+          <span class="pcText"><span class="pcHi">Welcome back,</span><span class="pcName" id="pcName"></span></span>
+          <span class="pcStars" id="pcStars">⭐ 0</span>
+          <button class="pcSwitch" id="pcSwitch" type="button" aria-label="Not you? Switch player">switch</button>
+        </div>
         <div class="nameRow">
           <label for="nameInput">My name is</label>
           <input id="nameInput" type="text" maxlength="20" autocomplete="off" spellcheck="false" placeholder="type your name">
@@ -957,23 +997,29 @@
         </button>
         <div class="homeControls">
           <button id="chooseBtn" aria-expanded="false">📚 Choose a lesson <span class="chev">▾</span></button>
-          <div class="ctrlGroup">
-            <span class="ctrlLabel">Language</span>
-            <div class="toggleRow" id="langRow" aria-label="Voice language">
-              <button class="flagBtn" data-lang="en-GB" title="English" aria-label="English">🇬🇧</button>
-              <button class="flagBtn" data-lang="fr-FR" title="Français" aria-label="French">🇫🇷</button>
-              <button class="flagBtn" data-lang="es-ES" title="Español" aria-label="Spanish">🇪🇸</button>
-              <button class="flagBtn" data-lang="he-IL" title="עברית" aria-label="Hebrew">🇮🇱</button>
-              <button class="flagBtn" data-lang="tl-PH" title="Tagalog" aria-label="Tagalog">🇵🇭</button>
+          <div class="pickRow">
+            <div class="picker">
+              <button class="pickBtn" id="langPickBtn" aria-haspopup="true" aria-expanded="false">
+                <span class="pkCap">Language</span><span class="pkVal" id="langVal">🇬🇧</span><span class="chev">▾</span>
+              </button>
+              <div class="pickPop" id="langPop" role="menu" aria-label="Choose language">
+                <button class="flagBtn" data-lang="en-GB" title="English" aria-label="English">🇬🇧</button>
+                <button class="flagBtn" data-lang="fr-FR" title="Français" aria-label="French">🇫🇷</button>
+                <button class="flagBtn" data-lang="es-ES" title="Español" aria-label="Spanish">🇪🇸</button>
+                <button class="flagBtn" data-lang="he-IL" title="עברית" aria-label="Hebrew">🇮🇱</button>
+                <button class="flagBtn" data-lang="tl-PH" title="Tagalog" aria-label="Tagalog">🇵🇭</button>
+              </div>
             </div>
-          </div>
-          <div class="ctrlGroup">
-            <span class="ctrlLabel">Narrator</span>
-            <div class="toggleRow" id="personaRow" aria-label="Voice character">
-              <button class="personaBtn" data-persona="mom" title="Mom" aria-label="Mom voice">👩</button>
-              <button class="personaBtn" data-persona="dad" title="Dad" aria-label="Dad voice">👨</button>
-              <button class="personaBtn" data-persona="grandpa" title="Grandpa" aria-label="Grandpa voice">👴</button>
-              <button class="personaBtn" data-persona="grandma" title="Grandma" aria-label="Grandma voice">👵</button>
+            <div class="picker">
+              <button class="pickBtn" id="personaPickBtn" aria-haspopup="true" aria-expanded="false">
+                <span class="pkCap">Narrator</span><span class="pkVal" id="personaVal">👩</span><span class="chev">▾</span>
+              </button>
+              <div class="pickPop" id="personaPop" role="menu" aria-label="Choose narrator">
+                <button class="personaBtn" data-persona="mom" title="Mom" aria-label="Mom voice">👩</button>
+                <button class="personaBtn" data-persona="dad" title="Dad" aria-label="Dad voice">👨</button>
+                <button class="personaBtn" data-persona="grandpa" title="Grandpa" aria-label="Grandpa voice">👴</button>
+                <button class="personaBtn" data-persona="grandma" title="Grandma" aria-label="Grandma voice">👵</button>
+              </div>
             </div>
           </div>
         </div>
@@ -1400,7 +1446,15 @@
   // ================= Language Island (tap-to-answer, learn a tongue by ear) =================
   const VOCAB  = window.YAKO_VOCAB;
   const LANGS  = VOCAB.LANGS;
-  const CATALL = ANIMALS_DATA.concat(COLORS_DATA, SHAPES_DATA);   // every pictured object
+  // local Monterey animals join the vocabulary (distinct glyphs so Word Safari choices differ)
+  const LOCAL_ANIMALS_DATA = [
+    { name: 'Seal', glyph: '🦭' }, { name: 'Otter', glyph: '🦦' }, { name: 'Whale', glyph: '🐋' },
+    { name: 'Deer', glyph: '🦌' }, { name: 'Quail', glyph: '🐤' }, { name: 'Squirrel', glyph: '🐿️' },
+    { name: 'Pelican', glyph: '🦆' }, { name: 'Sheep', glyph: '🐑' }, { name: 'Cow', glyph: '🐮' },
+    { name: 'Bird', glyph: '🐦' }, { name: 'Fish', glyph: '🐟' }
+  ];
+  const ALL_ANIMALS = ANIMALS_DATA.concat(LOCAL_ANIMALS_DATA);
+  const CATALL = ALL_ANIMALS.concat(COLORS_DATA, SHAPES_DATA);   // every pictured object
   function wordFor(name, p) { const w = VOCAB.WORDS[name]; return w ? (w[p] || w.en) : name; }
   function numFor(n, p)     { const w = VOCAB.NUMS[n];     return w ? (w[p] || w.en) : String(n); }
   function picHTMLItem(it)  { return it.hex ? '<div class="swatch" style="background:' + it.hex + '"></div>'
@@ -1512,6 +1566,7 @@
 
   // ================= Monterey Adventures: count local animals around the peninsula =================
   const MONT = window.YAKO_MONTEREY;
+  let advPlace = null;   // last place greeted, so "Welcome to …" plays once per place (not every round)
   function setSceneBg(scene) { const el = document.getElementById('sceneBg'); if (el) el.style.backgroundImage = "url('" + scene + "')"; }
   function buildAdventure() {
     const place = MONT.PLACES[(level - 1) % MONT.PLACES.length];   // tour the peninsula, a new place each level
@@ -1532,7 +1587,13 @@
         targetEl.innerHTML = '<div class="advCount">' + objs(a.emoji, n) + '</div>';
         renderPickChoices(opts.map(o => ({ number: o.number, html: '' })));
       },
-      play() { playPersona('count_any', L().countAny, { rate: 0.95 }); },   // recorded "How many? Count them!"
+      play() {
+        // "Welcome to <place>!" once per place, then "How many <animal>? Count them!"
+        const chain = [];
+        if (place.id !== advPlace) { chain.push('place_' + place.id); advPlace = place.id; }
+        chain.push('howmany_' + key);
+        playPersonaChain(chain, L().countAny, { rate: 0.95 });
+      },
       revealAnswer() {}
     };
   }
@@ -1541,7 +1602,7 @@
     if (mode === 'adventures') return buildAdventure();
     if (mode === 'hello')      return buildLangPick(true);
     if (mode === 'guesslang')  return buildLangPick(false);
-    if (mode === 'wordsafari') return buildWordPick(ANIMALS_DATA);
+    if (mode === 'wordsafari') return buildWordPick(ALL_ANIMALS);
     if (mode === 'colormix')   return buildWordPick(COLORS_DATA.concat(SHAPES_DATA));
     if (mode === 'countlang')  return buildCountLang();
     if (mode === 'samediff')   return buildSameDiff();
@@ -2093,6 +2154,7 @@
       game.classList.toggle('seq-mode', mode === 'spelling' || mode === 'counting');
       game.classList.toggle('big-target', mode === 'sounds' || mode === 'listen' || mode === 'countobj' || mode === 'math');
       game.classList.toggle('adv', mode === 'adventures');   // full-scene Monterey layout
+      if (mode === 'adventures') advPlace = null;            // greet the first place on entry
       const pr = L().prompt;
       promptEl.textContent = cat ? (answerStyle === 'number' ? pr.catNum : pr.cat) : (pr[mode] || pr.both);
       hintEl.textContent = (LANG_MODES.includes(mode) || mode === 'adventures') ? 'Listen, then tap your answer! 👂' : 'Look closely and find the key!';
@@ -2114,6 +2176,7 @@
     startScreen.style.display = 'flex';
     targetEl.textContent = '';
     if (typeof refreshStartSub === 'function') refreshStartSub();   // START shows where the campaign resumes
+    if (typeof refreshProfileChip === 'function') refreshProfileChip();   // updated star total for the returning player
     if (typeof updateThemeMusic === 'function') updateThemeMusic(); // theme comes back on the menu
     startBarkLoop();
   }
@@ -2216,25 +2279,72 @@
   soundBtn.classList.toggle('muted', A.isMuted());        // reflect the persisted mute on load
 
   // ---- Narrator language + character toggles (home menu) ----
+  const PERSONA_EMOJI = { mom: '👩', dad: '👨', grandpa: '👴', grandma: '👵' };
+  const langValEl = document.getElementById('langVal');
+  const personaValEl = document.getElementById('personaVal');
+  function flagFor(lang) { const b = document.querySelector('.flagBtn[data-lang="' + lang + '"]'); return b ? b.textContent : '🇬🇧'; }
+  function bump(el) { if (!el) return; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
   function refreshVoiceUI() {
-    document.querySelectorAll('#langRow .flagBtn').forEach(b => b.classList.toggle('sel', b.dataset.lang === I.getLang()));
-    document.querySelectorAll('#personaRow .personaBtn').forEach(b => b.classList.toggle('sel', b.dataset.persona === A.getPersona()));
+    const lang = I.getLang(), per = A.getPersona();
+    document.querySelectorAll('.flagBtn').forEach(b => b.classList.toggle('sel', b.dataset.lang === lang));
+    document.querySelectorAll('.personaBtn').forEach(b => b.classList.toggle('sel', b.dataset.persona === per));
+    if (langValEl) langValEl.textContent = flagFor(lang);
+    if (personaValEl) personaValEl.textContent = PERSONA_EMOJI[per] || '👩';
   }
-  const langRowEl = document.getElementById('langRow');
-  const personaRowEl = document.getElementById('personaRow');
-  if (langRowEl) langRowEl.addEventListener('click', (e) => {
+  // Compact pickers: tap to open a popover, tap an option to choose (with a bounce + voice preview).
+  function closePops() {
+    document.querySelectorAll('.pickPop.open').forEach(p => p.classList.remove('open'));
+    document.querySelectorAll('.pickBtn.open').forEach(b => { b.classList.remove('open'); b.setAttribute('aria-expanded', 'false'); });
+  }
+  function wirePicker(btnId, popId) {
+    const btn = document.getElementById(btnId), pop = document.getElementById(popId);
+    if (!btn || !pop) return;
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = pop.classList.contains('open'); closePops();
+      if (!isOpen) { pop.classList.add('open'); btn.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); ensureAudio(); }
+    });
+    pop.addEventListener('click', e => e.stopPropagation());
+  }
+  wirePicker('langPickBtn', 'langPop');
+  wirePicker('personaPickBtn', 'personaPop');
+  const langPopEl = document.getElementById('langPop'), personaPopEl = document.getElementById('personaPop');
+  if (langPopEl) langPopEl.addEventListener('click', (e) => {
     const b = e.target.closest('.flagBtn'); if (!b) return;
-    I.setLang(b.dataset.lang);
-    pickVoice(); refreshVoiceUI(); ensureAudio();
-    stopAllSounds(); playPersona('greet', L().greet);  // quick preview in the chosen language/voice
+    I.setLang(b.dataset.lang); pickVoice(); refreshVoiceUI(); ensureAudio(); bump(langValEl); closePops();
+    stopAllSounds(); playPersona('greet', L().greet);   // hear the chosen language right away
   });
-  if (personaRowEl) personaRowEl.addEventListener('click', (e) => {
+  if (personaPopEl) personaPopEl.addEventListener('click', (e) => {
     const b = e.target.closest('.personaBtn'); if (!b) return;
-    A.setPersona(b.dataset.persona);
-    pickVoice(); refreshVoiceUI(); ensureAudio();
-    stopAllSounds(); playPersona('greet', L().greet);  // quick preview in the chosen voice
+    A.setPersona(b.dataset.persona); pickVoice(); refreshVoiceUI(); ensureAudio(); bump(personaValEl); closePops();
+    if (profileChipEl && !profileChipEl.hidden) pcAvatarEl.textContent = PERSONA_EMOJI[A.getPersona()] || '🙂';
+    stopAllSounds(); playPersona('greet', L().greet);   // hear the chosen narrator right away
   });
+  document.addEventListener('click', closePops);   // tapping elsewhere closes the popover
   refreshVoiceUI();
+
+  // ---- Returning-player chip: Yako remembers the child + their star total on this device ----
+  const profileChipEl = document.getElementById('profileChip');
+  const pcNameEl = document.getElementById('pcName'), pcStarsEl = document.getElementById('pcStars');
+  const pcAvatarEl = document.getElementById('pcAvatar'), pcSwitchEl = document.getElementById('pcSwitch');
+  function refreshProfileChip() {
+    let name = ''; try { name = localStorage.getItem('kbfun_name') || ''; } catch (e) {}
+    if (!profileChipEl) return;
+    if (name) {
+      pcNameEl.textContent = name;
+      pcStarsEl.textContent = '⭐ ' + (getNum('yako_points') || 0);
+      pcAvatarEl.textContent = PERSONA_EMOJI[A.getPersona()] || '🙂';
+      profileChipEl.hidden = false;
+      if (nameInput && !nameInput.value) nameInput.value = name;
+    } else { profileChipEl.hidden = true; }
+  }
+  if (pcSwitchEl) pcSwitchEl.addEventListener('click', (e) => {
+    e.stopPropagation();
+    try { localStorage.removeItem('kbfun_name'); } catch (e) {}
+    if (nameInput) { nameInput.value = ''; nameInput.focus(); }
+    refreshProfileChip();
+  });
+  refreshProfileChip();
 
   // Touchscreen taps in free play make a burst
   document.addEventListener('pointerdown', (e) => {
