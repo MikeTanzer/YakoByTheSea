@@ -2626,6 +2626,12 @@
     const card = p.scene.replace(/\.png$/, '_card.png');       // a different painted view for the card
     img.onerror = () => { img.onerror = null; img.src = p.scene; };  // fall back to the backdrop still
     img.src = card;
+    // a different Yako-and-puppy pose per place (hug, fetch, walk, scratch…); falls back to the cheer art
+    const yk = placeCardEl.querySelector('.pcYako');
+    const ykSrc = p.scene.replace(/\.png$/, '_yako.png');
+    yk.onerror = () => { yk.onerror = null; yk.src = 'yako_cheer.png'; };
+    yk.style.display = '';
+    yk.src = ykSrc;
     placeCardEl.querySelector('.pcPlace').textContent = p.name;
     placeCardEl.querySelector('.pcFact').textContent  = p.fact  || '';
     placeCardEl.querySelector('.pcLoves').textContent = p.loves || '';
