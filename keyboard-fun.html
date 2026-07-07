@@ -750,7 +750,8 @@
     font-size: min(2.2vh, 4vw); transition: transform .12s ease, border-color .12s ease; white-space: nowrap; }
   #placePop button:hover { transform: translateX(3px); }
   #placePop button.sel { border-color: var(--gold); background: #ffefc0; }
-  #placePop button .pIco { font-size: 1.25em; }
+  #placePop button .pThumb { flex: 0 0 auto; width: 2.4em; height: 1.6em; object-fit: cover;
+    border-radius: 7px; border: 2px solid var(--gold); box-shadow: 0 1px 3px rgba(60,45,15,.3); }
   /* — the Yako place card: a fun fact + what Yako loves to do here — */
   #placeCard { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 60;
     width: min(480px, 88vw); background: #fdf3d7; border: 5px solid var(--gold); border-radius: 22px;
@@ -2588,7 +2589,7 @@
   if (placePopEl) MONT.PLACES.forEach((p, i) => {
     const b = document.createElement('button');
     b.type = 'button';
-    b.innerHTML = '<span class="pIco">🏞️</span>' + p.name;
+    b.innerHTML = '<img class="pThumb" src="' + p.scene + '" alt="" loading="lazy">' + p.name;
     b.addEventListener('click', e => { e.stopPropagation(); hidePlacePop(); goPlace(i); });
     placePopEl.appendChild(b);
   });
