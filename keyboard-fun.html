@@ -780,9 +780,12 @@
   #placeCard .pcPlace { font-weight: 900; color: var(--blue); font-size: min(3.4vh, 6vw); }
   #placeCard .pcFact  { font-weight: 700; color: #5b4327; font-size: min(2.3vh, 4.2vw); line-height: 1.3; }
   #placeCard .pcLoves { font-weight: 800; color: #b0722a; font-size: min(2.3vh, 4.2vw); line-height: 1.3; }
-  #placeCard .pcX { position: absolute; top: 8px; right: 12px; cursor: pointer; border: none; background: none;
-    font-size: min(3vh, 5.5vw); font-weight: 900; color: #a5834b; line-height: 1; }
-  #placeCard .pcX:active { transform: scale(.85); }
+  #placeCard .pcX { position: absolute; top: -16px; right: -16px; z-index: 80; cursor: pointer;
+    width: min(6vh, 46px); height: min(6vh, 46px); display: flex; align-items: center; justify-content: center;
+    background: #fff; border: 3px solid var(--gold-d); border-radius: 50%; color: #6e4f24;
+    font-size: min(3vh, 24px); font-weight: 900; line-height: 1; box-shadow: 0 4px 10px rgba(40,28,8,.45); }
+  #placeCard .pcX:hover { background: #fff6e0; }
+  #placeCard .pcX:active { transform: scale(.88); }
 
   /* ---------- On-screen keyboard ---------- */
   #keyboard {
@@ -1423,6 +1426,7 @@
   let lastTarget = null;
   let playerName = '';
   let answerStyle = 'letter';
+  let flagIntroShown = false;   // one-time "each flag is a language" training per session
 
   // level / scoring / timing
   const STARS_PER_LEVEL = 5;
@@ -2411,8 +2415,17 @@
       setLevelScene();                     // pick the location for this lesson/level
       const pr = L().prompt;
       promptEl.textContent = cat ? (answerStyle === 'number' ? pr.catNum : pr.cat) : (pr[mode] || pr.both);
-      hintEl.textContent = LANG_MODES.includes(mode) ? 'Listen, then tap your answer! 👂' : 'Look closely and find the key!';
-      setTimeout(newTarget, 500);
+      // Guess-the-Language / Hello World show flags — teach that each flag IS a language.
+      const flagMode = (mode === 'hello' || mode === 'guesslang');
+      hintEl.textContent = flagMode ? 'Each flag is a language — listen, then tap! 🌍'
+                         : (LANG_MODES.includes(mode) ? 'Listen, then tap your answer! 👂' : 'Look closely and find the key!');
+      let firstDelay = 500;
+      if (flagMode && !flagIntroShown) {   // once per session: a short spoken lesson before the first round
+        flagIntroShown = true;
+        setTimeout(() => speak('Each flag is a different language, like French and Spanish! Listen to the word, then tap the flag it comes from.'), 350);
+        firstDelay = 4200;                 // let the training line finish before the first word plays
+      }
+      setTimeout(newTarget, firstDelay);
     }
   }
   function backToMenu() {
@@ -2609,6 +2622,7 @@
   const placeTagEl  = document.getElementById('placeTag');
   const placePopEl  = document.getElementById('placePop');
   const placeCardEl = document.getElementById('placeCard');
+  const placeAudio = new Audio();                    // Mom-voice location narration (played once per card open)
   if (placePopEl) MONT.PLACES.forEach((p, i) => {
     const b = document.createElement('button');
     b.type = 'button';
@@ -2617,7 +2631,7 @@
     placePopEl.appendChild(b);
   });
   function hidePlacePop() { if (placePopEl) placePopEl.classList.remove('open'); }
-  function hidePlaceCard() { if (placeCardEl && !placeCardEl.hidden) { placeCardEl.hidden = true; stopAllSounds(); } }
+  function hidePlaceCard() { if (placeCardEl && !placeCardEl.hidden) { placeCardEl.hidden = true; try { placeAudio.pause(); } catch (e) {} stopAllSounds(); } }
   // Traveling somewhere shows Yako + his puppy with a fun fact and what he loves to do there.
   function goPlace(i) {
     showPlace(i);
@@ -2637,7 +2651,16 @@
     placeCardEl.querySelector('.pcLoves').textContent = p.loves || '';
     placeCardEl.hidden = false;
     stopAllSounds();
-    speak((p.fact || '') + ' ' + (p.loves || ''), { rate: 1.0 });
+    // Narrate the place ONCE, in the recorded Mom voice (synth fallback if the clip is missing/blocked)
+    try { placeAudio.pause(); placeAudio.currentTime = 0; } catch (e) {}
+    if (!A.isMuted()) {
+      const say = () => speak((p.fact || '') + ' ' + (p.loves || ''), { rate: 1.0 });
+      placeAudio.src = 'voice/place/' + p.id + '.mp3';
+      placeAudio.volume = A.getVolume();
+      placeAudio.onerror = say;
+      const pl = placeAudio.play();
+      if (pl && pl.catch) pl.catch(say);
+    }
   }
   if (placeTagEl) placeTagEl.addEventListener('click', e => {
     e.stopPropagation();

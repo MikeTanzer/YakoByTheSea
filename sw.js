@@ -1,5 +1,5 @@
 /* Yako by the Sea — service worker (offline + installable PWA) */
-const CORE = 'yako-core-v9';     // versioned: bumped whenever the code/art below changes
+const CORE = 'yako-core-v10';    // versioned: bumped whenever the code/art below changes
 const MEDIA = 'yako-media';      // persistent: recorded clips cached as they play (survives version bumps)
 const CORE_ASSETS = [
   './',
@@ -45,7 +45,7 @@ self.addEventListener('activate', (e) => {
 
 // A clip/scene is immutable once recorded — cache-first, kept in the persistent MEDIA cache.
 const isMedia = (url) => url.origin === location.origin &&
-  (url.pathname.includes('/voice/clips/') ||
+  (url.pathname.includes('/voice/') ||
    (/\.(mp3|jpg|jpeg|png|mp4)$/i.test(url.pathname) && url.pathname.includes('/scenes/')));
 
 self.addEventListener('fetch', (e) => {
