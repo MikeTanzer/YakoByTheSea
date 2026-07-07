@@ -174,9 +174,13 @@
   #lessonsBack:active { transform: scale(.94); }
   .lessonsHead .lhTitle { flex: 1; text-align: center; font-family: 'Baloo 2', sans-serif; font-weight: 800;
     color: #6e4f24; font-size: clamp(16px, 1.7vw, 23px); }
-  .lessonsHead .lhPad { flex: 0 0 auto; visibility: hidden;     /* mirrors the back button so the title centers */
+  #lessonsFun { cursor: pointer; flex: 0 0 auto; border: 3px solid var(--gold); border-radius: 999px;
+    background: linear-gradient(180deg, #ffd977, #f0b73c); color: #5b4327;
     font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(13px, 1.2vw, 18px);
-    padding: .7vh 1.6vw; border: 3px solid transparent; }
+    padding: .7vh 1.6vw; box-shadow: 0 3px 8px rgba(60,45,15,.28);
+    transition: transform .12s ease; }
+  #lessonsFun:hover { transform: translateY(-1px); }
+  #lessonsFun:active { transform: scale(.94); }
   /* ===== Collapsible lesson groups (scales as levels grow) ===== */
   .lessonGroups { display: flex; flex-direction: column; gap: 1vh; width: 100%; }
   .lgroup .btnGrid { grid-template-columns: repeat(2, 1fr); }   /* roomier buttons in the narrow card */
@@ -1188,7 +1192,7 @@
         <div class="lessonsHead">
           <button id="lessonsBack" type="button" aria-label="Back to the main menu">🏠 Back</button>
           <span class="lhTitle">📚 Pick a lesson</span>
-          <span class="lhPad">🏠 Back</span>
+          <button id="lessonsFun" type="button" data-mode="free" aria-label="Just for Fun">🎉 Fun</button>
         </div>
         <div class="lessonGroups">
           <section class="lgroup open" data-group="basics">
@@ -1229,9 +1233,6 @@
               <button class="modeBtn lang" data-mode="guesslang"  aria-label="Guess the Language"><span class="title">Guess Language</span><span class="icons">🇬🇧 🇫🇷 🇵🇭</span></button>
               <button class="modeBtn lang" data-mode="samediff"   aria-label="Same or Different"><span class="title">Same or Different?</span><span class="icons">🟰 ↔️</span></button>
             </div>
-          </section>
-          <section class="lgroup lgroupSolo" data-group="fun">
-            <button class="groupHead lgroupLink" type="button" data-mode="free" aria-label="Free Play"><span class="ghIcon">🎉</span><span class="ghName">Just for Fun</span><span class="chev play">▶</span></button>
           </section>
         </div>
       </div>
@@ -2559,6 +2560,8 @@
       if (chooseBtnEl) chooseBtnEl.setAttribute('aria-expanded', 'false');
       card.scrollTop = 0;
     }); }
+  { const lf = document.getElementById('lessonsFun');
+    if (lf) lf.addEventListener('click', () => { playMode = 'practice'; startGame('free'); }); }
   // Accordion: tap a group header to expand its lessons (others stay as they are).
   document.querySelectorAll('.groupHead').forEach(h => {
     h.addEventListener('click', () => {
