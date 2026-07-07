@@ -386,12 +386,17 @@
   .homeFoot .mBtn svg { width: 54%; height: 54%; fill: #6e4f24; display: block; pointer-events: none; }
   .homeFoot .footText em { transition: opacity .35s ease; }
   .homeFoot.subswap .footText em { opacity: 0; }
-  /* 🥚 secret seashell: a quietly-tappable Easter egg that flips the playlist */
-  #footShell { cursor: pointer; user-select: none; -webkit-user-select: none; transition: transform .12s ease; }
+  /* 🥚 secret seashell: a quietly-tappable Easter egg that flips the playlist.
+     Tapping it colors the shell; tapping again returns it to normal. */
+  #footShell { cursor: pointer; user-select: none; -webkit-user-select: none;
+    display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; padding: 1px 3px;
+    transition: transform .12s ease, background .25s ease, box-shadow .25s ease; }
   #footShell:active { transform: scale(.85); }
   .shellPop { animation: shellPop .55s cubic-bezier(.2,1.6,.4,1); }
   @keyframes shellPop { 0% { transform: scale(1) rotate(0); } 40% { transform: scale(1.55) rotate(-20deg); } 100% { transform: scale(1) rotate(0); } }
-  .homeFoot.secret { background: linear-gradient(#efdcff, #d9bdf3); border-color: #b98ce2; }
+  .homeFoot.secret #footShell {          /* active: the shell turns rainbow-colorful */
+    background: conic-gradient(from 0deg, #ff8fb1, #ffd36e, #8fe3a0, #7cc4ff, #c79cff, #ff8fb1);
+    box-shadow: 0 0 0 2px #fff, 0 0 12px 3px rgba(160,90,220,.6); }
   /* The painted home menu, scaled to fit; hotspots positioned in % of the image */
   .homeStage { position: relative; }
   .homeStage img.bg { display: block; max-width: 100vw; max-height: 100vh; width: auto; height: auto;
