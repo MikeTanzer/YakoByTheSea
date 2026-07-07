@@ -220,22 +220,35 @@
   .pkVal.bump { animation: pkPop .45s cubic-bezier(.2,1.6,.4,1); }
   @keyframes pkPop { 0% { transform: scale(1); } 45% { transform: scale(1.5) rotate(-8deg); } 100% { transform: scale(1); } }
   /* the option popover under each picker */
-  /* fixed so it escapes the scrolling card; JS places it just above the picker button */
-  .pickPop { position: fixed; left: 50%; bottom: 12vh; top: auto;
-    transform: translateX(-50%) scale(.8); transform-origin: bottom center;
+  /* fixed so it escapes the scrolling card; JS places it just below the picker button */
+  .pickPop { position: fixed; left: 50%; top: auto; bottom: auto;
+    transform: translateX(-50%) scale(.8); transform-origin: top center;
     z-index: 30; display: grid; grid-auto-flow: column; gap: 6px; padding: 8px;
     background: #fff7e6; border: 3px solid var(--gold); border-radius: 16px;
     box-shadow: 0 12px 26px rgba(60,45,15,.4); opacity: 0; pointer-events: none;
     transition: opacity .16s ease, transform .16s cubic-bezier(.2,1.5,.4,1); }
   .pickPop.open { opacity: 1; pointer-events: auto; transform: translateX(-50%) scale(1); }
-  .pickPop::before { content: ''; position: absolute; bottom: -8px; top: auto; left: 50%; transform: translateX(-50%);
-    border: 7px solid transparent; border-top-color: var(--gold); }
+  .pickPop::before { content: ''; position: absolute; top: -8px; bottom: auto; left: 50%; transform: translateX(-50%);
+    border: 7px solid transparent; border-bottom-color: var(--gold); }
   .pickPop button { cursor: pointer; border: 3px solid transparent; border-radius: 12px; background: rgba(255,255,255,.6);
     line-height: 1; padding: 6px 8px; font-size: clamp(22px, 2.2vw, 30px);
     transition: transform .12s ease, border-color .12s ease, background .12s ease; }
   .pickPop button:hover { transform: translateY(-2px); }
   .pickPop button:active { transform: scale(.9); }
   .pickPop button.sel { border-color: var(--gold); background: #ffefc0; box-shadow: inset 0 0 0 2px rgba(255,255,255,.7); }
+  /* narrator name tooltip — pops up ABOVE the character with a springy animation */
+  .personaBtn { position: relative; }
+  .personaBtn::after { content: attr(data-name); position: absolute; left: 50%; bottom: calc(100% + 10px);
+    transform: translateX(-50%) translateY(8px) scale(.7); transform-origin: bottom center;
+    background: var(--gold-d); color: #fff; font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 14px; letter-spacing: .3px; padding: 3px 12px; border-radius: 999px; white-space: nowrap;
+    opacity: 0; pointer-events: none; z-index: 6; box-shadow: 0 5px 12px rgba(60,45,15,.4);
+    transition: opacity .16s ease, transform .28s cubic-bezier(.2,1.7,.4,1); }
+  .personaBtn::before { content: ''; position: absolute; left: 50%; bottom: calc(100% + 3px);
+    transform: translateX(-50%) translateY(8px) scale(.7); border: 6px solid transparent; border-top-color: var(--gold-d);
+    opacity: 0; pointer-events: none; z-index: 6; transition: opacity .16s ease, transform .28s cubic-bezier(.2,1.7,.4,1); }
+  .personaBtn:hover::after, .personaBtn:focus-visible::after,
+  .personaBtn:hover::before, .personaBtn:focus-visible::before { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
   /* returning-player chip */
   .profileChip { display: flex; align-items: center; gap: .6em; align-self: center;
     background: linear-gradient(#fff7df, #f3e2b0); border: 3px solid var(--gold); border-radius: 999px;
@@ -310,29 +323,18 @@
   .homeFoot .footText { display: flex; align-items: baseline; gap: 14px; min-width: 0; }
   .homeFoot .footText b  { font-weight: 800; font-size: clamp(12px, 1.5vw, 19px); }
   .homeFoot .footText em { font-style: normal; font-weight: 600; font-size: clamp(11px, 1.3vw, 16px); color: #8a6a36; }
-  /* Home music player — a slim pill at the top of the menu card */
-  .musicBar { align-self: stretch;
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    padding: 6px 14px; box-sizing: border-box;
-    background: linear-gradient(#f7e4b4, #e7c884);
-    border: 3px solid var(--gold); border-radius: 999px;
-    box-shadow: 0 4px 12px rgba(60,45,15,.28), inset 0 0 0 2px rgba(255,255,255,.45);
-    font-family: 'Baloo 2', sans-serif; }
-  .musicBar .mNote { font-size: clamp(13px, 1.5vw, 18px); line-height: 1; flex: 0 0 auto;
-    filter: drop-shadow(0 1px 1px rgba(90,60,15,.35)); }
-  .musicBar .mBtn { flex: 0 0 auto; width: clamp(26px, 3vw, 32px); height: clamp(26px, 3vw, 32px);
+  /* Media player merged into the foot ribbon (play/pause + next song) */
+  .homeFoot .footMusic { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+  .homeFoot .mBtn { flex: 0 0 auto; width: clamp(30px, 3.2vw, 38px); height: clamp(30px, 3.2vw, 38px);
     display: flex; align-items: center; justify-content: center;
-    font-size: clamp(11px, 1.4vw, 15px); line-height: 1; cursor: pointer;
+    font-size: clamp(13px, 1.5vw, 17px); line-height: 1; cursor: pointer;
     background: #fff6e0; color: #6e4f24; border: 2px solid var(--gold-d); border-radius: 50%;
     box-shadow: 0 2px 4px rgba(90,60,15,.25); transition: transform .1s ease, background .15s ease; }
-  .musicBar .mBtn:hover { background: #fffaf0; }
-  .musicBar .mBtn:active { transform: scale(.9); }
-  .musicBar .mPlay { width: clamp(30px, 3.4vw, 38px); height: clamp(30px, 3.4vw, 38px);
-    background: linear-gradient(#ffe9a8, #f0c869); font-size: clamp(12px, 1.6vw, 17px); }
-  .musicBar .mTitle { min-width: 0; max-width: 22vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    font-weight: 800; font-size: clamp(11px, 1.3vw, 15px); color: #6e4f24; text-shadow: 0 1px 0 rgba(255,255,255,.5);
-    padding-left: 2px; }
-  .musicBar.paused .mTitle { opacity: .55; }
+  .homeFoot .mBtn:hover { background: #fffaf0; }
+  .homeFoot .mBtn:active { transform: scale(.9); }
+  .homeFoot .mPlay { background: linear-gradient(#ffe9a8, #f0c869); }
+  .homeFoot .footText em { transition: opacity .35s ease; }
+  .homeFoot.subswap .footText em { opacity: 0; }
   /* The painted home menu, scaled to fit; hotspots positioned in % of the image */
   .homeStage { position: relative; }
   .homeStage img.bg { display: block; max-width: 100vw; max-height: 100vh; width: auto; height: auto;
@@ -601,8 +603,12 @@
 
   /* ---------- Monterey Adventures: a painted location scene as the backdrop ---------- */
   #sceneBg { position: fixed; inset: 0; z-index: 0; display: none;
-    background-size: cover; background-position: center bottom; background-repeat: no-repeat; }
+    width: 100%; height: 100%; object-fit: cover; object-position: center bottom; }
   #game.adv #sceneBg { display: block; }
+  /* soft vignette over the living scene so the cream card stays crisp and readable */
+  #sceneScrim { position: fixed; inset: 0; z-index: 0; display: none; pointer-events: none;
+    background: radial-gradient(ellipse 82% 72% at 50% 45%, rgba(0,0,0,0) 42%, rgba(18,12,3,.38) 100%); }
+  #game.adv #sceneScrim { display: block; }
   #game.adv .gameStage .bg { display: none; }                 /* hide the painted desk frame */
   #game.adv #gameRibbon, #game.adv #reactionBox { display: none; }
   /* readable cream card centered over the scene (works at every width) */
@@ -628,6 +634,14 @@
     display: flex; align-items: center; justify-content: center; font-size: min(4vh,6vw); z-index: 12; }
   #game.adv #exit  { left: 3vw; right: auto; }
   #game.adv #sound { right: 3vw; left: auto; }
+  /* Just-for-Fun home button (Free Play hides the painted frame, so it needs its own) */
+  #freeHome { position: fixed; left: 3vw; bottom: 2.5vh; z-index: 7; display: none;
+    width: min(8vh,13vw); height: min(8vh,13vw); align-items: center; justify-content: center;
+    font-size: min(3.8vh,6vw); line-height: 1; cursor: pointer;
+    background: #fff6e0; color: #6e4f24; border: 3px solid var(--gold-d); border-radius: 50%;
+    box-shadow: 0 5px 12px rgba(0,0,0,.32); }
+  #freeHome:active { transform: scale(.92); }
+  #game.free-mode #freeHome { display: flex; }
   #game.adv #exit::after  { content: '🏠'; }
   #game.adv #sound::after { content: '🔊'; }
   #game.adv #sound.muted { background: #c0392b; border-color: #9a261a; }
@@ -925,17 +939,13 @@
     #start .modeBtn[data-mode="both"] .title { font-size: 5.6vw; }
     #start .modeBtn[data-mode="free"] .sub   { font-size: 6vw; }
 
-    .homeFoot { width: 92vw; max-width: 92vw; bottom: .8vh; gap: 3vw; padding: 1vh 3vw; white-space: normal; }
+    .homeFoot { width: 92vw; max-width: 92vw; bottom: .8vh; gap: 2.6vw; padding: 1vh 3vw; white-space: normal; }
     .homeFoot .footText { flex-direction: column; align-items: center; gap: .2vh; text-align: center; }
     .homeFoot .footText b  { font-size: 3.4vw; white-space: nowrap; }
     .homeFoot .footText em { font-size: 2.9vw; white-space: nowrap; }
     .homeFoot .footIcon { font-size: 5.2vw; }
-
-    .musicBar { gap: 2.4vw; padding: 1.2vw 3vw; }
-    .musicBar .mNote { font-size: 4vw; }
-    .musicBar .mBtn  { width: 9vw; height: 9vw; font-size: 4vw; }
-    .musicBar .mPlay { width: 10.4vw; height: 10.4vw; font-size: 4.6vw; }
-    .musicBar .mTitle { max-width: 40vw; font-size: 3.4vw; }
+    .homeFoot .footMusic { gap: 2vw; }
+    .homeFoot .mBtn  { width: 10vw; height: 10vw; font-size: 4.6vw; }
 
     /* ===================== MOBILE GAME VIEW (all modes except Free Play) ===================== */
     /* painted seaside video fills the screen; landscape interface PNG is hidden */
@@ -1047,13 +1057,6 @@
       <div class="homeTitle">Yako <span>by the Sea</span></div>
       <div class="homeRibbon">🐚 Have fun counting &amp; spelling! ⭐</div>
       <div class="homeCard">
-        <div class="musicBar" id="musicBar" aria-label="Music player">
-          <span class="mNote">🎵</span>
-          <button class="mBtn" id="mPrev" type="button" title="Previous song" aria-label="Previous song">⏮</button>
-          <button class="mBtn mPlay" id="mPlay" type="button" title="Play or pause music" aria-label="Play or pause music">⏸</button>
-          <button class="mBtn" id="mNext" type="button" title="Next song" aria-label="Next song">⏭</button>
-          <span class="mTitle" id="mTitle">Yako by the Sea</span>
-        </div>
         <div class="profileChip" id="profileChip" hidden>
           <span class="pcAvatar" id="pcAvatar">🙂</span>
           <span class="pcText"><span class="pcHi">Welcome back,</span><span class="pcName" id="pcName"></span></span>
@@ -1088,10 +1091,10 @@
                 <span class="pkCap">Narrator</span><span class="pkVal" id="personaVal">👩</span><span class="chev">▾</span>
               </button>
               <div class="pickPop" id="personaPop" role="menu" aria-label="Choose narrator">
-                <button class="personaBtn" data-persona="mom" title="Mom" aria-label="Mom voice">👩</button>
-                <button class="personaBtn" data-persona="dad" title="Dad" aria-label="Dad voice">👨</button>
-                <button class="personaBtn" data-persona="grandpa" title="Grandpa" aria-label="Grandpa voice">👴</button>
-                <button class="personaBtn" data-persona="grandma" title="Grandma" aria-label="Grandma voice">👵</button>
+                <button class="personaBtn" data-persona="mom" data-name="Mom" aria-label="Mom voice">👩</button>
+                <button class="personaBtn" data-persona="dad" data-name="Dad" aria-label="Dad voice">👨</button>
+                <button class="personaBtn" data-persona="grandpa" data-name="Grandpa" aria-label="Grandpa voice">👴</button>
+                <button class="personaBtn" data-persona="grandma" data-name="Grandma" aria-label="Grandma voice">👵</button>
               </div>
             </div>
           </div>
@@ -1119,6 +1122,7 @@
               <button class="modeBtn" data-mode="spelling" aria-label="Spelling"><span class="title">Spelling</span><span class="sub">CAT DOG</span></button>
               <button class="modeBtn" data-mode="sounds"   aria-label="Letter Sounds"><span class="title">Letter Sounds</span><span class="icons">🔊 A a</span></button>
               <button class="modeBtn" data-mode="listen"   aria-label="Listen and Find"><span class="title">Listen &amp; Find</span><span class="icons">👂 🔊 ❓</span></button>
+              <button class="modeBtn" data-mode="earmatch" aria-label="Listen and Match"><span class="title">Listen &amp; Match</span><span class="icons">👂 🔊 ⌨️</span></button>
               <button class="modeBtn" data-mode="counting" aria-label="Counting"><span class="title">Counting</span><span class="sub">1 2 3</span></button>
               <button class="modeBtn" data-mode="countobj" aria-label="How Many"><span class="title">How Many?</span><span class="icons">🐚 🐚 🐚</span></button>
               <button class="modeBtn" data-mode="math"     aria-label="Add and Subtract"><span class="title">Add &amp; Subtract</span><span class="icons">🦀 ➕ 🦀</span></button>
@@ -1142,7 +1146,7 @@
       </div>
     </div>
     <div class="homeChar" role="img" aria-label="Yako waving with his puppy"></div>
-    <div class="homeFoot"><span class="footIcon">⭐</span><span class="footText"><b>Collect 5 stars to win a level!</b><em>Tip: turn your volume up &amp; press F11.</em></span><span class="footIcon">🐚</span></div>
+    <div class="homeFoot" id="musicBar"><span class="footIcon">🐚</span><span class="footText"><b>Collect 5 stars to win a level!</b><em id="footSub">Tip: turn your volume up &amp; press F11.</em></span><span class="footMusic"><button class="mBtn mPlay" id="mPlay" type="button" title="Play or pause music" aria-label="Play or pause music">⏸</button><button class="mBtn" id="mNext" type="button" title="Next song" aria-label="Next song">⏭</button></span></div>
   </div>
 
   <!-- GAME: the painted interface illustration with live overlays -->
@@ -1150,7 +1154,8 @@
     <video id="freeBg" src="home_bg.mp4" muted loop playsinline preload="auto"></video>
     <div id="freeVignette"></div>
     <div id="flash"></div>
-    <div id="sceneBg"></div>
+    <video id="sceneBg" muted loop playsinline preload="auto"></video>
+    <div id="sceneScrim"></div>
     <div id="placeTag"></div>
     <div class="gameStage">
       <video id="gameBg" class="bg" src="gameui_anim.mp4" poster="gameui.png" muted loop autoplay playsinline preload="auto"></video>
@@ -1170,6 +1175,7 @@
     <div id="yako">👦🐕</div>
     <div id="buddy"></div>
     <div id="freecard"><img class="freecardImg" src="freepanel.png" alt=""><div id="freeLetter"></div></div>
+    <button id="freeHome" type="button" title="Back to menu" aria-label="Back to menu">🏠</button>
     <div id="hint">Look closely and find the key!</div>
     <div id="reactionBox">
       <video id="reactionVid" src="reactions.mp4" playsinline preload="auto"></video>
@@ -1267,6 +1273,7 @@
     ['animals',  'Animals'],
     ['sounds',   'Letter Sounds'],
     ['listen',   'Listen & Find'],
+    ['earmatch', 'Listen & Match'],
     ['countobj', 'How Many?'],
     ['spelling', 'Spelling'],
     ['counting', 'Counting'],
@@ -1481,11 +1488,49 @@
           '<span class="phonPic">' + emoji + '</span></div>';
       } };
   }
+  // ----- Listen & Match: hear a letter/number that is NEVER shown; match it on the
+  //       keyboard by ear. The prompt repeats up to 5×, 3s apart, and only reveals
+  //       the answer on the 5th repeat OR after 2 wrong guesses. -----
+  let earTimer = null, earCount = 0, targetWrong = 0;
+  function clearEar() { clearTimeout(earTimer); earTimer = null; }
+  function buildEarMatch() {
+    const ch = pick(LETTERS.concat(NUMBERS));
+    const isN = /[0-9]/.test(ch);
+    function speakFind() { playPersona(isN ? 'find_num_' + ch : 'find_let_' + ch, L().find(ch), { rate: 0.92 }); }
+    return {
+      answer: ch, kind: isN ? 'number' : 'letter', name: 'ear_' + ch, style: 'earmatch',
+      render() {
+        targetEl.style.color = '';
+        targetEl.innerHTML = '<div class="phonCol"><span class="phonPic listenPic">👂</span>' +
+          '<button type="button" class="speakerBtn" aria-label="Hear it again">🔊</button></div>';
+        const sb = targetEl.querySelector('.speakerBtn');
+        if (sb) sb.addEventListener('click', e => { e.stopPropagation(); speakFind(); });
+      },
+      // announce() calls play() first: say it, then repeat every 3s (up to 5), revealing on the 5th
+      play() {
+        clearEar();
+        earCount = 1; speakFind();
+        const tick = () => {
+          earCount++; speakFind();
+          if (earCount >= 5) this.revealAnswer();       // 5th time → finally show it
+          else earTimer = setTimeout(tick, 3000);
+        };
+        earTimer = setTimeout(tick, 3000);
+      },
+      revealAnswer() {
+        clearEar();
+        targetEl.innerHTML = '<div class="phonCol"><span class="bigletter" style="color:var(--blue)">' + ch + '</span></div>';
+      }
+    };
+  }
   // ----- How Many? (count the sea creatures) and Add & Subtract -----
   const SEA = [['🐚','shells'],['🦀','crabs'],['⭐','starfish'],['🐟','fish'],['🐙','octopuses'],['🐬','dolphins']];
   function objs(emoji, n) { let s = ''; for (let i = 0; i < n; i++) s += '<span class="cobj">' + emoji + '</span>'; return s; }
+  // How Many? grows gently: at most 4 objects at first, then 6, then 9 — the cap
+  // rises only after a level is cleared quickly and with few mistakes (see completeLevel).
+  function countMax() { const t = getNum('yako_count_tier'); return (t === 6 || t === 9) ? t : 4; }
   function buildCountObjects() {
-    const n = 1 + Math.floor(Math.random() * 9);     // 1..9
+    const n = 1 + Math.floor(Math.random() * countMax());   // 1..(4|6|9)
     const c = pick(SEA);
     return { answer: String(n), kind: 'number', name: 'cnt_' + n + c[1], style: 'count', creatures: c[1],
       render() { targetEl.style.color = ''; targetEl.innerHTML = '<div class="countObjRow">' + objs(c[0], n) + '</div>'; },
@@ -1630,7 +1675,15 @@
 
   // ================= Monterey Adventures: count local animals around the peninsula =================
   const MONT = window.YAKO_MONTEREY;
-  function setSceneBg(scene) { const el = document.getElementById('sceneBg'); if (el) el.style.backgroundImage = "url('" + scene + "')"; }
+  function setSceneBg(scene) {   // scene = 'scenes/<id>.png'; the living loop is the matching .mp4
+    const el = document.getElementById('sceneBg'); if (!el) return;
+    const mp4 = scene.replace(/\.png$/, '.mp4');
+    if (el.getAttribute('src') === mp4) return;             // already showing this place
+    el.poster = scene;                                      // painted still shows instantly / video fallback
+    el.src = mp4;
+    try { el.load(); } catch (e) {}
+    el.play().catch(() => {});
+  }
   // Every lesson is set in a Monterey place; the backdrop moves to a new area as levels advance.
   function setLevelScene() {
     if (mode === 'free') return;
@@ -1648,6 +1701,7 @@
     if (mode === 'samediff')   return buildSameDiff();
     if (mode === 'sounds')   return buildSounds();
     if (mode === 'listen')   return buildListen();
+    if (mode === 'earmatch') return buildEarMatch();
     if (mode === 'countobj') return buildCountObjects();
     if (mode === 'math')     return buildMath();
     if (mode === 'spelling') return buildSpell();
@@ -1673,6 +1727,7 @@
     choicesEl.innerHTML = '';
     game.classList.remove('choices-mode');
     clearFeedback();                 // both cards dim until they answer
+    clearEar(); targetWrong = 0;     // reset the Listen & Match repeat/reveal state
     next.render();
     targetEl.style.transform = 'scale(1)';
     hintStage = 0;
@@ -1766,7 +1821,7 @@
   // current countdown (so it only helps when the child is stuck, not guessing).
   function scheduleHint() {
     clearHintTimer();
-    if (!challenge || mode === 'free' || challenge.choices || locked || hintStage >= 2) return;
+    if (!challenge || mode === 'free' || mode === 'earmatch' || challenge.choices || locked || hintStage >= 2) return;
     const delay = hintStage === 0 ? HINT_DELAYS.cluster : HINT_DELAYS.exact;
     hintTimer = setTimeout(() => {
       if (hintStage === 0) { hintStage = 1; nearKeysHint(); scheduleHint(); }
@@ -1910,6 +1965,7 @@
   function correct(pressed) {
     stopAllSounds();
     clearHintTimer();
+    clearEar();
     locked = true;
     levelStars++;
     totalStars++; setNum('yako_points', totalStars);
@@ -1959,6 +2015,8 @@
     targetEl.style.transform = 'scale(0.94)';
     setTimeout(() => { targetEl.style.transform = 'scale(1)'; }, 150);
     playPersona('try', wrongPhrase(keyPressed));   // real-voice "try again" (synth fallback)
+    // Listen & Match: after 2 wrong guesses, finally reveal the hidden letter/number
+    if (mode === 'earmatch') { targetWrong++; if (targetWrong >= 2 && challenge.revealAnswer) challenge.revealAnswer(); }
     scheduleHint();   // restart the idle countdown toward the next hint
   }
 
@@ -1969,6 +2027,12 @@
     const bestKey = 'yako_best_' + mode, lastKey = 'yako_last_' + mode, cntKey = 'yako_count_' + mode;
     const prevBest = getNum(bestKey), prevLast = getNum(lastKey);
     setNum(cntKey, (getNum(cntKey) || 0) + 1);
+    // How Many?: raise the object cap (4 → 6 → 9) once a level is done well
+    if (mode === 'countobj') {
+      const tier = countMax();
+      if (tier < 9 && levelMistakes <= 1 && levelElapsed <= 8 * STARS_PER_LEVEL)
+        setNum('yako_count_tier', tier === 4 ? 6 : 9);
+    }
     const isBest = (prevBest == null) || (levelElapsed < prevBest);
     if (isBest) setNum(bestKey, levelElapsed);
     setNum(lastKey, levelElapsed);
@@ -2110,6 +2174,15 @@
       setTimeout(() => el.remove(), 1400);
     }
   }
+  // Free-play spelling detection: every known spelling word, uppercased.
+  const FREE_WORDS = new Set([].concat(...Object.values(WORDS)).map(w => String(w).toUpperCase()));
+  const FREE_WORD_MAXLEN = Math.max(3, ...[...FREE_WORDS].map(w => w.length));
+  let freeBuffer = '';
+  function announceSpelled(w) {
+    confetti(); sprinkleEmojis(10); showBuddy();
+    // let the last letter's name finish, then: "CAT! You spelled CAT!"
+    setTimeout(() => { speakName(w + '! ' + L().doneSpell(w), { rate: 1.0 }); playApplause(2.2); }, 700);
+  }
   function freePlayKey(e) {
     // ignore modifier keys (⌘ Ctrl Alt Shift Caps, etc.) — they shouldn't show in Free Play
     if (['Meta','Control','Alt','Shift','CapsLock','AltGraph','ContextMenu','OS','Fn','Dead'].includes(e.key)) return;
@@ -2124,6 +2197,14 @@
     if (e.key === ' ')      { confetti(); sprinkleEmojis(12); playApplause(); }
     else if (e.key === 'Enter') { confetti(); playChime(); }
     if (e.key.length === 1 && /[a-z0-9]/i.test(e.key)) playPersona('name_' + e.key.toUpperCase(), e.key.toLowerCase());   // real-voice key name (synth fallback)
+    // Spelling a real word ("C","A","T" → "CAT! You spelled CAT!")
+    if (e.key.length === 1 && /[a-z]/i.test(e.key)) {
+      freeBuffer = (freeBuffer + e.key.toUpperCase()).slice(-FREE_WORD_MAXLEN);
+      for (let len = FREE_WORD_MAXLEN; len >= 3; len--) {
+        const tail = freeBuffer.slice(-len);
+        if (tail.length === len && FREE_WORDS.has(tail)) { announceSpelled(tail); freeBuffer = ''; break; }
+      }
+    } else { freeBuffer = ''; }   // any non-letter breaks the word
   }
 
   // ---------- Key handling ----------
@@ -2160,7 +2241,7 @@
     game.classList.remove('choices-mode');
     game.classList.remove('adv');                // cleared here; re-added below only for Monterey Adventures
     clearKeyHighlights();
-    clearHintTimer(); hintStage = 0;
+    clearHintTimer(); hintStage = 0; clearEar();
     hideBuddy();
     winEl.classList.remove('show');
     clearFeedback();
@@ -2172,7 +2253,7 @@
     if (mode === 'free') {
       game.classList.add('free-mode');
       game.style.background = '';
-      freeKeyCount = 0;
+      freeKeyCount = 0; freeBuffer = '';
       if (freeLetterEl) freeLetterEl.textContent = '';
       const fb = document.getElementById('freeBg');
       if (fb) { try { fb.currentTime = 0; } catch (e) {} fb.play().catch(() => {}); }
@@ -2207,6 +2288,7 @@
     const fb = document.getElementById('freeBg'); if (fb) fb.pause();
     hideBuddy();
     clearHintTimer();
+    clearEar();
     clearTimeout(winTimer);
     clearTimeout(roundTimer); locked = false;
     winEl.classList.remove('show');
@@ -2227,7 +2309,7 @@
   // backgrounded). A watchdog re-starts whichever background should be visible right now.
   (function loopBackgrounds() {
     const RATE = 0.40;                                        // 40% speed, as before
-    const vids = [document.getElementById('bgvid'), document.getElementById('freeBg'), document.getElementById('gameBg')].filter(Boolean);
+    const vids = [document.getElementById('bgvid'), document.getElementById('freeBg'), document.getElementById('gameBg'), document.getElementById('sceneBg')].filter(Boolean);
     // NOTE: offsetParent is always null for position:fixed elements — use
     // getClientRects() to test real visibility (it also sees hidden ancestors).
     const showing = v => v.getClientRects().length > 0;
@@ -2251,9 +2333,10 @@
   })();
 
   // ---------- Music player: a playlist that plays softly on the home menu ----------
-  // Playlist lives in data/music.js (window.YAKO_MUSIC); ⏮/⏯/⏭ + a per-device
-  // "music paused" toggle. Music only ever sounds on the home menu, and the global
-  // sound button (soundBtn) still mutes it along with everything else.
+  // Playlist lives in data/music.js (window.YAKO_MUSIC). The current song LOOPS on
+  // repeat; only the ⏭ next button switches songs (never auto-advances). Controls
+  // live in the foot ribbon; ⏸/▶ pauses the music (separate from the sound button,
+  // which still mutes everything). Music only ever sounds on the home menu.
   const MUSIC = (window.YAKO_MUSIC && window.YAKO_MUSIC.length) ? window.YAKO_MUSIC
                                                                 : [{ title: 'Yako by the Sea', src: 'theme.mp3' }];
   let trackIdx = 0;
@@ -2262,48 +2345,58 @@
   try { musicPaused = localStorage.getItem('yako_music_paused') === '1'; } catch (e) {}
   const themeMusic = new Audio();
   themeMusic.volume = 0.35;
+  themeMusic.loop = true;                                        // each song repeats until Next is pressed
   themeMusic.src = MUSIC[trackIdx].src;
-  themeMusic.addEventListener('ended', () => nextTrack());       // roll on to the next song (wraps; replays if only one)
-  const mTitleEl = document.getElementById('mTitle');
   const mPlayEl  = document.getElementById('mPlay');
-  const musicBarEl = document.getElementById('musicBar');
+  const mNextEl  = document.getElementById('mNext');
+  const footSubEl = document.getElementById('footSub');
+  const FOOT_TIP = footSubEl ? footSubEl.textContent : '';      // the F11 tip; alternates with the track name
   function musicShouldPlay() {
     return startScreen.style.display !== 'none' && !A.isMuted() && !musicPaused;
   }
   function updateMusicUI() {
     const playing = musicShouldPlay();
-    if (mTitleEl) mTitleEl.textContent = MUSIC[trackIdx].title;
     if (mPlayEl)  mPlayEl.textContent = playing ? '⏸' : '▶';
-    if (musicBarEl) musicBarEl.classList.toggle('paused', !playing);
-    // only one song? hide the skip buttons — nothing to skip to
-    const solo = MUSIC.length <= 1;
-    ['mPrev', 'mNext'].forEach(id => { const b = document.getElementById(id); if (b) b.style.display = solo ? 'none' : ''; });
+    if (mNextEl)  mNextEl.style.display = MUSIC.length <= 1 ? 'none' : '';  // one song → nothing to skip to
   }
   function updateThemeMusic() {
     if (musicShouldPlay()) themeMusic.play().catch(() => {});
     else themeMusic.pause();
     updateMusicUI();
   }
-  function loadTrack(i) {
-    trackIdx = (i % MUSIC.length + MUSIC.length) % MUSIC.length;
+  function nextTrack() {
+    if (MUSIC.length <= 1) return;
+    trackIdx = (trackIdx + 1) % MUSIC.length;
     try { localStorage.setItem('yako_track', String(trackIdx)); } catch (e) {}
-    themeMusic.src = MUSIC[trackIdx].src;
+    themeMusic.src = MUSIC[trackIdx].src;                        // new song, also looping
     themeMusic.currentTime = 0;
     if (musicShouldPlay()) themeMusic.play().catch(() => {});
+    showTrackName();
     updateMusicUI();
   }
-  function nextTrack() { if (MUSIC.length <= 1) { themeMusic.currentTime = 0; updateThemeMusic(); } else loadTrack(trackIdx + 1); }
-  function prevTrack() { if (MUSIC.length > 1) loadTrack(trackIdx - 1); }
   function toggleMusicPause() {
     musicPaused = !musicPaused;
     try { localStorage.setItem('yako_music_paused', musicPaused ? '1' : '0'); } catch (e) {}
+    if (!musicPaused) showTrackName();
     updateThemeMusic();
   }
+  // Foot subtext gently swaps between the F11 tip and "♫ <track name>".
+  const footEl = document.getElementById('musicBar');
+  let showingTrack = false;
+  function setFootSub(text) {
+    if (!footSubEl) return;
+    footEl.classList.add('subswap');                            // fade out
+    setTimeout(() => { footSubEl.textContent = text; footEl.classList.remove('subswap'); }, 350);
+  }
+  function showTrackName() { showingTrack = true; setFootSub('♫ ' + MUSIC[trackIdx].title); }
+  setInterval(() => {
+    if (!footSubEl || startScreen.style.display === 'none') return;
+    showingTrack = !showingTrack;
+    setFootSub(showingTrack ? '♫ ' + MUSIC[trackIdx].title : FOOT_TIP);
+  }, 6000);
   document.addEventListener('pointerdown', updateThemeMusic);   // first tap unlocks autoplay
-  { const p = document.getElementById('mPrev'), n = document.getElementById('mNext');
-    if (p) p.addEventListener('click', prevTrack);
-    if (n) n.addEventListener('click', nextTrack);
-    if (mPlayEl) mPlayEl.addEventListener('click', toggleMusicPause); }
+  if (mNextEl) mNextEl.addEventListener('click', nextTrack);
+  if (mPlayEl) mPlayEl.addEventListener('click', toggleMusicPause);
   updateMusicUI();
 
   // ---------- Wiring ----------
@@ -2351,13 +2444,19 @@
     h.addEventListener('click', () => {
       if (h.dataset.mode) { playMode = 'practice'; startGame(h.dataset.mode); return; }   // direct-launch bar (e.g. Just for Fun)
       const g = h.closest('.lgroup');
-      const open = g.classList.toggle('open');
-      h.setAttribute('aria-expanded', open ? 'true' : 'false');
+      const willOpen = !g.classList.contains('open');
+      // single-open accordion: close every other group first
+      document.querySelectorAll('.lgroup.open').forEach(o => {
+        o.classList.remove('open');
+        const oh = o.querySelector('.groupHead'); if (oh) oh.setAttribute('aria-expanded', 'false');
+      });
+      if (willOpen) { g.classList.add('open'); h.setAttribute('aria-expanded', 'true'); }
     });
   });
   refreshStartSub();
   exitBtn.addEventListener('click', backToMenu);
   document.getElementById('logo').addEventListener('click', backToMenu);
+  { const fh = document.getElementById('freeHome'); if (fh) fh.addEventListener('click', backToMenu); }
   soundBtn.addEventListener('click', () => {
     A.setMuted(!A.isMuted());                             // muting also stops all sounds
     soundBtn.classList.toggle('muted', A.isMuted());      // green (on) / red (off)
@@ -2383,11 +2482,11 @@
     document.querySelectorAll('.pickPop.open').forEach(p => p.classList.remove('open'));
     document.querySelectorAll('.pickBtn.open').forEach(b => { b.classList.remove('open'); b.setAttribute('aria-expanded', 'false'); });
   }
-  function placePop(btn, pop) {   // fixed popover, centered above the picker button
+  function placePop(btn, pop) {   // fixed popover, centered just below the picker button
     const r = btn.getBoundingClientRect();
     pop.style.left = (r.left + r.width / 2) + 'px';
-    pop.style.top = 'auto';
-    pop.style.bottom = (window.innerHeight - r.top + 8) + 'px';
+    pop.style.bottom = 'auto';
+    pop.style.top = (r.bottom + 8) + 'px';
   }
   function wirePicker(btnId, popId) {
     const btn = document.getElementById(btnId), pop = document.getElementById(popId);
