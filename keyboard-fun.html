@@ -733,15 +733,18 @@
   #game.adv.num-answer #keyboard .krow:nth-child(4) { display: none; }         /* hide letters for number rounds */
   #game.adv.choices-mode #keyboard { display: none; }
   /* a small place caption so you know where Yako is today — tap it to travel */
-  #game.adv #placeTag { position: fixed; left: 50%; top: 2vh; transform: translateX(-50%); z-index: 11;
-    display: flex; align-items: center; gap: .5em;
+  /* top bar: location (left) · stars (center) · star count (right) — no overlap */
+  #game.adv #placeTag { position: fixed; left: 2vw; top: 1.6vh; transform: none; z-index: 13;
+    display: flex; align-items: center; gap: .5em; max-width: 42vw;
     background: rgba(255,247,223,.92); border: 3px solid var(--gold); border-radius: 999px;
-    padding: .4vh .5em .4vh .5em; font-family: 'Baloo 2'; font-weight: 800; color: #6e4f24; font-size: min(2.4vh,4.2vw);
+    padding: .4vh .7em .4vh .4em; font-family: 'Baloo 2'; font-weight: 800; color: #6e4f24; font-size: min(2.2vh,3.6vw);
     box-shadow: 0 4px 12px rgba(60,45,15,.3); cursor: pointer; transition: transform .12s ease; }
-  #game.adv #placeTag:hover { transform: translateX(-50%) scale(1.05); }
+  #game.adv #placeTag:hover { transform: scale(1.05); }
   #game.adv #placeTag .pThumb { flex: 0 0 auto; width: 2.4em; height: 1.5em; object-fit: cover;
     border-radius: 6px; border: 2px solid var(--gold); }
-  #game.adv #placeTag .chev { font-size: .8em; margin-left: .1em; margin-right: .2em; }
+  #game.adv #placeTag .plName { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #game.adv #placeTag .chev { flex: 0 0 auto; font-size: .8em; }
+  #game.adv #starbar { left: 50%; right: auto; transform: translateX(-50%); }   /* keep stars centered even on mobile */
   #game:not(.adv) #placeTag, #game.free-mode #placeTag { display: none; }
   /* — the travel dropdown: every Monterey place, tap to switch — */
   #placePop { position: fixed; left: 50%; transform: translateX(-50%) scale(.85); transform-origin: top center;
@@ -766,7 +769,12 @@
     font-family: 'Baloo 2', sans-serif; animation: placeCardIn .4s cubic-bezier(.2,1.4,.4,1); }
   #placeCard[hidden] { display: none; }
   @keyframes placeCardIn { 0% { transform: translate(-50%, -50%) scale(.6); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
-  #placeCard .pcYako { width: min(150px, 32vw); height: auto; filter: drop-shadow(0 6px 10px rgba(50,30,5,.3)); }
+  /* a fresh painted view of the place, with Yako waving from its lower edge */
+  #placeCard .pcScene { position: relative; width: 100%; margin-bottom: min(48px, 11vw); }
+  #placeCard .pcSceneImg { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover;
+    border-radius: 16px; border: 4px solid var(--gold); box-shadow: 0 8px 18px rgba(40,28,8,.35); background: #e9dcc0; }
+  #placeCard .pcYako { position: absolute; left: 50%; bottom: min(-40px, -9vw); transform: translateX(-50%);
+    width: min(120px, 26vw); height: auto; filter: drop-shadow(0 5px 8px rgba(50,30,5,.45)); }
   #placeCard .pcPlace { font-weight: 900; color: var(--blue); font-size: min(3.4vh, 6vw); }
   #placeCard .pcFact  { font-weight: 700; color: #5b4327; font-size: min(2.3vh, 4.2vw); line-height: 1.3; }
   #placeCard .pcLoves { font-weight: 800; color: #b0722a; font-size: min(2.3vh, 4.2vw); line-height: 1.3; }
@@ -1052,7 +1060,7 @@
     #game:not(.free-mode) #reactionBox { display: none !important; }   /* the band gives feedback instead */
     #game.free-mode #gameRibbon, #game.free-mode #mfb { display: none; }
 
-    /* stars (left) + score (right) as pills */
+    /* stars (center) + score (right) as pills */
     #game #starbar { left: 4%; right: auto; top: 2.2%; width: auto; height: auto; transform: none;
       background: #fff6e0; border: 3px solid var(--gold); border-radius: 999px; padding: .7vh 3vw; gap: 1.4vw;
       box-shadow: 0 4px 10px rgba(60,45,15,.3); }
@@ -1060,6 +1068,13 @@
     #game #score { left: auto; right: 4%; top: 2.2%; width: auto; height: auto; transform: none;
       background: var(--blue); color: #fff; border: 3px solid var(--blue-d); border-radius: 999px;
       padding: .7vh 4vw; font-size: 2.6vh; font-weight: 800; box-shadow: 0 4px 10px rgba(60,45,15,.3); }
+    /* adv top bar packs three things across a narrow phone — shrink so they never touch */
+    #game.adv #placeTag { left: 1.6vw; top: 1.4vh; max-width: 34vw; font-size: 3.1vw; gap: .35em; padding: .4vh .5em .4vh .35em; }
+    #game.adv #placeTag .pThumb { width: 8.4vw; height: 5.2vw; border-width: 2px; }
+    #game.adv #placeTag .chev { display: none; }              /* still tappable; saves width */
+    #game.adv #starbar { top: 1.4vh; padding: .5vh 2vw; gap: 1vw; }
+    #game.adv #starbar .lvlStar { font-size: 2.5vh; }
+    #game.adv #score { right: 1.6vw; top: 1.4vh; padding: .5vh 2.4vw; font-size: 2.2vh; }
 
     /* ribbon */
     #gameRibbon { display: flex; align-items: center; justify-content: center; position: absolute;
@@ -1259,7 +1274,7 @@
     <div id="placePop" role="menu" aria-label="Travel to a place"></div>
     <div id="placeCard" hidden>
       <button class="pcX" type="button" aria-label="Close">✕</button>
-      <img class="pcYako" src="yako_cheer.png" alt="Yako and his puppy" onerror="this.style.display='none'">
+      <div class="pcScene"><img class="pcSceneImg" alt=""><img class="pcYako" src="yako_cheer.png" alt="Yako and his puppy" onerror="this.style.display='none'"></div>
       <div class="pcPlace"></div>
       <div class="pcFact"></div>
       <div class="pcLoves"></div>
@@ -1800,7 +1815,7 @@
     const place = MONT.PLACES[curPlaceIdx];
     setSceneBg(place.scene);
     const tag = document.getElementById('placeTag');
-    if (tag) tag.innerHTML = '<img class="pThumb" src="' + place.scene + '" alt="">' + place.name + ' <span class="chev">▾</span>';
+    if (tag) tag.innerHTML = '<img class="pThumb" src="' + place.scene + '" alt=""><span class="plName">' + place.name + '</span><span class="chev">▾</span>';
     document.querySelectorAll('#placePop button').forEach((b, j) => b.classList.toggle('sel', j === curPlaceIdx));
   }
   function setLevelScene() {
@@ -2605,7 +2620,11 @@
   function goPlace(i) {
     showPlace(i);
     const p = MONT.PLACES[curPlaceIdx];
-    placeCardEl.querySelector('.pcPlace').textContent = '🏞️ ' + p.name;
+    const img = placeCardEl.querySelector('.pcSceneImg');
+    const card = p.scene.replace(/\.png$/, '_card.png');       // a different painted view for the card
+    img.onerror = () => { img.onerror = null; img.src = p.scene; };  // fall back to the backdrop still
+    img.src = card;
+    placeCardEl.querySelector('.pcPlace').textContent = p.name;
     placeCardEl.querySelector('.pcFact').textContent  = p.fact  || '';
     placeCardEl.querySelector('.pcLoves').textContent = p.loves || '';
     placeCardEl.hidden = false;
