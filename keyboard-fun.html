@@ -731,11 +731,14 @@
   #game.adv.choices-mode #keyboard { display: none; }
   /* a small place caption so you know where Yako is today — tap it to travel */
   #game.adv #placeTag { position: fixed; left: 50%; top: 2vh; transform: translateX(-50%); z-index: 11;
+    display: flex; align-items: center; gap: .5em;
     background: rgba(255,247,223,.92); border: 3px solid var(--gold); border-radius: 999px;
-    padding: .5vh 1.2em; font-family: 'Baloo 2'; font-weight: 800; color: #6e4f24; font-size: min(2.4vh,4.2vw);
+    padding: .4vh .5em .4vh .5em; font-family: 'Baloo 2'; font-weight: 800; color: #6e4f24; font-size: min(2.4vh,4.2vw);
     box-shadow: 0 4px 12px rgba(60,45,15,.3); cursor: pointer; transition: transform .12s ease; }
   #game.adv #placeTag:hover { transform: translateX(-50%) scale(1.05); }
-  #game.adv #placeTag .chev { font-size: .8em; margin-left: .3em; }
+  #game.adv #placeTag .pThumb { flex: 0 0 auto; width: 2.4em; height: 1.5em; object-fit: cover;
+    border-radius: 6px; border: 2px solid var(--gold); }
+  #game.adv #placeTag .chev { font-size: .8em; margin-left: .1em; margin-right: .2em; }
   #game:not(.adv) #placeTag, #game.free-mode #placeTag { display: none; }
   /* — the travel dropdown: every Monterey place, tap to switch — */
   #placePop { position: fixed; left: 50%; transform: translateX(-50%) scale(.85); transform-origin: top center;
@@ -1794,7 +1797,7 @@
     const place = MONT.PLACES[curPlaceIdx];
     setSceneBg(place.scene);
     const tag = document.getElementById('placeTag');
-    if (tag) tag.innerHTML = '🏞️ ' + place.name + ' <span class="chev">▾</span>';
+    if (tag) tag.innerHTML = '<img class="pThumb" src="' + place.scene + '" alt="">' + place.name + ' <span class="chev">▾</span>';
     document.querySelectorAll('#placePop button').forEach((b, j) => b.classList.toggle('sel', j === curPlaceIdx));
   }
   function setLevelScene() {
