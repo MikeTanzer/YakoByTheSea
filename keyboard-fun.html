@@ -65,6 +65,8 @@
   .homeCard::-webkit-scrollbar { width: 10px; }
   .homeCard::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 999px; border: 2px solid #f4e8c8; }
   .homeCard .nameRow { display: flex; align-items: center; gap: 1.2vw; font-size: 2.4vh; font-weight: 800; color: var(--ink); }
+  .homeCard .nameRow label { flex: 0 0 auto; white-space: nowrap; }   /* keep "My name is" on one line */
+  .homeCard .nameRow input { flex: 1 1 auto; min-width: 0; }
   #start #nameInput {
     font-family: 'Baloo 2'; font-weight: 700; font-size: 2.4vh; text-align: center;
     color: var(--blue-d); width: 9em; padding: .8vh 1.2vw;
