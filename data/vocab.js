@@ -102,13 +102,26 @@ window.YAKO_MONTEREY = {
     seal:  { emoji: '🦭', name: 'seals' },  otter:    { emoji: '🦦', name: 'sea otters' },
     pelican: { emoji: '🐦', name: 'pelicans' }, fish: { emoji: '🐟', name: 'fish' }
   },
-  // ordered peninsula tour (campaign advances through these by level)
+  // ordered peninsula tour (campaign advances through these by level);
+  // fact + loves feed the tap-the-location Yako card (spoken by the narrator)
   PLACES: [
-    { id: 'mission',      name: 'Mission Ranch',  scene: 'scenes/mission.png',      animals: ['sheep', 'cow', 'bird'] },
-    { id: 'bigsur',       name: 'Big Sur',        scene: 'scenes/bigsur.png',       animals: ['deer', 'cow', 'bird', 'squirrel'] },
-    { id: 'carmelvalley', name: 'Carmel Valley',  scene: 'scenes/carmelvalley.png', animals: ['quail', 'rabbit', 'deer', 'squirrel'] },
-    { id: 'pebble',       name: 'Pebble Beach',   scene: 'scenes/pebble.png',       animals: ['whale', 'deer', 'seal'] },
-    { id: 'pacificgrove', name: 'Pacific Grove',  scene: 'scenes/pacificgrove.png', animals: ['bird', 'seal', 'whale'] },
-    { id: 'montereybay',  name: 'Monterey Bay',   scene: 'scenes/montereybay.png',  animals: ['otter', 'pelican', 'whale', 'fish'] }
+    { id: 'mission',      name: 'Mission Ranch',  scene: 'scenes/mission.png',      animals: ['sheep', 'cow', 'bird'],
+      fact:  'Mission Ranch is a cozy old ranch in Carmel where woolly sheep graze in the meadow by the sea.',
+      loves: 'Yako loves saying good morning to the sheep while his puppy tries to count them all!' },
+    { id: 'bigsur',       name: 'Big Sur',        scene: 'scenes/bigsur.png',       animals: ['deer', 'cow', 'bird', 'squirrel'],
+      fact:  'Big Sur is a wild, beautiful coast where giant cliffs meet the ocean and condors soar overhead.',
+      loves: 'Yako loves hiking the big cliffs and waving at the waves crashing far below with his puppy!' },
+    { id: 'carmelvalley', name: 'Carmel Valley',  scene: 'scenes/carmelvalley.png', animals: ['quail', 'rabbit', 'deer', 'squirrel'],
+      fact:  'Carmel Valley is full of sunny golden hills, old oak trees, and little quail running in the grass.',
+      loves: 'Yako loves picnics under the oak trees while his puppy chases butterflies through the tall grass!' },
+    { id: 'pebble',       name: 'Pebble Beach',   scene: 'scenes/pebble.png',       animals: ['whale', 'deer', 'seal'],
+      fact:  'Pebble Beach is famous for its lone cypress tree standing on a rock above the sparkling sea.',
+      loves: 'Yako loves looking for spouting whales from the shore — his puppy barks hello to every one!' },
+    { id: 'pacificgrove', name: 'Pacific Grove',  scene: 'scenes/pacificgrove.png', animals: ['bird', 'seal', 'whale'],
+      fact:  'Pacific Grove is called Butterfly Town, because thousands of monarch butterflies rest there every winter.',
+      loves: 'Yako loves tide-pooling on the rocky shore, finding starfish while his puppy sniffs the sea breeze!' },
+    { id: 'montereybay',  name: 'Monterey Bay',   scene: 'scenes/montereybay.png',  animals: ['otter', 'pelican', 'whale', 'fish'],
+      fact:  'Monterey Bay has a huge underwater canyon and a famous aquarium full of amazing sea creatures.',
+      loves: 'Yako loves watching the sea otters float on their backs — his puppy wishes he could float like that too!' }
   ]
 };

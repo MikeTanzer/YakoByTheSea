@@ -161,6 +161,22 @@
   #chooseBtn:hover { transform: translateY(-2px); }
   #chooseBtn .chev { display: inline-block; transition: transform .2s ease; }
   .homeCard:not(.lessonsOpen) .lessonGroups { display: none; }
+  /* ===== "Choose a lesson" swaps the whole card to a dedicated lessons page ===== */
+  .homeCard.lessonsOpen > :not(.lessonGroups):not(.lessonsHead) { display: none !important; }
+  .homeCard.lessonsOpen { max-height: 80vh; }
+  .lessonsHead { display: none; width: 100%; align-items: center; gap: 1vw; }
+  .homeCard.lessonsOpen .lessonsHead { display: flex; }
+  #lessonsBack { cursor: pointer; flex: 0 0 auto; border: 3px solid var(--gold); border-radius: 999px;
+    background: #fff7df; color: #7a5a2e; font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: clamp(13px, 1.2vw, 18px); padding: .7vh 1.6vw; box-shadow: 0 3px 8px rgba(60,45,15,.22);
+    transition: transform .12s ease; }
+  #lessonsBack:hover { transform: translateY(-1px); }
+  #lessonsBack:active { transform: scale(.94); }
+  .lessonsHead .lhTitle { flex: 1; text-align: center; font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    color: #6e4f24; font-size: clamp(16px, 1.7vw, 23px); }
+  .lessonsHead .lhPad { flex: 0 0 auto; visibility: hidden;     /* mirrors the back button so the title centers */
+    font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(13px, 1.2vw, 18px);
+    padding: .7vh 1.6vw; border: 3px solid transparent; }
   /* ===== Collapsible lesson groups (scales as levels grow) ===== */
   .lessonGroups { display: flex; flex-direction: column; gap: 1vh; width: 100%; }
   .lgroup .btnGrid { grid-template-columns: repeat(2, 1fr); }   /* roomier buttons in the narrow card */
@@ -178,6 +194,32 @@
   .lgroupLink .chev.play { transform: none; color: var(--blue); font-size: .95em; }
   .lgroup .btnGrid { width: auto; padding: 1.2vh; gap: 1.2vh 1vw; }
   .lgroup:not(.open) .btnGrid { display: none; }
+  /* — file-cabinet folder: the flap swings open to reveal the lessons inside — */
+  .lgroup.open { background: rgba(255,252,240,.6); }
+  .lgroup.open .groupHead { border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+    background: linear-gradient(#f2d896, #e2bc6c); box-shadow: 0 3px 6px rgba(60,45,15,.18); }
+  .lgroup.open .btnGrid { transform-origin: top center;
+    animation: folderOpen .55s cubic-bezier(.2, 1.25, .4, 1);
+    max-height: 46vh; overflow-y: auto; overscroll-behavior: contain; }
+  .lgroup.open .btnGrid::-webkit-scrollbar { width: 8px; }
+  .lgroup.open .btnGrid::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 999px; }
+  @keyframes folderOpen {
+    0%   { transform: perspective(700px) rotateX(-72deg); opacity: 0; }
+    60%  { opacity: 1; }
+    100% { transform: perspective(700px) rotateX(0deg); opacity: 1; }
+  }
+  .lgroup.open .btnGrid .modeBtn { animation: folderItem .45s ease-out both; }
+  .lgroup.open .btnGrid .modeBtn:nth-child(1) { animation-delay: .10s; }
+  .lgroup.open .btnGrid .modeBtn:nth-child(2) { animation-delay: .16s; }
+  .lgroup.open .btnGrid .modeBtn:nth-child(3) { animation-delay: .22s; }
+  .lgroup.open .btnGrid .modeBtn:nth-child(4) { animation-delay: .28s; }
+  .lgroup.open .btnGrid .modeBtn:nth-child(5) { animation-delay: .34s; }
+  .lgroup.open .btnGrid .modeBtn:nth-child(n+6) { animation-delay: .40s; }
+  @keyframes folderItem {
+    0%   { transform: translateY(-14px) scale(.85); opacity: 0; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) { .lgroup.open .btnGrid, .lgroup.open .btnGrid .modeBtn { animation: none !important; } }
   .homeCard.lessonsOpen #chooseBtn .chev { transform: rotate(180deg); }
 
   /* ===== In-card challenge layouts: target on top, its picture underneath ===== */
@@ -296,7 +338,9 @@
   @keyframes iconBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
   .homeTitle  { animation: titleIn .8s cubic-bezier(.2,1.5,.4,1) both; }
   .homeRibbon { animation: ribbonIn .7s cubic-bezier(.2,1.5,.4,1) .45s both; }
-  .homeCard   { animation: cardIn .7s ease-out .2s both; }
+  /* fill-mode backwards (NOT both): a retained end-transform would make the card the
+     containing block for the fixed picker popovers — mispositioning and clipping them */
+  .homeCard   { animation: cardIn .7s ease-out .2s backwards; }
   #start .btnGrid .modeBtn .icons { animation: iconBob 2.4s ease-in-out infinite; display: inline-block; }
   #start .btnGrid .modeBtn:nth-child(2) .icons { animation-delay: .2s; }
   #start .btnGrid .modeBtn:nth-child(3) .icons { animation-delay: .4s; }
@@ -333,6 +377,7 @@
   .homeFoot .mBtn:hover { background: #fffaf0; }
   .homeFoot .mBtn:active { transform: scale(.9); }
   .homeFoot .mPlay { background: linear-gradient(#ffe9a8, #f0c869); }
+  .homeFoot .mBtn svg { width: 54%; height: 54%; fill: #6e4f24; display: block; pointer-events: none; }
   .homeFoot .footText em { transition: opacity .35s ease; }
   .homeFoot.subswap .footText em { opacity: 0; }
   /* The painted home menu, scaled to fit; hotspots positioned in % of the image */
@@ -646,6 +691,16 @@
   #game.adv #sound::after { content: '🔊'; }
   #game.adv #sound.muted { background: #c0392b; border-color: #9a261a; }
   #game.adv #sound.muted::after { content: '🔇'; }
+  /* volume slider — appears when the mouse rests on the speaker button */
+  #volPop { position: fixed; right: 2vw; bottom: calc(2.5vh + min(8vh,13vw) + 12px); z-index: 45;
+    display: flex; align-items: center; gap: 8px; padding: 8px 14px;
+    background: #fff7e6; border: 3px solid var(--gold); border-radius: 999px;
+    box-shadow: 0 10px 22px rgba(60,45,15,.4);
+    opacity: 0; pointer-events: none; transform: translateY(8px) scale(.9); transform-origin: bottom right;
+    transition: opacity .16s ease, transform .16s cubic-bezier(.2,1.5,.4,1); }
+  #volPop.show { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+  #volPop .vIco { font-size: 15px; line-height: 1; }
+  #volSlider { width: min(160px, 34vw); accent-color: var(--gold-d); cursor: pointer; }
   /* ----- scene layout now hosts EVERY lesson: size the card target + on-screen keyboard ----- */
   #game.adv #panel #target { font-size: min(15vh, 20vw); color: var(--blue); }
   #game.adv #panel #target .bigletter { font-size: min(15vh, 20vw); }
@@ -670,12 +725,43 @@
   #game.adv.num-answer #keyboard .krow:nth-child(3),
   #game.adv.num-answer #keyboard .krow:nth-child(4) { display: none; }         /* hide letters for number rounds */
   #game.adv.choices-mode #keyboard { display: none; }
-  /* a small place caption so you know where Yako is today */
+  /* a small place caption so you know where Yako is today — tap it to travel */
   #game.adv #placeTag { position: fixed; left: 50%; top: 2vh; transform: translateX(-50%); z-index: 11;
     background: rgba(255,247,223,.92); border: 3px solid var(--gold); border-radius: 999px;
     padding: .5vh 1.2em; font-family: 'Baloo 2'; font-weight: 800; color: #6e4f24; font-size: min(2.4vh,4.2vw);
-    box-shadow: 0 4px 12px rgba(60,45,15,.3); pointer-events: none; }
+    box-shadow: 0 4px 12px rgba(60,45,15,.3); cursor: pointer; transition: transform .12s ease; }
+  #game.adv #placeTag:hover { transform: translateX(-50%) scale(1.05); }
+  #game.adv #placeTag .chev { font-size: .8em; margin-left: .3em; }
   #game:not(.adv) #placeTag, #game.free-mode #placeTag { display: none; }
+  /* — the travel dropdown: every Monterey place, tap to switch — */
+  #placePop { position: fixed; left: 50%; transform: translateX(-50%) scale(.85); transform-origin: top center;
+    z-index: 40; display: flex; flex-direction: column; gap: 4px; padding: 8px;
+    background: #fff7e6; border: 3px solid var(--gold); border-radius: 16px;
+    box-shadow: 0 12px 26px rgba(60,45,15,.4); opacity: 0; pointer-events: none;
+    transition: opacity .16s ease, transform .16s cubic-bezier(.2,1.5,.4,1); max-height: 62vh; overflow-y: auto; }
+  #placePop.open { opacity: 1; pointer-events: auto; transform: translateX(-50%) scale(1); }
+  #placePop button { cursor: pointer; display: flex; align-items: center; gap: 10px; text-align: left;
+    border: 3px solid transparent; border-radius: 12px; background: rgba(255,255,255,.6);
+    padding: 7px 14px; font-family: 'Baloo 2', sans-serif; font-weight: 800; color: #6e4f24;
+    font-size: min(2.2vh, 4vw); transition: transform .12s ease, border-color .12s ease; white-space: nowrap; }
+  #placePop button:hover { transform: translateX(3px); }
+  #placePop button.sel { border-color: var(--gold); background: #ffefc0; }
+  #placePop button .pIco { font-size: 1.25em; }
+  /* — the Yako place card: a fun fact + what Yako loves to do here — */
+  #placeCard { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 60;
+    width: min(480px, 88vw); background: #fdf3d7; border: 5px solid var(--gold); border-radius: 22px;
+    padding: 2.2vh 4vw 2.6vh; box-shadow: 0 18px 44px rgba(30,20,5,.5);
+    display: flex; flex-direction: column; align-items: center; gap: 1vh; text-align: center;
+    font-family: 'Baloo 2', sans-serif; animation: placeCardIn .4s cubic-bezier(.2,1.4,.4,1); }
+  #placeCard[hidden] { display: none; }
+  @keyframes placeCardIn { 0% { transform: translate(-50%, -50%) scale(.6); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+  #placeCard .pcYako { width: min(150px, 32vw); height: auto; filter: drop-shadow(0 6px 10px rgba(50,30,5,.3)); }
+  #placeCard .pcPlace { font-weight: 900; color: var(--blue); font-size: min(3.4vh, 6vw); }
+  #placeCard .pcFact  { font-weight: 700; color: #5b4327; font-size: min(2.3vh, 4.2vw); line-height: 1.3; }
+  #placeCard .pcLoves { font-weight: 800; color: #b0722a; font-size: min(2.3vh, 4.2vw); line-height: 1.3; }
+  #placeCard .pcX { position: absolute; top: 8px; right: 12px; cursor: pointer; border: none; background: none;
+    font-size: min(3vh, 5.5vw); font-weight: 900; color: #a5834b; line-height: 1; }
+  #placeCard .pcX:active { transform: scale(.85); }
 
   /* ---------- On-screen keyboard ---------- */
   #keyboard {
@@ -1099,6 +1185,11 @@
             </div>
           </div>
         </div>
+        <div class="lessonsHead">
+          <button id="lessonsBack" type="button" aria-label="Back to the main menu">🏠 Back</button>
+          <span class="lhTitle">📚 Pick a lesson</span>
+          <span class="lhPad">🏠 Back</span>
+        </div>
         <div class="lessonGroups">
           <section class="lgroup open" data-group="basics">
             <button class="groupHead" type="button" aria-expanded="true"><span class="ghIcon">🔤</span><span class="ghName">Letters &amp; Numbers</span><span class="chev">▾</span></button>
@@ -1146,7 +1237,7 @@
       </div>
     </div>
     <div class="homeChar" role="img" aria-label="Yako waving with his puppy"></div>
-    <div class="homeFoot" id="musicBar"><span class="footIcon">🐚</span><span class="footText"><b>Collect 5 stars to win a level!</b><em id="footSub">Tip: turn your volume up &amp; press F11.</em></span><span class="footMusic"><button class="mBtn mPlay" id="mPlay" type="button" title="Play or pause music" aria-label="Play or pause music">⏸</button><button class="mBtn" id="mNext" type="button" title="Next song" aria-label="Next song">⏭</button></span></div>
+    <div class="homeFoot" id="musicBar"><span class="footIcon">🐚</span><span class="footText"><b>Collect 5 stars to win a level!</b><em id="footSub">Tip: turn your volume up &amp; press F11.</em></span><span class="footMusic"><button class="mBtn mPlay" id="mPlay" type="button" title="Play or pause music" aria-label="Play or pause music"></button><button class="mBtn" id="mNext" type="button" title="Next song" aria-label="Next song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5v14l9.5-7L5 5z"/><rect x="16" y="5" width="3.4" height="14" rx="1.2"/></svg></button></span></div>
   </div>
 
   <!-- GAME: the painted interface illustration with live overlays -->
@@ -1156,7 +1247,16 @@
     <div id="flash"></div>
     <video id="sceneBg" muted loop playsinline preload="auto"></video>
     <div id="sceneScrim"></div>
-    <div id="placeTag"></div>
+    <div id="placeTag" role="button" tabindex="0" aria-haspopup="true" aria-label="Choose a Monterey place"></div>
+    <div id="placePop" role="menu" aria-label="Travel to a place"></div>
+    <div id="placeCard" hidden>
+      <button class="pcX" type="button" aria-label="Close">✕</button>
+      <img class="pcYako" src="yako_cheer.png" alt="Yako and his puppy" onerror="this.style.display='none'">
+      <div class="pcPlace"></div>
+      <div class="pcFact"></div>
+      <div class="pcLoves"></div>
+    </div>
+    <div id="volPop"><span class="vIco">🔉</span><input type="range" id="volSlider" min="0" max="100" step="1" aria-label="Volume"><span class="vIco">🔊</span></div>
     <div class="gameStage">
       <video id="gameBg" class="bg" src="gameui_anim.mp4" poster="gameui.png" muted loop autoplay playsinline preload="auto"></video>
       <div id="starbar"></div>
@@ -1684,13 +1784,20 @@
     try { el.load(); } catch (e) {}
     el.play().catch(() => {});
   }
-  // Every lesson is set in a Monterey place; the backdrop moves to a new area as levels advance.
-  function setLevelScene() {
-    if (mode === 'free') return;
-    const place = MONT.PLACES[(lessonIdx(mode) + Math.max(0, level - 1)) % MONT.PLACES.length];
+  // Every lesson is set in a Monterey place; the backdrop moves to a new area as levels
+  // advance — and tapping the place pill lets the child travel anywhere on the peninsula.
+  let curPlaceIdx = 0;
+  function showPlace(i) {
+    curPlaceIdx = ((i % MONT.PLACES.length) + MONT.PLACES.length) % MONT.PLACES.length;
+    const place = MONT.PLACES[curPlaceIdx];
     setSceneBg(place.scene);
     const tag = document.getElementById('placeTag');
-    if (tag) tag.textContent = '🏞️ ' + place.name;
+    if (tag) tag.innerHTML = '🏞️ ' + place.name + ' <span class="chev">▾</span>';
+    document.querySelectorAll('#placePop button').forEach((b, j) => b.classList.toggle('sel', j === curPlaceIdx));
+  }
+  function setLevelScene() {
+    if (mode === 'free') return;
+    showPlace(lessonIdx(mode) + Math.max(0, level - 1));
   }
   function buildChallenge() {
     if (mode === 'hello')      return buildLangPick(true);
@@ -2289,6 +2396,8 @@
     hideBuddy();
     clearHintTimer();
     clearEar();
+    hidePlacePop(); hidePlaceCard();
+    { const vp = document.getElementById('volPop'); if (vp) vp.classList.remove('show'); }
     clearTimeout(winTimer);
     clearTimeout(roundTimer); locked = false;
     winEl.classList.remove('show');
@@ -2354,9 +2463,12 @@
   function musicShouldPlay() {
     return startScreen.style.display !== 'none' && !A.isMuted() && !musicPaused;
   }
+  // theme-colored SVG icons (emoji glyphs render as flat black on some platforms)
+  const SVG_PLAY  = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.8v14.4L19 12 7 4.8z"/></svg>';
+  const SVG_PAUSE = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.5" y="4.5" width="4.4" height="15" rx="1.4"/><rect x="14.1" y="4.5" width="4.4" height="15" rx="1.4"/></svg>';
   function updateMusicUI() {
     const playing = musicShouldPlay();
-    if (mPlayEl)  mPlayEl.textContent = playing ? '⏸' : '▶';
+    if (mPlayEl)  mPlayEl.innerHTML = playing ? SVG_PAUSE : SVG_PLAY;
     if (mNextEl)  mNextEl.style.display = MUSIC.length <= 1 ? 'none' : '';  // one song → nothing to skip to
   }
   function updateThemeMusic() {
@@ -2436,9 +2548,17 @@
   });
   if (chooseBtnEl) chooseBtnEl.addEventListener('click', () => {
     const card = document.querySelector('.homeCard');
-    const open = card.classList.toggle('lessonsOpen');
+    const open = card.classList.toggle('lessonsOpen');   // swaps the card to the lessons page
     chooseBtnEl.setAttribute('aria-expanded', open ? 'true' : 'false');
+    card.scrollTop = 0;
   });
+  { const lb = document.getElementById('lessonsBack');
+    if (lb) lb.addEventListener('click', () => {
+      const card = document.querySelector('.homeCard');
+      card.classList.remove('lessonsOpen');
+      if (chooseBtnEl) chooseBtnEl.setAttribute('aria-expanded', 'false');
+      card.scrollTop = 0;
+    }); }
   // Accordion: tap a group header to expand its lessons (others stay as they are).
   document.querySelectorAll('.groupHead').forEach(h => {
     h.addEventListener('click', () => {
@@ -2457,6 +2577,57 @@
   exitBtn.addEventListener('click', backToMenu);
   document.getElementById('logo').addEventListener('click', backToMenu);
   { const fh = document.getElementById('freeHome'); if (fh) fh.addEventListener('click', backToMenu); }
+
+  // ---- Travel: tap the place pill for a dropdown of every Monterey location ----
+  const placeTagEl  = document.getElementById('placeTag');
+  const placePopEl  = document.getElementById('placePop');
+  const placeCardEl = document.getElementById('placeCard');
+  if (placePopEl) MONT.PLACES.forEach((p, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.innerHTML = '<span class="pIco">🏞️</span>' + p.name;
+    b.addEventListener('click', e => { e.stopPropagation(); hidePlacePop(); goPlace(i); });
+    placePopEl.appendChild(b);
+  });
+  function hidePlacePop() { if (placePopEl) placePopEl.classList.remove('open'); }
+  function hidePlaceCard() { if (placeCardEl && !placeCardEl.hidden) { placeCardEl.hidden = true; stopAllSounds(); } }
+  // Traveling somewhere shows Yako + his puppy with a fun fact and what he loves to do there.
+  function goPlace(i) {
+    showPlace(i);
+    const p = MONT.PLACES[curPlaceIdx];
+    placeCardEl.querySelector('.pcPlace').textContent = '🏞️ ' + p.name;
+    placeCardEl.querySelector('.pcFact').textContent  = p.fact  || '';
+    placeCardEl.querySelector('.pcLoves').textContent = p.loves || '';
+    placeCardEl.hidden = false;
+    stopAllSounds();
+    speak((p.fact || '') + ' ' + (p.loves || ''), { rate: 1.0 });
+  }
+  if (placeTagEl) placeTagEl.addEventListener('click', e => {
+    e.stopPropagation();
+    if (!placePopEl) return;
+    const r = placeTagEl.getBoundingClientRect();
+    placePopEl.style.top = (r.bottom + 8) + 'px';
+    placePopEl.classList.toggle('open');
+  });
+  if (placeCardEl) placeCardEl.addEventListener('click', hidePlaceCard);   // tap the card to close it
+  document.addEventListener('click', hidePlacePop);                        // tap elsewhere closes the dropdown
+
+  // ---- Volume: rest the mouse on the speaker button for a loudness slider ----
+  const volPopEl = document.getElementById('volPop');
+  const volSliderEl = document.getElementById('volSlider');
+  let volHideT = null;
+  function showVolPop() { clearTimeout(volHideT); if (volPopEl) volPopEl.classList.add('show'); }
+  function hideVolPopSoon() { clearTimeout(volHideT); volHideT = setTimeout(() => volPopEl && volPopEl.classList.remove('show'), 600); }
+  function applyMusicVolume() { themeMusic.volume = 0.35 * A.getVolume(); }
+  if (volSliderEl) {
+    volSliderEl.value = Math.round(A.getVolume() * 100);
+    volSliderEl.addEventListener('input', () => { A.setVolume(volSliderEl.value / 100); applyMusicVolume(); });
+  }
+  [soundBtn, volPopEl].forEach(el => { if (!el) return;
+    el.addEventListener('mouseenter', showVolPop);
+    el.addEventListener('mouseleave', hideVolPopSoon);
+  });
+  applyMusicVolume();   // honor the persisted volume for the menu music too
   soundBtn.addEventListener('click', () => {
     A.setMuted(!A.isMuted());                             // muting also stops all sounds
     soundBtn.classList.toggle('muted', A.isMuted());      // green (on) / red (off)

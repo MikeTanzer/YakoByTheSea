@@ -20,12 +20,29 @@ window.YAKO.audio = (function () {
   }
   function isMuted() { return muted; }
 
+  // ----- master volume (persisted; 0..1, scales clips + SFX + synth) -----
+  let volume = 1;
+  try { const v = parseFloat(localStorage.getItem('yako_volume')); if (!isNaN(v)) volume = Math.min(1, Math.max(0, v)); } catch (e) {}
+  function setVolume(v) {
+    volume = Math.min(1, Math.max(0, +v || 0));
+    try { localStorage.setItem('yako_volume', String(volume)); } catch (e) {}
+    VOICE.a.volume = volume;
+    if (master) master.gain.value = volume;
+  }
+  function getVolume() { return volume; }
+
   // ----- Web Audio context -----
-  let actx = null;
+  let actx = null, master = null;
   function ensureAudio() {
-    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!actx) {
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      master = actx.createGain();               // every effect routes through this
+      master.gain.value = volume;
+      master.connect(actx.destination);
+    }
     if (actx.state === 'suspended') actx.resume();
   }
+  const out = () => master || actx.destination;
   let activeNodes = [];
   function trackNode(node) {
     activeNodes.push(node);
@@ -61,7 +78,7 @@ window.YAKO.audio = (function () {
       pan.pan.value = (Math.random() * 2 - 1) * 0.8;
       gain.connect(pan); node = pan;
     }
-    src.connect(bp); bp.connect(gain); node.connect(actx.destination);
+    src.connect(bp); bp.connect(gain); node.connect(out());
     trackNode(src);
     src.start(t);
   }
@@ -100,7 +117,7 @@ window.YAKO.audio = (function () {
       gain.gain.setValueAtTime(0, t);
       gain.gain.linearRampToValueAtTime(0.25, t + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
-      osc.connect(gain); gain.connect(actx.destination);
+      osc.connect(gain); gain.connect(out());
       trackNode(osc);
       osc.start(t); osc.stop(t + 0.55);
     });
@@ -115,7 +132,7 @@ window.YAKO.audio = (function () {
     osc.frequency.linearRampToValueAtTime(330, now + 0.25);
     gain.gain.setValueAtTime(0.15, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-    osc.connect(gain); gain.connect(actx.destination);
+    osc.connect(gain); gain.connect(out());
     trackNode(osc);
     osc.start(now); osc.stop(now + 0.32);
   }
@@ -133,7 +150,7 @@ window.YAKO.audio = (function () {
     gain.gain.setValueAtTime(0.0001, now);
     gain.gain.exponentialRampToValueAtTime(0.3, now + 0.02);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-    osc.connect(gain); gain.connect(actx.destination);
+    osc.connect(gain); gain.connect(out());
     trackNode(osc);
     osc.start(now); osc.stop(now + 0.5);
   }
@@ -178,13 +195,14 @@ window.YAKO.audio = (function () {
     u.lang = I().getLang();
     u.rate = (opts.rate || 1) * p.rate;
     u.pitch = p.pitch;
-    u.volume = 1;
+    u.volume = volume;
     speechSynthesis.speak(u);
   }
   function speakName(line, opts) { speak(I().withName(line), opts); }
 
   // ----- recorded narration clips -----
   const VOICE = { dir: 'voice/clips/', a: new Audio(), token: 0, ready: false };  // flat root clips disabled — persona clips + synth cover everything
+  VOICE.a.volume = volume;                       // honor the persisted master volume
   function chClip(ch) {
     ch = String(ch).toUpperCase();
     if (/^[A-Z]$/.test(ch)) return 'let_' + ch;
@@ -296,6 +314,7 @@ window.YAKO.audio = (function () {
 
   return {
     setMuted: setMuted, isMuted: isMuted,
+    setVolume: setVolume, getVolume: getVolume,
     ensureAudio: ensureAudio, stopAllSounds: stopAllSounds,
     playApplause: playApplause, playChime: playChime, playTryAgainTone: playTryAgainTone, playNote: playNote,
     startBarkLoop: startBarkLoop, stopBarkLoop: stopBarkLoop,
