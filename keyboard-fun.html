@@ -92,7 +92,7 @@
     width: min(840px, 88vw); max-width: none; }
   #start .btnGrid .modeBtn {
     --bg: #777; position: relative; width: auto; min-width: 0; height: auto; min-height: clamp(96px, 12vh, 132px);
-    border: 4px solid #f2d274; border-radius: 22px; padding: 1.4vh 1vw 1.1vh; cursor: pointer; text-align: center;
+    border: 4px solid #f2d274; border-radius: 22px; padding: 1.4vh 16px 1.1vh; cursor: pointer; text-align: center;
     color: #fff7e5; font-family: Georgia, serif; overflow: hidden;
     background:
       radial-gradient(circle at 20% 15%, rgba(255,255,255,.22), transparent 28%),
@@ -107,8 +107,9 @@
   #start .btnGrid .modeBtn:hover { transform: translateY(-2px); }
   #start .btnGrid .modeBtn:active { transform: translateY(5px);
     box-shadow: 0 3px 0 color-mix(in srgb, var(--bg), #000 38%), 0 6px 10px rgba(34,21,4,.18); }
-  #start .btnGrid .modeBtn .title { position: relative; z-index: 1; display: block; font-weight: 900; line-height: 1;
-    font-size: clamp(20px, 2vw, 34px); margin-bottom: .7vh; color: #fff7e5;
+  #start .btnGrid .modeBtn .title { position: relative; z-index: 1; display: block; font-weight: 900; line-height: 1.05;
+    font-size: clamp(18px, 1.9vw, 30px); margin-bottom: .7vh; color: #fff7e5;
+    max-width: 100%; overflow-wrap: break-word;   /* wrap between words; only break a word as a last resort */
     text-shadow: 2px 2px 0 rgba(35,22,8,.85), -1px -1px 0 rgba(35,22,8,.35); }
   #start .btnGrid .modeBtn .sub { position: relative; z-index: 1; display: block; color: #fff7e5;
     font-family: 'Trebuchet MS', Georgia, serif; font-weight: 900; font-size: clamp(15px, 1.4vw, 24px);
@@ -118,6 +119,12 @@
   #start .modeBtn[data-mode="both"] .title,
   #start .modeBtn[data-mode="sounds"] .title,
   #start .modeBtn[data-mode="math"] .title { font-size: clamp(15px, 1.5vw, 23px); }
+  /* longer labels get a smaller font so they never touch the inner border */
+  #start .modeBtn[data-mode="countlang"] .title,
+  #start .modeBtn[data-mode="colormix"] .title { font-size: clamp(14px, 1.35vw, 20px); }
+  /* longest single words ("Language", "Different?") need the smallest size to fit unbroken */
+  #start .modeBtn[data-mode="guesslang"] .title,
+  #start .modeBtn[data-mode="samediff"] .title { font-size: clamp(12px, 1.15vw, 17px); }
   #start .modeBtn[data-mode="free"] .sub  { letter-spacing: 0; font-size: clamp(24px, 2.2vw, 34px); }
   /* per-mode colours */
   #start .modeBtn[data-mode="letters"]  { --bg: #137fc2; }
@@ -1067,6 +1074,11 @@
     #start .btnGrid .modeBtn .icons { font-size: 5.4vw; }
     #start .modeBtn[data-mode="both"] .title { font-size: 5.6vw; }
     #start .modeBtn[data-mode="free"] .sub   { font-size: 6vw; }
+    /* lesson folders stay 2-column even on phones, so long labels need to shrink to fit the button */
+    #start .modeBtn[data-mode="countlang"] .title,
+    #start .modeBtn[data-mode="colormix"] .title { font-size: 5vw; }
+    #start .modeBtn[data-mode="guesslang"] .title,
+    #start .modeBtn[data-mode="samediff"] .title { font-size: 4.2vw; }
 
     .homeFoot { width: 92vw; max-width: 92vw; bottom: .8vh; gap: 2vw; padding: 1vh 2.4vw; white-space: normal; box-sizing: border-box; }
     .homeFoot .footIcon { flex: 0 0 auto; font-size: 5vw; }
