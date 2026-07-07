@@ -715,8 +715,9 @@
   #game.adv #panel #target .bigletter { font-size: min(15vh, 20vw); }
   #game.adv #panel #target .glyph { font-size: min(13vh, 17vw); }
   #game.adv #panel #target .swatch { width: min(13vh,17vw); height: min(13vh,17vw); border-radius: 18px; }
-  #game.adv #panel #target .spellRow { display: flex; gap: 1.2vw; flex-wrap: wrap; justify-content: center; }
-  #game.adv #panel #target .spellRow .sl { font-size: min(9vh, 12vw); }
+  #game.adv #panel #target .spellRow { display: flex; gap: 1.2vw; flex-wrap: nowrap; justify-content: center;
+    max-width: 100%; overflow-x: auto; }   /* digits/letters stay on one line */
+  #game.adv #panel #target .spellRow .sl { font-size: min(8vh, 11vw); flex: 0 0 auto; }
   #game.adv #panel #target .spellPic, #game.adv #panel #target .listenPic { font-size: min(11vh, 15vw); }
   #game.adv #panel #target .phonLetter { font-size: min(12vh,16vw); }
   #game.adv #panel #target .phonPic { font-size: min(11vh,15vw); }
