@@ -2441,6 +2441,7 @@
     }
     I.setPlayerName(playerName);   // the narrator greets the child by name
     if (typeof updateThemeMusic === 'function') updateThemeMusic();   // music keeps playing into the lesson
+    if (typeof fadeMusicDuck === 'function') fadeMusicDuck(0.6, 1200);  // slowly dip the music −40% so the narrator is clear
     ensureAudio();
     speak(" ");
     startScreen.style.display = 'none';
@@ -2506,6 +2507,7 @@
   }
   function backToMenu() {
     stopAllSounds();
+    if (typeof fadeMusicDuck === 'function') fadeMusicDuck(1, 1000);   // bring the music back up on the menu
     const fb = document.getElementById('freeBg'); if (fb) fb.pause();
     hideBuddy();
     clearHintTimer();
@@ -2777,7 +2779,21 @@
   const volPopEl   = document.getElementById('volPop');
   const volMusicEl = document.getElementById('volMusic');
   const volVoiceEl = document.getElementById('volVoice');
-  function applyMusicVolume() { themeMusic.volume = musicVol; }
+  // musicDuck lowers the music under the narrator during lessons (1 = full, .6 = −40%)
+  let musicDuck = 1, duckTimer = null;
+  function applyMusicVolume() { themeMusic.volume = Math.min(1, Math.max(0, musicVol * musicDuck)); }
+  function fadeMusicDuck(target, ms) {
+    clearInterval(duckTimer);
+    const start = musicDuck, delta = target - start, t0 = performance.now(); ms = ms || 1000;
+    if (Math.abs(delta) < 0.001) { musicDuck = target; applyMusicVolume(); return; }
+    duckTimer = setInterval(() => {
+      const p = Math.min(1, (performance.now() - t0) / ms);
+      musicDuck = start + delta * p;
+      applyMusicVolume();
+      if (p >= 1) { clearInterval(duckTimer); duckTimer = null; }
+    }, 40);
+  }
+  window.fadeMusicDuck = fadeMusicDuck;   // callable from startGame / backToMenu below
   function setMusicVol(v) {
     musicVol = Math.min(1, Math.max(0, v));
     try { localStorage.setItem('yako_music_vol', String(musicVol)); } catch (e) {}
