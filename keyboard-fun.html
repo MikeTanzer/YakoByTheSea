@@ -1057,13 +1057,13 @@
     #start .modeBtn[data-mode="both"] .title { font-size: 5.6vw; }
     #start .modeBtn[data-mode="free"] .sub   { font-size: 6vw; }
 
-    .homeFoot { width: 92vw; max-width: 92vw; bottom: .8vh; gap: 2.6vw; padding: 1vh 3vw; white-space: normal; }
-    .homeFoot .footText { flex-direction: column; align-items: center; gap: .2vh; text-align: center; }
-    .homeFoot .footText b  { font-size: 3.4vw; white-space: nowrap; }
-    .homeFoot .footText em { font-size: 2.9vw; white-space: nowrap; }
-    .homeFoot .footIcon { font-size: 5.2vw; }
-    .homeFoot .footMusic { gap: 2vw; }
-    .homeFoot .mBtn  { width: 10vw; height: 10vw; font-size: 4.6vw; }
+    .homeFoot { width: 92vw; max-width: 92vw; bottom: .8vh; gap: 2vw; padding: 1vh 2.4vw; white-space: normal; box-sizing: border-box; }
+    .homeFoot .footIcon { flex: 0 0 auto; font-size: 5vw; }
+    .homeFoot .footText { flex: 1 1 auto; min-width: 0; flex-direction: column; align-items: center; gap: .2vh; text-align: center; }
+    .homeFoot .footText b  { font-size: 3.1vw; white-space: normal; max-width: 100%; }
+    .homeFoot .footText em { font-size: 2.7vw; white-space: normal; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+    .homeFoot .footMusic { flex: 0 0 auto; gap: 1.6vw; }
+    .homeFoot .mBtn  { width: 9vw; height: 9vw; font-size: 4.4vw; }
 
     /* ===================== MOBILE GAME VIEW (all modes except Free Play) ===================== */
     /* painted seaside video fills the screen; landscape interface PNG is hidden */
