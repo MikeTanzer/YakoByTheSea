@@ -778,14 +778,18 @@
     height: clamp(38px, 6vh, 52px); display: flex; align-items: center;
     border-radius: 999px; box-shadow: 0 4px 12px rgba(60,45,15,.26);
     font-family: 'Baloo 2', sans-serif; font-weight: 800; }
-  #game.adv #placeTag { left: 2vw; right: auto; transform: none; gap: .5em; max-width: 40vw;
-    padding: 0 .9em 0 .35em; background: rgba(255,247,223,.94); border: 3px solid var(--gold);
-    color: #6e4f24; font-size: min(2.2vh, 3.6vw); cursor: pointer; transition: transform .12s ease; }
+  /* location pill stacks the name over the thumbnail so it stays narrow and never
+     reaches the centered star counter; height is auto (taller, not a pill row) */
+  #game.adv #placeTag { left: 2vw; right: auto; transform: none; height: auto; max-width: 30vw;
+    flex-direction: column; align-items: center; gap: .3em; border-radius: 16px;
+    padding: .5vh .7em; background: rgba(255,247,223,.94); border: 3px solid var(--gold);
+    color: #6e4f24; font-size: min(2.1vh, 3.4vw); cursor: pointer; transition: transform .12s ease; }
   #game.adv #placeTag:hover { transform: scale(1.04); }
-  #game.adv #placeTag .pThumb { flex: 0 0 auto; height: 68%; width: auto; aspect-ratio: 8 / 5; object-fit: cover;
-    border-radius: 7px; border: 2px solid var(--gold); }
+  #game.adv #placeTag .ptTop { display: flex; align-items: center; gap: .3em; max-width: 100%; }
   #game.adv #placeTag .plName { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #game.adv #placeTag .chev { flex: 0 0 auto; font-size: .8em; opacity: .7; }
+  #game.adv #placeTag .pThumb { width: min(9vh, 18vw); height: auto; aspect-ratio: 16 / 9; object-fit: cover;
+    border-radius: 8px; border: 2px solid var(--gold); }
   #game.adv #starbar { left: 50%; right: auto; transform: translateX(-50%);
     gap: .5vw; padding: 0 1.4vw; background: rgba(255,247,223,.94); border: 3px solid var(--gold); }
   #game.adv #starbar .lvlStar { font-size: min(3vh, 4.6vw); }
@@ -1125,10 +1129,11 @@
     #game #score { left: auto; right: 4%; top: 2.2%; width: auto; height: auto; transform: none;
       background: var(--blue); color: #fff; border: 3px solid var(--blue-d); border-radius: 999px;
       padding: .7vh 4vw; font-size: 2.6vh; font-weight: 800; box-shadow: 0 4px 10px rgba(60,45,15,.3); }
-    /* adv top bar packs three pills across a narrow phone — keep them even + roomy */
-    #game.adv #placeTag, #game.adv #starbar, #game.adv #score { top: 1.2vh; height: 8.4vw; box-shadow: 0 3px 8px rgba(60,45,15,.28); }
-    #game.adv #placeTag { left: 1.6vw; max-width: 40vw; font-size: 3.2vw; gap: .4em; padding: 0 .7em 0 .3em; }
-    #game.adv #placeTag .chev { display: none; }              /* still tappable; saves width */
+    /* adv top bar: star bar + score stay pills; the location stacks name-over-thumbnail */
+    #game.adv #starbar, #game.adv #score { top: 1.2vh; height: 8.4vw; box-shadow: 0 3px 8px rgba(60,45,15,.28); }
+    #game.adv #placeTag { top: 1vh; left: 1.6vw; height: auto; max-width: 30vw; font-size: 3.1vw; gap: .3em;
+      padding: .5vh .6em; box-shadow: 0 3px 8px rgba(60,45,15,.28); }
+    #game.adv #placeTag .pThumb { width: 15vw; }
     #game.adv #starbar { padding: 0 2.4vw; gap: 1.4vw; }
     #game.adv #starbar .lvlStar { font-size: 4.4vw; }
     #game.adv #score { right: 1.6vw; padding: 0 3vw; font-size: 4vw; }
@@ -1896,7 +1901,8 @@
     const place = MONT.PLACES[curPlaceIdx];
     setSceneBg(place.scene);
     const tag = document.getElementById('placeTag');
-    if (tag) tag.innerHTML = '<img class="pThumb" src="' + place.scene + '" alt=""><span class="plName">' + place.name + '</span><span class="chev">▾</span>';
+    if (tag) tag.innerHTML = '<span class="ptTop"><span class="plName">' + place.name + '</span><span class="chev">▾</span></span>' +
+                             '<img class="pThumb" src="' + place.scene + '" alt="">';
     document.querySelectorAll('#placePop button').forEach((b, j) => b.classList.toggle('sel', j === curPlaceIdx));
   }
   function setLevelScene() {
