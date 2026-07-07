@@ -1,5 +1,5 @@
 /* Yako by the Sea — service worker (offline + installable PWA) */
-const CORE = 'yako-core-v6';     // versioned: bumped whenever the code/art below changes
+const CORE = 'yako-core-v7';     // versioned: bumped whenever the code/art below changes
 const MEDIA = 'yako-media';      // persistent: recorded clips cached as they play (survives version bumps)
 const CORE_ASSETS = [
   './',
@@ -10,6 +10,7 @@ const CORE_ASSETS = [
   './js/audio.js',
   './data/lessons.js',
   './data/vocab.js',
+  './data/music.js',
   './data/strings.en.js',
   './data/strings.fr.js',
   './data/strings.es.js',
