@@ -2552,26 +2552,25 @@
     else themeMusic.pause();
     updateMusicUI();
   }
-  function loadCurrent(announce) {                              // point the player at list()[trackIdx]
+  function loadCurrent() {                                      // point the player at list()[trackIdx]
     themeMusic.src = list()[trackIdx].src;
     themeMusic.currentTime = 0;
     if (musicShouldPlay()) themeMusic.play().catch(() => {});
-    if (announce) showTrackName();
     updateMusicUI();
   }
   function nextTrack() {
     if (list().length <= 1) return;
     trackIdx = (trackIdx + 1) % list().length;
     if (!secretMode) { try { localStorage.setItem('yako_track', String(trackIdx)); } catch (e) {} }
-    loadCurrent(true);
+    loadCurrent();
   }
   function toggleMusicPause() {
     musicPaused = !musicPaused;
     try { localStorage.setItem('yako_music_paused', musicPaused ? '1' : '0'); } catch (e) {}
-    if (!musicPaused) showTrackName();
     updateThemeMusic();
   }
   // 🥚 Easter egg: tapping the seashell flips to the hidden playlist (tap again to return).
+  // The shell itself lights up as the only cue — the song title is never shown.
   function toggleSecret() {
     if (!SECRET.length) return;
     secretMode = !secretMode;
@@ -2579,25 +2578,10 @@
     footEl.classList.toggle('secret', secretMode);
     if (footShellEl) { footShellEl.classList.remove('shellPop'); void footShellEl.offsetWidth; footShellEl.classList.add('shellPop'); }
     try { playChime(); } catch (e) {}
-    loadCurrent(false);
-    setFootSub(secretMode ? '🥚 Secret song! ♫ ' + list()[0].title : '♫ ' + list()[0].title);
-    showingTrack = true;
+    loadCurrent();
   }
-  // Foot subtext gently swaps between the F11 tip and "♫ <track name>".
   const footEl = document.getElementById('musicBar');
   const footShellEl = document.getElementById('footShell');
-  let showingTrack = false;
-  function setFootSub(text) {
-    if (!footSubEl) return;
-    footEl.classList.add('subswap');                            // fade out
-    setTimeout(() => { footSubEl.textContent = text; footEl.classList.remove('subswap'); }, 350);
-  }
-  function showTrackName() { showingTrack = true; setFootSub('♫ ' + list()[trackIdx].title); }
-  setInterval(() => {
-    if (!footSubEl || startScreen.style.display === 'none') return;
-    showingTrack = !showingTrack;
-    setFootSub(showingTrack ? '♫ ' + list()[trackIdx].title : FOOT_TIP);
-  }, 6000);
   document.addEventListener('pointerdown', updateThemeMusic);   // first tap unlocks autoplay
   if (mNextEl) mNextEl.addEventListener('click', nextTrack);
   if (mPlayEl) mPlayEl.addEventListener('click', toggleMusicPause);
