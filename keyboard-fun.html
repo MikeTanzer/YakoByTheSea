@@ -678,14 +678,15 @@
   #game.adv #choices .choice .num { font-size: min(5.5vh, 8vw); font-weight: 900; }
   #game.adv #choices .choice { min-width: min(16vh, 22vw); padding: 1.4vh 2vw; }
   /* visible round Home + Sound buttons (the painted hotspots are hidden with the frame) */
+  /* Icons are inline SVG background images (not emoji glyphs — those inherit the
+     invisible-hotspot transparent color on some platforms and vanish). */
   #game.adv #exit, #game.adv #sound { position: fixed; bottom: 2.5vh; top: auto; width: min(8vh,13vw); height: min(8vh,13vw);
-    border-radius: 50%; background: var(--blue); border: 3px solid var(--blue-d); box-shadow: 0 5px 12px rgba(0,0,0,.4);
-    display: flex; align-items: center; justify-content: center; font-size: min(4vh,6vw); z-index: 12; }
-  #game.adv #exit  { left: 3vw; right: auto; }
-  #game.adv #sound { right: 3vw; left: auto; }
-  /* the .hotspot base makes glyphs transparent (invisible click regions); these
-     round buttons show a real icon, so force it visible */
-  #game.adv #exit::after, #game.adv #sound::after { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+    border-radius: 50%; background-color: var(--blue); background-repeat: no-repeat; background-position: center; background-size: 52%;
+    border: 3px solid var(--blue-d); box-shadow: 0 5px 12px rgba(0,0,0,.4); z-index: 12; }
+  #game.adv #exit  { left: 3vw; right: auto;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M12 3 2.4 11h2.7v8.4h4.2v-5h5.4v5h4.2V11H21.6z'/></svg>"); }
+  #game.adv #sound { right: 3vw; left: auto;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='white' d='M3 9v6h4l5 4V5L7 9H3z'/><path fill='none' stroke='white' stroke-width='2' stroke-linecap='round' d='M15.5 8.6a4.6 4.6 0 0 1 0 6.8M18.2 6a8 8 0 0 1 0 12'/></svg>"); }
   /* Just-for-Fun home button (Free Play hides the painted frame, so it needs its own) */
   #freeHome { position: fixed; left: 3vw; bottom: 2.5vh; z-index: 7; display: none;
     width: min(8vh,13vw); height: min(8vh,13vw); align-items: center; justify-content: center;
@@ -694,10 +695,9 @@
     box-shadow: 0 5px 12px rgba(0,0,0,.32); }
   #freeHome:active { transform: scale(.92); }
   #game.free-mode #freeHome { display: flex; }
-  #game.adv #exit::after  { content: '🏠'; }
-  #game.adv #sound::after { content: '🔊'; }
-  #game.adv #sound.muted { background: #c0392b; border-color: #9a261a; }
-  #game.adv #sound.muted::after { content: '🔇'; }
+  #game.adv #exit::after, #game.adv #sound::after { content: none; }   /* icon comes from the SVG background */
+  #game.adv #sound.muted { background-color: #c0392b; border-color: #9a261a;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='white' d='M3 9v6h4l5 4V5L7 9H3z'/><path fill='none' stroke='white' stroke-width='2' stroke-linecap='round' d='M16 9l6 6M22 9l-6 6'/></svg>"); }
   /* volume slider — appears when the mouse rests on the speaker button */
   #volPop { position: fixed; right: 2vw; bottom: calc(2.5vh + min(8vh,13vw) + 12px); z-index: 45;
     display: flex; align-items: center; gap: 8px; padding: 8px 14px;
