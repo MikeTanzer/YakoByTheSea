@@ -609,6 +609,36 @@
   #game.adv #sound::after { content: '🔊'; }
   #game.adv #sound.muted { background: #c0392b; border-color: #9a261a; }
   #game.adv #sound.muted::after { content: '🔇'; }
+  /* ----- scene layout now hosts EVERY lesson: size the card target + on-screen keyboard ----- */
+  #game.adv #panel #target { font-size: min(15vh, 20vw); color: var(--blue); }
+  #game.adv #panel #target .bigletter { font-size: min(15vh, 20vw); }
+  #game.adv #panel #target .glyph { font-size: min(13vh, 17vw); }
+  #game.adv #panel #target .swatch { width: min(13vh,17vw); height: min(13vh,17vw); border-radius: 18px; }
+  #game.adv #panel #target .spellRow { display: flex; gap: 1.2vw; flex-wrap: wrap; justify-content: center; }
+  #game.adv #panel #target .spellRow .sl { font-size: min(9vh, 12vw); }
+  #game.adv #panel #target .spellPic, #game.adv #panel #target .listenPic { font-size: min(11vh, 15vw); }
+  #game.adv #panel #target .phonLetter { font-size: min(12vh,16vw); }
+  #game.adv #panel #target .phonPic { font-size: min(11vh,15vw); }
+  #game.adv #panel #target .countObjRow, #game.adv #panel #target .mathRow { display: flex; flex-wrap: wrap; gap: .6vh .8vw; align-items: center; justify-content: center; font-size: min(7vh,10vw); }
+  #game.adv #mfb, #game.adv #fbGood, #game.adv #fbBad { display: none; }   /* card + confetti + voice give feedback */
+  /* on-screen keyboard as a tidy bottom bar (letters- or numbers-only, no modifier rows) */
+  #game.adv #keyboard { position: fixed; left: 50%; bottom: 13vh; top: auto; transform: translateX(-50%);
+    width: min(760px, 96vw); height: auto; z-index: 6; padding: 1.2vh 1vw; gap: .8vh; border-radius: 18px; }
+  #game.adv #keyboard .krow { gap: .8vw; }
+  #game.adv #keyboard .key { height: min(6.4vh, 9vw); font-size: min(3vh, 4.2vw); border-radius: 10px; }
+  #game.adv #keyboard .key.mod { display: none; }
+  #game.adv #keyboard .krow:nth-child(5) { display: none; }
+  #game.adv:not(.num-answer) #keyboard .krow:nth-child(1) { display: none; }   /* hide digit row for letter rounds */
+  #game.adv.num-answer #keyboard .krow:nth-child(2),
+  #game.adv.num-answer #keyboard .krow:nth-child(3),
+  #game.adv.num-answer #keyboard .krow:nth-child(4) { display: none; }         /* hide letters for number rounds */
+  #game.adv.choices-mode #keyboard { display: none; }
+  /* a small place caption so you know where Yako is today */
+  #game.adv #placeTag { position: fixed; left: 50%; top: 2vh; transform: translateX(-50%); z-index: 11;
+    background: rgba(255,247,223,.92); border: 3px solid var(--gold); border-radius: 999px;
+    padding: .5vh 1.2em; font-family: 'Baloo 2'; font-weight: 800; color: #6e4f24; font-size: min(2.4vh,4.2vw);
+    box-shadow: 0 4px 12px rgba(60,45,15,.3); pointer-events: none; }
+  #game:not(.adv) #placeTag, #game.free-mode #placeTag { display: none; }
 
   /* ---------- On-screen keyboard ---------- */
   #keyboard {
@@ -1069,12 +1099,6 @@
               <button class="modeBtn lang" data-mode="samediff"   aria-label="Same or Different"><span class="title">Same or Different?</span><span class="icons">🟰 ↔️</span></button>
             </div>
           </section>
-          <section class="lgroup" data-group="monterey">
-            <button class="groupHead" type="button" aria-expanded="false"><span class="ghIcon">🏞️</span><span class="ghName">Monterey Adventures</span><span class="chev">▾</span></button>
-            <div class="btnGrid">
-              <button class="modeBtn adv" data-mode="adventures" aria-label="Monterey Adventures"><span class="title">Count with Yako</span><span class="icons">🐑 🦌 🐋</span></button>
-            </div>
-          </section>
           <section class="lgroup lgroupSolo" data-group="fun">
             <button class="groupHead lgroupLink" type="button" data-mode="free" aria-label="Free Play"><span class="ghIcon">🎉</span><span class="ghName">Just for Fun</span><span class="chev play">▶</span></button>
           </section>
@@ -1091,6 +1115,7 @@
     <div id="freeVignette"></div>
     <div id="flash"></div>
     <div id="sceneBg"></div>
+    <div id="placeTag"></div>
     <div class="gameStage">
       <video id="gameBg" class="bg" src="gameui_anim.mp4" poster="gameui.png" muted loop autoplay playsinline preload="auto"></video>
       <div id="starbar"></div>
@@ -1216,8 +1241,6 @@
     ['countlang',  'Number Words'],
     ['guesslang',  'Guess the Language'],
     ['samediff',   'Same or Different?'],
-    // ----- Monterey Adventures: count local animals around Yako's home peninsula -----
-    ['adventures', 'Monterey Adventures'],
   ];
   const LANG_MODES = ['hello', 'wordsafari', 'colormix', 'countlang', 'guesslang', 'samediff'];
   const lessonIdx  = m => LESSONS.findIndex(l => l[0] === m);
@@ -1570,40 +1593,16 @@
 
   // ================= Monterey Adventures: count local animals around the peninsula =================
   const MONT = window.YAKO_MONTEREY;
-  let advPlace = null;   // last place greeted, so "Welcome to …" plays once per place (not every round)
   function setSceneBg(scene) { const el = document.getElementById('sceneBg'); if (el) el.style.backgroundImage = "url('" + scene + "')"; }
-  function buildAdventure() {
-    const place = MONT.PLACES[(level - 1) % MONT.PLACES.length];   // tour the peninsula, a new place each level
-    const key = pick(place.animals);
-    const a = MONT.ANIMALS[key];
-    const n = 1 + Math.floor(Math.random() * 9);
-    const wrongs = shuffle([1,2,3,4,5,6,7,8,9].filter(d => d !== n)).slice(0, 2);
-    // the choice IS the digit (number = the digit itself), so tapping a card or
-    // pressing that number key both answer; the right card is the true count.
-    const opts = shuffle([n].concat(wrongs)).map(d => ({ number: d }));
-    return {
-      answer: String(n), kind: 'number', style: 'adventure', choices: opts,
-      name: 'adv_' + place.id + '_' + n + key, place: place, animalKey: key,
-      render() {
-        setSceneBg(place.scene);
-        promptEl.textContent = '🏞️ ' + place.name;
-        targetEl.style.color = '';
-        targetEl.innerHTML = '<div class="advCount">' + objs(a.emoji, n) + '</div>';
-        renderPickChoices(opts.map(o => ({ number: o.number, html: '' })));
-      },
-      play() {
-        // "Welcome to <place>!" once per place, then "How many <animal>? Count them!"
-        const chain = [];
-        if (place.id !== advPlace) { chain.push('place_' + place.id); advPlace = place.id; }
-        chain.push('howmany_' + key);
-        playPersonaChain(chain, L().countAny, { rate: 0.95 });
-      },
-      revealAnswer() {}
-    };
+  // Every lesson is set in a Monterey place; the backdrop moves to a new area as levels advance.
+  function setLevelScene() {
+    if (mode === 'free') return;
+    const place = MONT.PLACES[(lessonIdx(mode) + Math.max(0, level - 1)) % MONT.PLACES.length];
+    setSceneBg(place.scene);
+    const tag = document.getElementById('placeTag');
+    if (tag) tag.textContent = '🏞️ ' + place.name;
   }
-
   function buildChallenge() {
-    if (mode === 'adventures') return buildAdventure();
     if (mode === 'hello')      return buildLangPick(true);
     if (mode === 'guesslang')  return buildLangPick(false);
     if (mode === 'wordsafari') return buildWordPick(ALL_ANIMALS);
@@ -2024,6 +2023,7 @@
     if (act === 'level') level++;
     levelStars = 0; levelMistakes = 0;
     updateStarbar();
+    setLevelScene();                 // travel to the next Monterey area on level up
     levelStartTime = performance.now();
     locked = false;
     newTarget();
@@ -2157,11 +2157,11 @@
       const cat = (mode === 'colors' || mode === 'shapes' || mode === 'animals');
       game.classList.toggle('seq-mode', mode === 'spelling' || mode === 'counting');
       game.classList.toggle('big-target', mode === 'sounds' || mode === 'listen' || mode === 'countobj' || mode === 'math');
-      game.classList.toggle('adv', mode === 'adventures');   // full-scene Monterey layout
-      if (mode === 'adventures') advPlace = null;            // greet the first place on entry
+      game.classList.add('adv');          // every lesson plays over a painted Monterey scene
+      setLevelScene();                     // pick the location for this lesson/level
       const pr = L().prompt;
       promptEl.textContent = cat ? (answerStyle === 'number' ? pr.catNum : pr.cat) : (pr[mode] || pr.both);
-      hintEl.textContent = (LANG_MODES.includes(mode) || mode === 'adventures') ? 'Listen, then tap your answer! 👂' : 'Look closely and find the key!';
+      hintEl.textContent = LANG_MODES.includes(mode) ? 'Listen, then tap your answer! 👂' : 'Look closely and find the key!';
       setTimeout(newTarget, 500);
     }
   }
