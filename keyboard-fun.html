@@ -70,7 +70,7 @@
   .homeCard .nameRow input { flex: 1 1 auto; min-width: 0; width: auto; }
   #start #nameInput {
     font-family: 'Baloo 2'; font-weight: 700; font-size: 2.4vh; text-align: center;
-    color: var(--blue-d); width: 9em; padding: .8vh 1.2vw;
+    color: var(--blue-d); flex: 1 1 auto; width: 100%; max-width: 24em; min-width: 0; padding: .8vh 1.2vw;
     background: linear-gradient(#fffdf6, #f6efdc);
     border: 2px solid #d9c38a; border-radius: 14px; outline: none;
     box-shadow: inset 0 2px 5px rgba(120,90,40,.16), 0 2px 3px rgba(255,255,255,.5);
@@ -123,7 +123,7 @@
   /* longer labels get a smaller font so they never touch the inner border */
   #start .modeBtn[data-mode="countlang"] .title,
   #start .modeBtn[data-mode="colormix"] .title { font-size: clamp(14px, 1.35vw, 20px); }
-  #start .modeBtn[data-mode="numbers"] .title { font-size: clamp(15px, 1.6vw, 24px); white-space: nowrap; }   /* keep "Numbers" on one line */
+  #start .modeBtn[data-mode="numbers"] .title { font-size: clamp(13px, 1.35vw, 20px); white-space: nowrap; }   /* "Numbers" on one line, inside the border */
   /* longest single words ("Language", "Different?") need the smallest size to fit unbroken */
   #start .modeBtn[data-mode="guesslang"] .title,
   #start .modeBtn[data-mode="samediff"] .title { font-size: clamp(12px, 1.15vw, 17px); }
@@ -1098,7 +1098,7 @@
     #start .modeBtn[data-mode="colormix"] .title { font-size: 5vw; }
     #start .modeBtn[data-mode="guesslang"] .title,
     #start .modeBtn[data-mode="samediff"] .title { font-size: 4.2vw; }
-    #start .modeBtn[data-mode="numbers"] .title { font-size: 5.4vw; white-space: nowrap; }   /* "Numbers" on one line */
+    #start .modeBtn[data-mode="numbers"] .title { font-size: 4.8vw; white-space: nowrap; }   /* "Numbers" on one line */
 
     .homeFoot { width: 92vw; max-width: 92vw; bottom: .8vh; gap: 2vw; padding: 1vh 2.4vw; white-space: normal; box-sizing: border-box; }
     .homeFoot .footIcon { flex: 0 0 auto; font-size: 5vw; }
@@ -2632,6 +2632,9 @@
   const footEl = document.getElementById('musicBar');
   const footShellEl = document.getElementById('footShell');
   document.addEventListener('pointerdown', updateThemeMusic);   // first tap unlocks autoplay
+  // keep the music playing continuously across every page — resume if the browser stalls it
+  setInterval(() => { if (musicShouldPlay() && themeMusic.paused) themeMusic.play().catch(() => {}); }, 3000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && musicShouldPlay() && themeMusic.paused) themeMusic.play().catch(() => {}); });
   if (mNextEl) mNextEl.addEventListener('click', nextTrack);
   if (mPlayEl) mPlayEl.addEventListener('click', toggleMusicPause);
   if (footShellEl) footShellEl.addEventListener('click', e => { e.stopPropagation(); toggleSecret(); });
