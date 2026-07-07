@@ -386,6 +386,12 @@
   .homeFoot .mBtn svg { width: 54%; height: 54%; fill: #6e4f24; display: block; pointer-events: none; }
   .homeFoot .footText em { transition: opacity .35s ease; }
   .homeFoot.subswap .footText em { opacity: 0; }
+  /* 🥚 secret seashell: a quietly-tappable Easter egg that flips the playlist */
+  #footShell { cursor: pointer; user-select: none; -webkit-user-select: none; transition: transform .12s ease; }
+  #footShell:active { transform: scale(.85); }
+  .shellPop { animation: shellPop .55s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes shellPop { 0% { transform: scale(1) rotate(0); } 40% { transform: scale(1.55) rotate(-20deg); } 100% { transform: scale(1) rotate(0); } }
+  .homeFoot.secret { background: linear-gradient(#efdcff, #d9bdf3); border-color: #b98ce2; }
   /* The painted home menu, scaled to fit; hotspots positioned in % of the image */
   .homeStage { position: relative; }
   .homeStage img.bg { display: block; max-width: 100vw; max-height: 100vh; width: auto; height: auto;
@@ -1273,7 +1279,7 @@
       </div>
     </div>
     <div class="homeChar" role="img" aria-label="Yako waving with his puppy"></div>
-    <div class="homeFoot" id="musicBar"><span class="footIcon">🐚</span><span class="footText"><b>Collect 5 stars to win a level!</b><em id="footSub">Tip: turn your volume up &amp; press F11.</em></span><span class="footMusic"><button class="mBtn mPlay" id="mPlay" type="button" title="Play or pause music" aria-label="Play or pause music"></button><button class="mBtn" id="mNext" type="button" title="Next song" aria-label="Next song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5v14l9.5-7L5 5z"/><rect x="16" y="5" width="3.4" height="14" rx="1.2"/></svg></button></span></div>
+    <div class="homeFoot" id="musicBar"><span class="footIcon" id="footShell" role="button" tabindex="-1" aria-label="🐚">🐚</span><span class="footText"><b>Collect 5 stars to win a level!</b><em id="footSub">Tip: turn your volume up &amp; press F11.</em></span><span class="footMusic"><button class="mBtn mPlay" id="mPlay" type="button" title="Play or pause music" aria-label="Play or pause music"></button><button class="mBtn" id="mNext" type="button" title="Next song" aria-label="Next song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5v14l9.5-7L5 5z"/><rect x="16" y="5" width="3.4" height="14" rx="1.2"/></svg></button></span></div>
   </div>
 
   <!-- GAME: the painted interface illustration with live overlays -->
@@ -2494,6 +2500,9 @@
   // which still mutes everything). Music only ever sounds on the home menu.
   const MUSIC = (window.YAKO_MUSIC && window.YAKO_MUSIC.length) ? window.YAKO_MUSIC
                                                                 : [{ title: 'Yako by the Sea', src: 'theme.mp3' }];
+  const SECRET = (window.YAKO_MUSIC_SECRET && window.YAKO_MUSIC_SECRET.length) ? window.YAKO_MUSIC_SECRET : [];
+  let secretMode = false;                                       // 🥚 flipped by tapping the seashell
+  const list = () => (secretMode ? SECRET : MUSIC);             // the active playlist
   let trackIdx = 0;
   try { const t = parseInt(localStorage.getItem('yako_track') || '0', 10); if (t >= 0 && t < MUSIC.length) trackIdx = t; } catch (e) {}
   let musicPaused = false;
@@ -2515,22 +2524,25 @@
   function updateMusicUI() {
     const playing = musicShouldPlay();
     if (mPlayEl)  mPlayEl.innerHTML = playing ? SVG_PAUSE : SVG_PLAY;
-    if (mNextEl)  mNextEl.style.display = MUSIC.length <= 1 ? 'none' : '';  // one song → nothing to skip to
+    if (mNextEl)  mNextEl.style.display = list().length <= 1 ? 'none' : '';  // one song → nothing to skip to
   }
   function updateThemeMusic() {
     if (musicShouldPlay()) themeMusic.play().catch(() => {});
     else themeMusic.pause();
     updateMusicUI();
   }
-  function nextTrack() {
-    if (MUSIC.length <= 1) return;
-    trackIdx = (trackIdx + 1) % MUSIC.length;
-    try { localStorage.setItem('yako_track', String(trackIdx)); } catch (e) {}
-    themeMusic.src = MUSIC[trackIdx].src;                        // new song, also looping
+  function loadCurrent(announce) {                              // point the player at list()[trackIdx]
+    themeMusic.src = list()[trackIdx].src;
     themeMusic.currentTime = 0;
     if (musicShouldPlay()) themeMusic.play().catch(() => {});
-    showTrackName();
+    if (announce) showTrackName();
     updateMusicUI();
+  }
+  function nextTrack() {
+    if (list().length <= 1) return;
+    trackIdx = (trackIdx + 1) % list().length;
+    if (!secretMode) { try { localStorage.setItem('yako_track', String(trackIdx)); } catch (e) {} }
+    loadCurrent(true);
   }
   function toggleMusicPause() {
     musicPaused = !musicPaused;
@@ -2538,23 +2550,37 @@
     if (!musicPaused) showTrackName();
     updateThemeMusic();
   }
+  // 🥚 Easter egg: tapping the seashell flips to the hidden playlist (tap again to return).
+  function toggleSecret() {
+    if (!SECRET.length) return;
+    secretMode = !secretMode;
+    trackIdx = 0;
+    footEl.classList.toggle('secret', secretMode);
+    if (footShellEl) { footShellEl.classList.remove('shellPop'); void footShellEl.offsetWidth; footShellEl.classList.add('shellPop'); }
+    try { playChime(); } catch (e) {}
+    loadCurrent(false);
+    setFootSub(secretMode ? '🥚 Secret song! ♫ ' + list()[0].title : '♫ ' + list()[0].title);
+    showingTrack = true;
+  }
   // Foot subtext gently swaps between the F11 tip and "♫ <track name>".
   const footEl = document.getElementById('musicBar');
+  const footShellEl = document.getElementById('footShell');
   let showingTrack = false;
   function setFootSub(text) {
     if (!footSubEl) return;
     footEl.classList.add('subswap');                            // fade out
     setTimeout(() => { footSubEl.textContent = text; footEl.classList.remove('subswap'); }, 350);
   }
-  function showTrackName() { showingTrack = true; setFootSub('♫ ' + MUSIC[trackIdx].title); }
+  function showTrackName() { showingTrack = true; setFootSub('♫ ' + list()[trackIdx].title); }
   setInterval(() => {
     if (!footSubEl || startScreen.style.display === 'none') return;
     showingTrack = !showingTrack;
-    setFootSub(showingTrack ? '♫ ' + MUSIC[trackIdx].title : FOOT_TIP);
+    setFootSub(showingTrack ? '♫ ' + list()[trackIdx].title : FOOT_TIP);
   }, 6000);
   document.addEventListener('pointerdown', updateThemeMusic);   // first tap unlocks autoplay
   if (mNextEl) mNextEl.addEventListener('click', nextTrack);
   if (mPlayEl) mPlayEl.addEventListener('click', toggleMusicPause);
+  if (footShellEl) footShellEl.addEventListener('click', e => { e.stopPropagation(); toggleSecret(); });
   updateMusicUI();
 
   // ---------- Wiring ----------

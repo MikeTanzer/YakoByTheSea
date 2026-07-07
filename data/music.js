@@ -7,7 +7,14 @@
 //
 // TO ADD A SONG: drop the .mp3 in the music/ folder and add a line below.
 window.YAKO_MUSIC = [
-  { title: 'Baby Yak',            src: 'music/baby-yak.mp3' },
-  { title: 'Baby Yak Boom-Bap Anthem', src: 'music/baby-yak-boom-bap-anthem.mp3' },
-  { title: 'Yako by the Sea',     src: 'theme.mp3' }
+  { title: 'Baby Yak',                  src: 'music/baby-yak.mp3' },
+  { title: 'Baby Yak Boom-Bap Anthem',  src: 'music/baby-yak-boom-bap-anthem.mp3' }
+];
+
+// 🥚 SECRET playlist — an Easter egg. Tapping the little seashell 🐚 in the foot
+// ribbon flips the media player over to this hidden set of songs (tap again to go
+// back). These are different tracks from the main playlist above. To add more
+// secret songs, drop them in music/secret/ and add lines here.
+window.YAKO_MUSIC_SECRET = [
+  { title: 'Yako by the Sea (Secret Theme)', src: 'theme.mp3' }
 ];
