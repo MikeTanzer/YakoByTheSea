@@ -1877,9 +1877,10 @@
 
   // ================= Monterey Adventures: count local animals around the peninsula =================
   const MONT = window.YAKO_MONTEREY;
+  const SCENE_V = 2;   // bump when scene .mp4s are regenerated, to bust the cache-first media cache
   function setSceneBg(scene) {   // scene = 'scenes/<id>.png'; the living loop is the matching .mp4
     const el = document.getElementById('sceneBg'); if (!el) return;
-    const mp4 = scene.replace(/\.png$/, '.mp4');
+    const mp4 = scene.replace(/\.png$/, '.mp4') + '?v=' + SCENE_V;
     if (el.getAttribute('src') === mp4) return;             // already showing this place
     el.poster = scene;                                      // painted still shows instantly / video fallback
     el.src = mp4;
@@ -2631,7 +2632,15 @@
   }
   const footEl = document.getElementById('musicBar');
   const footShellEl = document.getElementById('footShell');
-  document.addEventListener('pointerdown', updateThemeMusic);   // first tap unlocks autoplay
+  // Try to start music the instant the page loads; browsers usually defer autoplay-
+  // with-sound until the first interaction, so also unlock on the very first input of
+  // ANY kind (tap, touch, key, click, scroll) — whichever comes first.
+  themeMusic.autoplay = true;
+  function tryStartMusic() { if (musicShouldPlay()) themeMusic.play().catch(() => {}); updateMusicUI(); }
+  tryStartMusic();
+  window.addEventListener('load', tryStartMusic);
+  ['pointerdown', 'touchstart', 'keydown', 'click', 'wheel'].forEach(ev =>
+    document.addEventListener(ev, tryStartMusic, { passive: true }));
   // keep the music playing continuously across every page — resume if the browser stalls it
   setInterval(() => { if (musicShouldPlay() && themeMusic.paused) themeMusic.play().catch(() => {}); }, 3000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden && musicShouldPlay() && themeMusic.paused) themeMusic.play().catch(() => {}); });
