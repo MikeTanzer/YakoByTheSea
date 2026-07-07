@@ -398,7 +398,8 @@
   /* 🥚 secret seashell: a quietly-tappable Easter egg that flips the playlist.
      Tapping it colors the shell; tapping again returns it to normal. */
   #footShell { cursor: pointer; user-select: none; -webkit-user-select: none;
-    display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; padding: 1px 3px;
+    display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
+    width: 1.7em; height: 1.7em; aspect-ratio: 1; padding: 0; border-radius: 50%;   /* square box → the active ring is a true circle, not a rounded square */
     transition: transform .12s ease, background .25s ease, box-shadow .25s ease; }
   #footShell:active { transform: scale(.85); }
   .shellPop { animation: shellPop .55s cubic-bezier(.2,1.6,.4,1); }
