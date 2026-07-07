@@ -1535,14 +1535,28 @@
       ? '<div class="swatch" style="background:' + item.hex + '"></div>'
       : '<span class="glyph">' + item.glyph + '</span>';
   }
+  // Break a prompt onto two balanced lines (split at the space nearest the middle);
+  // works in any language, and HTML-escapes the text first.
+  function twoLine(s) {
+    const esc = String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+    const parts = esc.split(' ');
+    if (parts.length < 2) return esc;
+    const mid = esc.length / 2;
+    let best = 0, bestD = Infinity, run = 0;
+    for (let i = 0; i < parts.length - 1; i++) {
+      run += parts[i].length + 1;
+      const d = Math.abs(run - mid);
+      if (d < bestD) { bestD = d; best = i; }
+    }
+    return parts.slice(0, best + 1).join(' ') + '<br>' + parts.slice(best + 1).join(' ');
+  }
   function renderItemWithLetter(item, kind, letter) {
-    // The letter to find on top, the picture it stands for right underneath.
+    // Just the letter to find, big and clear (the picture clue was removed for a cleaner card).
     letter = letter || item.letter;
     targetEl.style.color = '';
     targetEl.innerHTML =
       '<div class="itemCol">' +
       '<span class="bigletter" style="color:' + (kind === 'color' ? item.hex : 'var(--blue)') + '">' + letter + '</span>' +
-      picHTML(item, kind) +
       '</div>';
   }
   function renderChoices(opts, kind) {
@@ -2428,7 +2442,9 @@
       game.classList.add('adv');          // every lesson plays over a painted Monterey scene
       setLevelScene();                     // pick the location for this lesson/level
       const pr = L().prompt;
-      promptEl.textContent = cat ? (answerStyle === 'number' ? pr.catNum : pr.cat) : (pr[mode] || pr.both);
+      const ptxt = cat ? (answerStyle === 'number' ? pr.catNum : pr.cat) : (pr[mode] || pr.both);
+      // category letter/number rounds get a taller two-line prompt (better balance vs. the star bar)
+      if (cat) promptEl.innerHTML = twoLine(ptxt); else promptEl.textContent = ptxt;
       // Guess-the-Language / Hello World show flags — teach that each flag IS a language.
       const flagMode = (mode === 'hello' || mode === 'guesslang');
       hintEl.textContent = flagMode ? 'Each flag is a language — listen, then tap! 🌍'
