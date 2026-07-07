@@ -9,7 +9,6 @@
 window.YAKO_MUSIC = [
   { title: 'Baby Yak',   src: 'music/baby-yak.mp3' },
   { title: 'Untitled 2', src: 'music/untitled-2.mp3' },
-  { title: 'Baby Yak 2', src: 'music/baby-yak-2.mp3' },
   { title: 'Untitled',   src: 'music/untitled.mp3' }
 ];
 
