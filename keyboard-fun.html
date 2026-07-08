@@ -2127,29 +2127,39 @@
     announce();
   }
 
+  // --- Name personalization -----------------------------------------------
+  // When the child typed a name, the narrator calls them by it: prompts get the
+  // name in front ("Yako, find the number 5!"), cheers get it at the end
+  // ("Great job, Yako!"). Named → personalized synth; no name → the recorded clip.
+  function namePrefix(s) { return playerName ? (playerName + ', ' + s.charAt(0).toLowerCase() + s.slice(1)) : s; }
+  function nameSuffix(s) { return playerName ? (s.replace(/[!?.\s]+$/, '') + ', ' + playerName + '!') : s; }
+  function sayPrompt(clipKeys, phrase, opts) {
+    if (playerName) speak(namePrefix(phrase), opts);   // personalized (synth, in the persona voice)
+    else playPersona(clipKeys, phrase, opts);          // generic recorded clip
+  }
   function announce() {
     // Language Island challenges carry their own play() (speaks a word/greeting in a chosen tongue).
     if (challenge.play) { challenge.play(); return; }
     const t = L(), cname = challenge.name, ans = challenge.answer, s = challenge.style;
     // Recorded persona clips wherever the phrase is enumerable; synth is only the fallback.
-    if (s === 'plain') { playPersona(isNum(ans) ? 'find_num_' + ans : 'find_let_' + ans, t.find(ans), { rate: 0.95 }); return; }
+    if (s === 'plain') { sayPrompt(isNum(ans) ? 'find_num_' + ans : 'find_let_' + ans, t.find(ans), { rate: 0.95 }); return; }
     // shapes/colors/animals: name the thing — "Find the letter R, for Rabbit!"
-    if (s === 'letter') { playPersona('find_for_' + challenge.itemKey, t.findFor(cname, ans), { rate: 0.95 }); return; }
+    if (s === 'letter') { sayPrompt('find_for_' + challenge.itemKey, t.findFor(cname, ans), { rate: 0.95 }); return; }
     // spelling: say the word first — "Let's spell CAR. Find the letter C!"
-    if (s === 'seq' && mode === 'spelling') { playPersona('spell_' + challenge.word, t.spell(challenge.word, ans), { rate: 0.95 }); return; }
+    if (s === 'seq' && mode === 'spelling') { sayPrompt('spell_' + challenge.word, t.spell(challenge.word, ans), { rate: 0.95 }); return; }
     // counting: speak the FULL multi-digit number, then the first digit
     // (all 90 two-digit numbers are recorded; longer numbers fall back to synth)
-    if (s === 'seq')   { playPersona('count_' + challenge.word, t.countIntro(challenge.word, ans), { rate: 0.95 }); return; }
-    if (s === 'sound') { playPersona('sound_' + ans, t.sound(ans, challenge.word, challenge.sound), { rate: 0.95 }); return; }
-    if (s === 'listen'){ playPersona('sound_' + ans, t.sound(ans, challenge.word, challenge.sound), { rate: 0.95 }); return; }
-    if (s === 'count') { playPersona('howmany_' + challenge.creatures, t.howMany(locCreat(challenge.creatures)), { rate: 0.95 }); return; }
-    if (s === 'number'){ playPersona('which_one', t.prompt.catNum, { rate: 0.95 }); return; }               // multiple-choice picker
+    if (s === 'seq')   { sayPrompt('count_' + challenge.word, t.countIntro(challenge.word, ans), { rate: 0.95 }); return; }
+    if (s === 'sound') { sayPrompt('sound_' + ans, t.sound(ans, challenge.word, challenge.sound), { rate: 0.95 }); return; }
+    if (s === 'listen'){ sayPrompt('sound_' + ans, t.sound(ans, challenge.word, challenge.sound), { rate: 0.95 }); return; }
+    if (s === 'count') { sayPrompt('howmany_' + challenge.creatures, t.howMany(locCreat(challenge.creatures)), { rate: 0.95 }); return; }
+    if (s === 'number'){ sayPrompt('which_one', t.prompt.catNum, { rate: 0.95 }); return; }               // multiple-choice picker
     // Add & Subtract: every possible problem has a recorded clip (creatures shown on screen).
     if (s === 'math') {
       const key = 'math_' + (challenge.op === '+' ? 'add' : 'sub') + '_' + challenge.a + '_' + challenge.b;
       const phrase = (challenge.op === '+') ? t.mathAdd(challenge.a, challenge.b, locCreat(challenge.creature))
                                             : t.mathSub(challenge.a, challenge.b, locCreat(challenge.creature));
-      playPersona(key, phrase, { rate: 0.95 });
+      sayPrompt(key, phrase, { rate: 0.95 });
       return;
     }
     speakName(t.find(ans), { rate: 0.95 });
@@ -2346,14 +2356,15 @@
       if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>' + w + '! 🎶</b><span>You made a chord!</span>'; }
       playTone(noteFreqs(challenge.seq), { dur: 1.5 });                 // ring the full chord in triumph
       speakName("That's " + w + '! You made a chord!', { rate: 1.0 });
+    } else if (mode === 'spelling') {
+      if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>You spelled ' + w + '!</b><span>Great job!</span>'; }
+      // read the letters back, then the word — "C, U, P! Great job, Yako! You spelled CUP!"
+      const letters = w.split('').join(', ');
+      speak(letters + '! ' + (playerName ? ('Great job, ' + playerName + '! ') : 'Great job! ') + 'You spelled ' + w + '!', { rate: 1.0 });
     } else {
-      if (mfb) {
-        mfb.className = 'show good';
-        mfb.innerHTML = '<b>' + (mode === 'spelling' ? ('You spelled ' + w + '!') : ("That's " + w + '!')) +
-                        '</b><span>Great job!</span>';
-      }
-      playPersona(mode === 'spelling' ? 'done_spell' : 'done_num',
-                  mode === 'spelling' ? L().doneSpell(w) : L().doneNum(w), { rate: 1.0 });   // real-voice completion (synth fallback)
+      if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>' + "That's " + w + '!</b><span>Great job!</span>'; }
+      if (playerName) speak(nameSuffix(L().doneNum(w)), { rate: 1.0 });
+      else playPersona('done_num', L().doneNum(w), { rate: 1.0 });
     }
     roundTimer = setTimeout(() => {
       if (finished) completeLevel();
@@ -2388,7 +2399,8 @@
     playChime();
     const dur = 2.0 + Math.random() * 1.5;        // 2–3.5 s between rounds
     playApplause(dur);
-    playPersona(['cheer_1', 'cheer_2', 'cheer_3', 'cheer_4', 'cheer_5', 'cheer_6', 'cheer_7', 'cheer_8'], nextCheer(), { rate: 1.0 });   // real-voice cheer (synth fallback)
+    if (playerName) speak(nameSuffix(nextCheer()), { rate: 1.0 });   // "Great job, Yako!"
+    else playPersona(['cheer_1', 'cheer_2', 'cheer_3', 'cheer_4', 'cheer_5', 'cheer_6', 'cheer_7', 'cheer_8'], nextCheer(), { rate: 1.0 });
 
     roundTimer = setTimeout(() => {
       if (finished) completeLevel();
