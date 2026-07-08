@@ -122,9 +122,9 @@
   #start .modeBtn[data-mode="math"] .title { font-size: clamp(15px, 1.5vw, 23px); }
   /* longer labels get a smaller font so they never touch the inner border */
   #start .modeBtn[data-mode="countlang"] .title,
-  #start .modeBtn[data-mode="colormix"] .title,
+  #start .modeBtn[data-mode="colormix"] .title { font-size: clamp(14px, 1.35vw, 20px); }
   #start .modeBtn[data-mode="pitchtrain"] .title,
-  #start .modeBtn[data-mode="pitchlisten"] .title { font-size: clamp(14px, 1.35vw, 20px); }
+  #start .modeBtn[data-mode="pitchlisten"] .title { font-size: clamp(12px, 1.15vw, 17px); }
   #start .modeBtn[data-mode="numbers"] .title { font-size: clamp(13px, 1.35vw, 20px); white-space: nowrap; }   /* "Numbers" on one line, inside the border */
   /* longest single words ("Language", "Different?") need the smallest size to fit unbroken */
   #start .modeBtn[data-mode="guesslang"] .title,
@@ -768,14 +768,18 @@
   #game.adv #sound.muted { background-color: #c0392b; border-color: #9a261a;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='white' d='M3 9v6h4l5 4V5L7 9H3z'/><path fill='none' stroke='white' stroke-width='2' stroke-linecap='round' d='M16 9l6 6M22 9l-6 6'/></svg>"); }
   /* two-slider volume panel (Music + Voice), above the in-game player */
-  #volPop { position: fixed; left: 50%; bottom: calc(2.5vh + min(9vh,14vw) + 14px); z-index: 45;
-    display: none; flex-direction: column; gap: 8px; padding: 10px 16px;
+  /* audio mixer — appears above the round Sound button (bottom-right): mute + faders */
+  #volPop { position: fixed; right: 2vw; bottom: calc(2.5vh + min(8vh,13vw) + 12px); z-index: 45;
+    display: none; flex-direction: column; gap: 8px; padding: 10px 14px;
     background: #fff7e6; border: 3px solid var(--gold); border-radius: 16px;
     box-shadow: 0 10px 22px rgba(60,45,15,.4);
-    opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(8px) scale(.9); transform-origin: bottom center;
+    opacity: 0; pointer-events: none; transform: translateY(8px) scale(.9); transform-origin: bottom right;
     transition: opacity .16s ease, transform .16s cubic-bezier(.2,1.5,.4,1); }
   #game #volPop { display: flex; }              /* only meaningful in-game */
-  #volPop.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0) scale(1); }
+  #volPop.show { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+  #volPop .volMute { cursor: pointer; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 14px;
+    color: #6e4f24; background: #ffe9a8; border: 2px solid var(--gold-d); border-radius: 999px; padding: 5px 10px; }
+  #volPop .volMute.muted { background: #f3c0b6; }
   #volPop .volRow { display: flex; align-items: center; gap: 8px; }
   #volPop .vIco { font-size: 16px; line-height: 1; width: 1.3em; text-align: center; }
   #volMusic, #volVoice { width: min(180px, 46vw); accent-color: var(--gold-d); cursor: pointer; }
@@ -1151,9 +1155,9 @@
     #start .modeBtn[data-mode="countlang"] .title,
     #start .modeBtn[data-mode="colormix"] .title { font-size: 5vw; }
     #start .modeBtn[data-mode="guesslang"] .title,
-    #start .modeBtn[data-mode="samediff"] .title,
+    #start .modeBtn[data-mode="samediff"] .title { font-size: 4.2vw; }
     #start .modeBtn[data-mode="pitchtrain"] .title,
-    #start .modeBtn[data-mode="pitchlisten"] .title { font-size: 4.2vw; }
+    #start .modeBtn[data-mode="pitchlisten"] .title { font-size: 3.8vw; }
     #start .modeBtn[data-mode="numbers"] .title { font-size: 4.8vw; white-space: nowrap; }   /* "Numbers" on one line */
 
     .homeFoot { width: 92vw; max-width: 92vw; bottom: .8vh; gap: 2vw; padding: 1vh 2.4vw; white-space: normal; box-sizing: border-box; }
@@ -1405,13 +1409,13 @@
       <div class="pcLoves"></div>
     </div>
     <div id="volPop">
+      <button class="volMute" id="volMute" type="button">🔊 Sound on</button>
       <div class="volRow"><span class="vIco">🎵</span><input type="range" id="volMusic" min="0" max="100" step="1" aria-label="Music volume"></div>
       <div class="volRow"><span class="vIco">🗣️</span><input type="range" id="volVoice" min="0" max="100" step="1" aria-label="Voice volume"></div>
     </div>
     <div id="gamePlayer" aria-label="Music player">
       <button class="gpBtn gpPlay" id="gpPlay" type="button" title="Play or pause music" aria-label="Play or pause music"></button>
       <button class="gpBtn" id="gpNext" type="button" title="Next song" aria-label="Next song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5v14l9.5-7L5 5z"/><rect x="16" y="5" width="3.4" height="14" rx="1.2"/></svg></button>
-      <button class="gpBtn gpVol" id="gpVol" type="button" title="Volume" aria-label="Volume">🔊</button>
     </div>
     <div class="gameStage">
       <video id="gameBg" class="bg" src="gameui_anim.mp4" poster="gameui.png" muted loop autoplay playsinline preload="auto"></video>
@@ -2002,7 +2006,7 @@
       div.dataset.number = n;
       div.style.setProperty('--nbg', NOTE_COLORS[n]);
       div.innerHTML = '<span class="noteLtr">' + n + '</span><span class="noteMark">♪</span>';
-      div.addEventListener('click', () => { playTone([NOTE_FREQ[n]], { dur: 0.7, keep: true }); tryAnswer(n); });   // hear the note you picked, right or wrong
+      div.addEventListener('click', () => tryAnswer(n));   // the pitch is played by tryAnswer (also covers keyboard keys)
       choicesEl.appendChild(div);
     });
   }
@@ -2267,6 +2271,8 @@
     clearHintTimer();
     pressed = String(pressed).toUpperCase();
     if (pressed.length !== 1) return;
+    // Music: sound the pitch of whatever note was pressed (button OR keyboard key), right or wrong
+    if (MUSIC_MODES.indexOf(mode) >= 0 && NOTE_FREQ[pressed]) playTone([NOTE_FREQ[pressed]], { dur: 0.7, keep: true });
     if (challenge.style === 'seq') {
       if (pressed === challenge.answer) seqAdvance(pressed);
       else if (/[A-Z0-9]/.test(pressed)) { flashKey(pressed, false); wrong(pressed); }
@@ -2979,24 +2985,26 @@
   if (volVoiceEl) { volVoiceEl.value = Math.round(A.getVolume() * 100);
     volVoiceEl.addEventListener('input', () => A.setVolume(volVoiceEl.value / 100)); }
   applyMusicVolume();
-  // in-game media player (bottom center): play/pause, next, and a volume popover
+  // in-game media player (bottom center): play/pause + next
+  if (gpPlayEl) gpPlayEl.addEventListener('click', toggleMusicPause);
+  if (gpNextEl) gpNextEl.addEventListener('click', nextTrack);
+  // Audio mixer lives on the round Sound button (bottom-right): hover (desktop) or
+  // tap (mobile) opens it; inside are a mute toggle + the Music/Voice faders.
   let volHideT = null;
   function showVolPop() { clearTimeout(volHideT); if (volPopEl) volPopEl.classList.add('show'); }
   function hideVolPopSoon() { clearTimeout(volHideT); volHideT = setTimeout(() => volPopEl && volPopEl.classList.remove('show'), 800); }
-  if (gpPlayEl) gpPlayEl.addEventListener('click', toggleMusicPause);
-  if (gpNextEl) gpNextEl.addEventListener('click', nextTrack);
-  { const gpVolEl = document.getElementById('gpVol');
-    [gpVolEl, volPopEl].forEach(el => { if (!el) return;
-      el.addEventListener('mouseenter', showVolPop);
-      el.addEventListener('mouseleave', hideVolPopSoon); });
-    if (gpVolEl) gpVolEl.addEventListener('click', e => { e.stopPropagation(); if (volPopEl) volPopEl.classList.toggle('show'); });
+  const volMuteEl = document.getElementById('volMute');
+  function syncMuteUI() {
+    const m = A.isMuted();
+    soundBtn.classList.toggle('muted', m);
+    if (volMuteEl) { volMuteEl.classList.toggle('muted', m); volMuteEl.textContent = m ? '🔇 Sound off' : '🔊 Sound on'; }
   }
-  soundBtn.addEventListener('click', () => {
-    A.setMuted(!A.isMuted());                             // muting also stops all sounds
-    soundBtn.classList.toggle('muted', A.isMuted());      // green (on) / red (off)
-    updateThemeMusic();
-  });
-  soundBtn.classList.toggle('muted', A.isMuted());        // reflect the persisted mute on load
+  [soundBtn, volPopEl].forEach(el => { if (!el) return;
+    el.addEventListener('mouseenter', showVolPop);
+    el.addEventListener('mouseleave', hideVolPopSoon); });
+  soundBtn.addEventListener('click', e => { e.stopPropagation(); if (volPopEl) volPopEl.classList.toggle('show'); });  // tap opens the mixer (mobile)
+  if (volMuteEl) volMuteEl.addEventListener('click', () => { A.setMuted(!A.isMuted()); syncMuteUI(); updateThemeMusic(); });
+  syncMuteUI();        // reflect the persisted mute on load
 
   // ---- Narrator language + character toggles (home menu) ----
   const PERSONA_EMOJI = { mom: '👩', dad: '👨', grandpa: '👴', grandma: '👵' };
