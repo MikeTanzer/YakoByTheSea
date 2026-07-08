@@ -706,6 +706,14 @@
   #choices .noteBtn:active { transform: translateY(4px); box-shadow: 0 2px 0 color-mix(in srgb, var(--nbg), #000 35%); }
   #target .noteBig  { font-family: Georgia, serif; font-weight: 900; font-size: min(18vh, 24vw); line-height: 1; }
   #target .noteGlyph { font-size: min(15vh, 20vw); line-height: 1; }
+  /* the bagpiper who plays the note (Pebble Beach) */
+  #target .piperWrap { display: flex; flex-direction: column; align-items: center; gap: .6vh; }
+  #target .piperImg { width: min(15vh, 22vw); height: auto; filter: drop-shadow(0 5px 8px rgba(50,30,5,.4));
+    transform-origin: 50% 90%; animation: piperPlay 1.6s ease-in-out infinite; }
+  @keyframes piperPlay { 0%,100% { transform: rotate(-2.5deg); } 50% { transform: rotate(2.5deg) translateY(-3%); } }
+  #target .piperWrap.noimg::before { content: '🎼'; font-size: min(12vh, 16vw); line-height: 1; }
+  #target .piperWrap .noteBig { font-size: min(9vh, 13vw); }     /* note shown smaller beside the piper */
+  #target .piperWrap .noteGlyph { font-size: min(8vh, 12vw); }
   #target .chordCard { display: flex; flex-direction: column; align-items: center; gap: 1.4vh; }
   #target .chordName { font-family: 'Baloo 2'; font-weight: 900; color: var(--blue); font-size: min(5vh, 8vw); }
   #target .chordRow { display: flex; gap: min(2vh, 3vw); }
@@ -1978,6 +1986,11 @@
   }
   function setLevelScene() {
     if (mode === 'free') return;
+    if (MUSIC_MODES.indexOf(mode) >= 0) {                 // Music lessons are always at Pebble Beach (the bagpiper's spot)
+      const pi = MONT.PLACES.findIndex(p => p.id === 'pebble');
+      showPlace(pi >= 0 ? pi : 3);
+      return;
+    }
     showPlace(lessonIdx(mode) + Math.max(0, level - 1));
   }
   // ================= Music: pitch training, listen & match, and chords =================
@@ -1996,6 +2009,13 @@
     return ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
   }
   function noteFreqs(names) { return names.map(n => NOTE_FREQ[n]); }
+  // The bagpiper who plays the notes (painted cutout; falls back to an emoji if the image is missing)
+  function piperHTML(extra) {
+    return '<div class="piperWrap">' +
+      '<img class="piperImg" src="scenes/piper.png" alt="Bagpiper" ' +
+      'onerror="this.style.display=\'none\'; this.parentNode.classList.add(\'noimg\')">' +
+      (extra || '') + '</div>';
+  }
   // A row of coloured note buttons; tapping one plays that note and answers.
   function renderNoteChoices(pool) {
     game.classList.add('choices-mode');
@@ -2017,21 +2037,21 @@
       answer: note, kind: 'note', style: 'pitch', choices: true, note: note,
       name: 'pitch_' + note + (showLetter ? 't' : 'l'),
       render() {
-        renderSpeakerTarget(showLetter
-          ? '<span class="noteBig" style="color:' + NOTE_COLORS[note] + '">' + note + '</span>'
-          : '<span class="noteGlyph">🎵</span>');
+        renderSpeakerTarget(piperHTML(showLetter
+          ? '<span class="noteBig pipeNote" style="color:' + NOTE_COLORS[note] + '">' + note + '</span>'
+          : '<span class="noteGlyph pipeNote">🎵</span>'));
         renderNoteChoices(pool);
       },
       play() { playTone([NOTE_FREQ[note]]); },
       revealAnswer() {
-        renderSpeakerTarget('<span class="noteBig" style="color:' + NOTE_COLORS[note] + '">' + note + '</span>');
+        renderSpeakerTarget(piperHTML('<span class="noteBig pipeNote" style="color:' + NOTE_COLORS[note] + '">' + note + '</span>'));
         renderNoteChoices(pool);
       }
     };
   }
   function renderChordCard(name, seq, revealed) {
     targetEl.style.color = '';
-    targetEl.innerHTML = '<div class="chordCard"><div class="chordName">' + name + '</div>' +
+    targetEl.innerHTML = '<div class="chordCard">' + piperHTML('') + '<div class="chordName">' + name + '</div>' +
       '<div class="chordRow">' + seq.map((n, i) => {
         const cls = i < revealed ? 'cn done' : (i === revealed ? 'cn now' : 'cn');
         return '<span class="' + cls + '" style="--nbg:' + NOTE_COLORS[n] + '">' + (i < revealed ? n : '?') + '</span>';
@@ -2652,14 +2672,14 @@
       setLevelScene();                     // pick the location for this lesson/level
       const pr = L().prompt;
       const musicMode = MUSIC_MODES.includes(mode);
-      const musicPrompt = { pitchtrain: 'Match the note!', pitchlisten: 'Which note do you hear?', chords: 'Build the chord!' };
+      const musicPrompt = { pitchtrain: 'The piper plays a note — match it!', pitchlisten: 'Which note did the piper play?', chords: "Build the piper's chord!" };
       const ptxt = musicMode ? musicPrompt[mode]
                  : (cat ? (answerStyle === 'number' ? pr.catNum : pr.cat) : (pr[mode] || pr.both));
       // category letter/number rounds get a taller two-line prompt (better balance vs. the star bar)
       if (cat) promptEl.innerHTML = twoLine(ptxt); else promptEl.textContent = ptxt;
       // Guess-the-Language / Hello World show flags — teach that each flag IS a language.
       const flagMode = (mode === 'hello' || mode === 'guesslang');
-      hintEl.textContent = musicMode ? 'Tap the note you hear! 🎵'
+      hintEl.textContent = musicMode ? 'Tap the note the bagpiper played! 🎵'
                          : flagMode ? 'Each flag is a language — listen, then tap! 🌍'
                          : (LANG_MODES.includes(mode) ? 'Listen, then tap your answer! 👂' : 'Look closely and find the key!');
       let firstDelay = 500;
