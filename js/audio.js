@@ -175,7 +175,7 @@ window.YAKO.audio = (function () {
       gain.gain.linearRampToValueAtTime(peak * 0.7, t + dur * 0.55);
       gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
       osc.connect(gain); gain.connect(out());
-      trackNode(osc);
+      if (!opts.keep) trackNode(osc);   // keep:true lets the note ring out even through stopAllSounds()
       osc.start(t); osc.stop(t + dur + 0.05);
     });
   }

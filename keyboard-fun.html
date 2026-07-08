@@ -122,7 +122,9 @@
   #start .modeBtn[data-mode="math"] .title { font-size: clamp(15px, 1.5vw, 23px); }
   /* longer labels get a smaller font so they never touch the inner border */
   #start .modeBtn[data-mode="countlang"] .title,
-  #start .modeBtn[data-mode="colormix"] .title { font-size: clamp(14px, 1.35vw, 20px); }
+  #start .modeBtn[data-mode="colormix"] .title,
+  #start .modeBtn[data-mode="pitchtrain"] .title,
+  #start .modeBtn[data-mode="pitchlisten"] .title { font-size: clamp(14px, 1.35vw, 20px); }
   #start .modeBtn[data-mode="numbers"] .title { font-size: clamp(13px, 1.35vw, 20px); white-space: nowrap; }   /* "Numbers" on one line, inside the border */
   /* longest single words ("Language", "Different?") need the smallest size to fit unbroken */
   #start .modeBtn[data-mode="guesslang"] .title,
@@ -185,6 +187,9 @@
   #lessonsBack:active { transform: scale(.94); }
   .lessonsHead .lhTitle { flex: 1; text-align: center; font-family: 'Baloo 2', sans-serif; font-weight: 800;
     color: #6e4f24; font-size: clamp(16px, 1.7vw, 23px); }
+  /* invisible mirror of the Back button so the title stays centered */
+  .lessonsHead .lhSpacer { flex: 0 0 auto; visibility: hidden; border: 3px solid transparent;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(13px, 1.2vw, 18px); padding: .7vh 1.6vw; }
   #lessonsFun { cursor: pointer; flex: 0 0 auto; border: 3px solid var(--gold); border-radius: 999px;
     background: linear-gradient(180deg, #ffd977, #f0b73c); color: #5b4327;
     font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(13px, 1.2vw, 18px);
@@ -220,6 +225,11 @@
   .lgroupLink .chev.play { transform: none; color: var(--blue); font-size: .95em; }
   .lgroup .btnGrid { width: auto; padding: 1.2vh; gap: 1.2vh 1vw; }
   .lgroup:not(.open) .btnGrid { display: none; }
+  /* drill-down: once a group is opened, hide the other tiles so only its lessons show */
+  .homeCard.subOpen .lgroup:not(.open) { display: none; }
+  .homeCard.subOpen .lgroup.open .groupHead { display: none; }   /* page title already names the group */
+  .homeCard.subOpen .lgroup.open { border: none; background: none; }
+  .lgroupFun .groupHead { background: linear-gradient(#ffdf8a, #f0b53a); }   /* the playful parity tile */
   /* — file-cabinet folder: the flap swings open to reveal the lessons inside — */
   .lgroup.open { background: rgba(255,252,240,.6); }
   .lgroup.open .groupHead { border-bottom-left-radius: 0; border-bottom-right-radius: 0;
@@ -1141,7 +1151,9 @@
     #start .modeBtn[data-mode="countlang"] .title,
     #start .modeBtn[data-mode="colormix"] .title { font-size: 5vw; }
     #start .modeBtn[data-mode="guesslang"] .title,
-    #start .modeBtn[data-mode="samediff"] .title { font-size: 4.2vw; }
+    #start .modeBtn[data-mode="samediff"] .title,
+    #start .modeBtn[data-mode="pitchtrain"] .title,
+    #start .modeBtn[data-mode="pitchlisten"] .title { font-size: 4.2vw; }
     #start .modeBtn[data-mode="numbers"] .title { font-size: 4.8vw; white-space: nowrap; }   /* "Numbers" on one line */
 
     .homeFoot { width: 92vw; max-width: 92vw; bottom: .8vh; gap: 2vw; padding: 1vh 2.4vw; white-space: normal; box-sizing: border-box; }
@@ -1313,9 +1325,9 @@
           </div>
         </div>
         <div class="lessonsHead">
-          <button id="lessonsBack" type="button" aria-label="Back to the main menu">🏠 Back</button>
-          <span class="lhTitle">📚 Pick a lesson</span>
-          <button id="lessonsFun" type="button" data-mode="free" aria-label="Just for Fun">🎉 Fun</button>
+          <button id="lessonsBack" type="button" aria-label="Back">🏠 Back</button>
+          <span class="lhTitle" id="lhTitle">📚 Pick a lesson</span>
+          <span class="lhSpacer" aria-hidden="true">🏠 Back</span>
         </div>
         <div class="lessonGroups">
           <section class="lgroup" data-group="basics">
@@ -1364,6 +1376,10 @@
               <button class="modeBtn music" data-mode="pitchlisten" aria-label="Listen and Match notes"><span class="title">Listen &amp; Match</span><span class="icons">👂 🎵 ❓</span></button>
               <button class="modeBtn music" data-mode="chords"      aria-label="Chords"><span class="title">Chords</span><span class="icons">🎹 🎶</span></button>
             </div>
+          </section>
+          <!-- Parity tile: shown only when the group count is odd, so the grid stays even -->
+          <section class="lgroup lgroupFun" data-group="fun" hidden>
+            <button class="groupHead" type="button" data-mode="free" aria-label="Just for Fun"><span class="ghIcon">🎉</span><span class="ghName">Just for Fun</span></button>
           </section>
         </div>
       </div>
@@ -1986,7 +2002,7 @@
       div.dataset.number = n;
       div.style.setProperty('--nbg', NOTE_COLORS[n]);
       div.innerHTML = '<span class="noteLtr">' + n + '</span><span class="noteMark">♪</span>';
-      div.addEventListener('click', () => { playTone([NOTE_FREQ[n]], { dur: 0.6 }); tryAnswer(n); });
+      div.addEventListener('click', () => { playTone([NOTE_FREQ[n]], { dur: 0.7, keep: true }); tryAnswer(n); });   // hear the note you picked, right or wrong
       choicesEl.appendChild(div);
     });
   }
@@ -2830,33 +2846,48 @@
     const idx = Math.min(getNum('yako_campaign') || 0, LESSONS.length - 1);
     startGame(LESSONS[idx][0]);
   });
+  const lhTitleEl = document.getElementById('lhTitle');
+  // Parity: the Just-for-Fun tile only appears when there's an odd number of lesson groups
+  // (so the square grid always ends up even).
+  { const realGroups = document.querySelectorAll('.lgroup:not(.lgroupFun)').length;
+    const funTile = document.querySelector('.lgroupFun');
+    if (funTile) funTile.hidden = (realGroups % 2 === 0); }
+  // Level 1 = the square category tiles. Level 2 = one group's sub-lessons (card.subOpen).
+  function showCategories() {
+    const card = document.querySelector('.homeCard');
+    card.classList.remove('subOpen');
+    document.querySelectorAll('.lgroup.open').forEach(o => { o.classList.remove('open'); const oh = o.querySelector('.groupHead'); if (oh) oh.setAttribute('aria-expanded', 'false'); });
+    if (lhTitleEl) lhTitleEl.textContent = '📚 Pick a lesson';
+    card.scrollTop = 0;
+  }
+  function openGroup(g) {
+    const card = document.querySelector('.homeCard');
+    document.querySelectorAll('.lgroup.open').forEach(o => o.classList.remove('open'));
+    g.classList.add('open');
+    const h = g.querySelector('.groupHead'); if (h) h.setAttribute('aria-expanded', 'true');
+    card.classList.add('subOpen');
+    const nm = g.querySelector('.ghName'); if (lhTitleEl && nm) lhTitleEl.textContent = nm.textContent;
+    card.scrollTop = 0;
+  }
   if (chooseBtnEl) chooseBtnEl.addEventListener('click', () => {
     const card = document.querySelector('.homeCard');
     const open = card.classList.toggle('lessonsOpen');   // swaps the card to the lessons page
     chooseBtnEl.setAttribute('aria-expanded', open ? 'true' : 'false');
-    card.scrollTop = 0;
+    if (open) showCategories();
   });
   { const lb = document.getElementById('lessonsBack');
     if (lb) lb.addEventListener('click', () => {
       const card = document.querySelector('.homeCard');
-      card.classList.remove('lessonsOpen');
+      if (card.classList.contains('subOpen')) { showCategories(); return; }   // Level 2 → back to the tiles
+      card.classList.remove('lessonsOpen');                                   // Level 1 → back to the main menu
       if (chooseBtnEl) chooseBtnEl.setAttribute('aria-expanded', 'false');
       card.scrollTop = 0;
     }); }
-  { const lf = document.getElementById('lessonsFun');
-    if (lf) lf.addEventListener('click', () => { playMode = 'practice'; startGame('free'); }); }
-  // Accordion: tap a group header to expand its lessons (others stay as they are).
+  // Tap a square category tile → drill into that group's lessons (or launch Free Play).
   document.querySelectorAll('.groupHead').forEach(h => {
     h.addEventListener('click', () => {
-      if (h.dataset.mode) { playMode = 'practice'; startGame(h.dataset.mode); return; }   // direct-launch bar (e.g. Just for Fun)
-      const g = h.closest('.lgroup');
-      const willOpen = !g.classList.contains('open');
-      // single-open accordion: close every other group first
-      document.querySelectorAll('.lgroup.open').forEach(o => {
-        o.classList.remove('open');
-        const oh = o.querySelector('.groupHead'); if (oh) oh.setAttribute('aria-expanded', 'false');
-      });
-      if (willOpen) { g.classList.add('open'); h.setAttribute('aria-expanded', 'true'); }
+      if (h.dataset.mode) { playMode = 'practice'; startGame(h.dataset.mode); return; }   // Fun tile launches Free Play
+      openGroup(h.closest('.lgroup'));
     });
   });
   refreshStartSub();
