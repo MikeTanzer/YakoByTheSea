@@ -1813,14 +1813,16 @@
   // ----- How Many? (count the sea creatures) and Add & Subtract -----
   const SEA = [['🐚','shells'],['🦀','crabs'],['⭐','starfish'],['🐟','fish'],['🐙','octopuses'],['🐬','dolphins']];
   function objs(emoji, n) { let s = ''; for (let i = 0; i < n; i++) s += '<span class="cobj">' + emoji + '</span>'; return s; }
-  // How Many? grows gently: at most 4 objects at first, then 6, then 9 — the cap
-  // rises only after a level is cleared quickly and with few mistakes (see completeLevel).
-  function countMax() { const t = getNum('yako_count_tier'); return (t === 6 || t === 9) ? t : 4; }
+  // How Many? starts at Mission Ranch counting SHEEP (1–5) for the whole first level;
+  // only after clearing it does the child move on to other objects and counts above 5.
+  const COUNT_OBJECTS = [['🐑', 'sheep'], ['🐮', 'cow'], ['🐦', 'bird']].concat(SEA);
   function buildCountObjects() {
-    const n = 1 + Math.floor(Math.random() * countMax());   // 1..(4|6|9)
-    const c = pick(SEA);
-    return { answer: String(n), kind: 'number', name: 'cnt_' + n + c[1], style: 'count', creatures: c[1],
-      render() { targetEl.style.color = ''; targetEl.innerHTML = '<div class="countObjRow">' + objs(c[0], n) + '</div>'; },
+    let emoji, label, max;
+    if (level <= 1) { emoji = '🐑'; label = 'sheep'; max = 5; }                 // sheep, 1–5
+    else { const c = pick(COUNT_OBJECTS); emoji = c[0]; label = c[1]; max = (level <= 3 ? 6 : 9); }
+    const n = 1 + Math.floor(Math.random() * max);
+    return { answer: String(n), kind: 'number', name: 'cnt_' + n + label, style: 'count', creatures: label,
+      render() { targetEl.style.color = ''; targetEl.innerHTML = '<div class="countObjRow">' + objs(emoji, n) + '</div>'; },
       revealAnswer() {} };
   }
   function buildMath() {
@@ -1989,6 +1991,11 @@
     if (MUSIC_MODES.indexOf(mode) >= 0) {                 // Music lessons are always at Pebble Beach (the bagpiper's spot)
       const pi = MONT.PLACES.findIndex(p => p.id === 'pebble');
       showPlace(pi >= 0 ? pi : 3);
+      return;
+    }
+    if (mode === 'countobj') {                            // How Many? always takes place at Mission Ranch
+      const mi = MONT.PLACES.findIndex(p => p.id === 'mission');
+      showPlace(mi >= 0 ? mi : 0);
       return;
     }
     showPlace(lessonIdx(mode) + Math.max(0, level - 1));
@@ -2419,12 +2426,7 @@
     const bestKey = 'yako_best_' + mode, lastKey = 'yako_last_' + mode, cntKey = 'yako_count_' + mode;
     const prevBest = getNum(bestKey), prevLast = getNum(lastKey);
     setNum(cntKey, (getNum(cntKey) || 0) + 1);
-    // How Many?: raise the object cap (4 → 6 → 9) once a level is done well
-    if (mode === 'countobj') {
-      const tier = countMax();
-      if (tier < 9 && levelMistakes <= 1 && levelElapsed <= 8 * STARS_PER_LEVEL)
-        setNum('yako_count_tier', tier === 4 ? 6 : 9);
-    }
+    // (How Many? difficulty now grows by level in buildCountObjects: sheep 1–5, then 6, then 9)
     const isBest = (prevBest == null) || (levelElapsed < prevBest);
     if (isBest) setNum(bestKey, levelElapsed);
     setNum(lastKey, levelElapsed);
