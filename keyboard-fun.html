@@ -2127,16 +2127,9 @@
     announce();
   }
 
-  // --- Name personalization -----------------------------------------------
-  // When the child typed a name, the narrator calls them by it: prompts get the
-  // name in front ("Yako, find the number 5!"), cheers get it at the end
-  // ("Great job, Yako!"). Named → personalized synth; no name → the recorded clip.
-  function namePrefix(s) { return playerName ? (playerName + ', ' + s.charAt(0).toLowerCase() + s.slice(1)) : s; }
-  function nameSuffix(s) { return playerName ? (s.replace(/[!?.\s]+$/, '') + ', ' + playerName + '!') : s; }
-  function sayPrompt(clipKeys, phrase, opts) {
-    if (playerName) speak(namePrefix(phrase), opts);   // personalized (synth, in the persona voice)
-    else playPersona(clipKeys, phrase, opts);          // generic recorded clip
-  }
+  // Every prompt uses the recorded Higgsfield persona clip (synth only as a
+  // fallback if a clip is ever missing/blocked). No browser-synth personalization.
+  function sayPrompt(clipKeys, phrase, opts) { playPersona(clipKeys, phrase, opts); }
   function announce() {
     // Language Island challenges carry their own play() (speaks a word/greeting in a chosen tongue).
     if (challenge.play) { challenge.play(); return; }
@@ -2355,16 +2348,15 @@
     if (mode === 'chords') {
       if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>' + w + '! 🎶</b><span>You made a chord!</span>'; }
       playTone(noteFreqs(challenge.seq), { dur: 1.5 });                 // ring the full chord in triumph
-      speakName("That's " + w + '! You made a chord!', { rate: 1.0 });
+      // spell the chord back in the recorded voice: "C. E. G." + a cheer
+      playPersonaChain(challenge.seq.map(n => 'name_' + n).concat('cheer_' + (1 + Math.floor(Math.random() * 8))), "That's " + w + '!', { rate: 1.0 });
     } else if (mode === 'spelling') {
       if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>You spelled ' + w + '!</b><span>Great job!</span>'; }
-      // read the letters back, then the word — "C, U, P! Great job, Yako! You spelled CUP!"
-      const letters = w.split('').join(', ');
-      speak(letters + '! ' + (playerName ? ('Great job, ' + playerName + '! ') : 'Great job! ') + 'You spelled ' + w + '!', { rate: 1.0 });
+      // read the letters back in the recorded voice, then the completion clip: "C. U. P. You spelled it!"
+      playPersonaChain(w.split('').map(ch => 'name_' + ch).concat('done_spell'), L().doneSpell(w), { rate: 1.0 });
     } else {
       if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>' + "That's " + w + '!</b><span>Great job!</span>'; }
-      if (playerName) speak(nameSuffix(L().doneNum(w)), { rate: 1.0 });
-      else playPersona('done_num', L().doneNum(w), { rate: 1.0 });
+      playPersona('done_num', L().doneNum(w), { rate: 1.0 });
     }
     roundTimer = setTimeout(() => {
       if (finished) completeLevel();
@@ -2399,8 +2391,7 @@
     playChime();
     const dur = 2.0 + Math.random() * 1.5;        // 2–3.5 s between rounds
     playApplause(dur);
-    if (playerName) speak(nameSuffix(nextCheer()), { rate: 1.0 });   // "Great job, Yako!"
-    else playPersona(['cheer_1', 'cheer_2', 'cheer_3', 'cheer_4', 'cheer_5', 'cheer_6', 'cheer_7', 'cheer_8'], nextCheer(), { rate: 1.0 });
+    playPersona(['cheer_1', 'cheer_2', 'cheer_3', 'cheer_4', 'cheer_5', 'cheer_6', 'cheer_7', 'cheer_8'], nextCheer(), { rate: 1.0 });   // recorded persona cheer
 
     roundTimer = setTimeout(() => {
       if (finished) completeLevel();
@@ -2586,8 +2577,8 @@
   let freeBuffer = '';
   function announceSpelled(w) {
     confetti(); sprinkleEmojis(10); showBuddy();
-    // let the last letter's name finish, then: "CAT! You spelled CAT!"
-    setTimeout(() => { speakName(w + '! ' + L().doneSpell(w), { rate: 1.0 }); playApplause(2.2); }, 700);
+    // read the word back in the recorded voice, then the completion clip
+    setTimeout(() => { playPersonaChain(w.split('').map(ch => 'name_' + ch).concat('done_spell'), L().doneSpell(w), { rate: 1.0 }); playApplause(2.2); }, 700);
   }
   function freePlayKey(e) {
     // ignore modifier keys (⌘ Ctrl Alt Shift Caps, etc.) — they shouldn't show in Free Play
@@ -2696,13 +2687,8 @@
       hintEl.textContent = musicMode ? 'Tap the note the bagpiper played! 🎵'
                          : flagMode ? 'Each flag is a language — listen, then tap! 🌍'
                          : (LANG_MODES.includes(mode) ? 'Listen, then tap your answer! 👂' : 'Look closely and find the key!');
-      let firstDelay = 500;
-      if (flagMode && !flagIntroShown) {   // once per session: a short spoken lesson before the first round
-        flagIntroShown = true;
-        setTimeout(() => speak('Each flag is a different language, like French and Spanish! Listen to the word, then tap the flag it comes from.'), 350);
-        firstDelay = 4200;                 // let the training line finish before the first word plays
-      }
-      setTimeout(newTarget, firstDelay);
+      // (flag-language lesson is taught by the on-screen hint above; no browser-synth line)
+      setTimeout(newTarget, 500);
     }
   }
   function backToMenu() {
