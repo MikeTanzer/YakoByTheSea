@@ -154,6 +154,31 @@ window.YAKO.audio = (function () {
     trackNode(osc);
     osc.start(now); osc.stop(now + 0.5);
   }
+  // Music lesson: play a pure note or a chord (array of frequencies) with a soft
+  // triangle voice + gentle ADSR. Chords play together; pass {arp:true} to roll them.
+  function playTone(freqs, opts) {
+    ensureAudio();
+    if (muted || !actx) return;
+    opts = opts || {};
+    freqs = Array.isArray(freqs) ? freqs : [freqs];
+    const now = actx.currentTime;
+    const dur = opts.dur || 0.95;
+    const peak = (opts.gain || 0.34) / Math.max(1, Math.sqrt(freqs.length));   // keep chords from clipping
+    freqs.forEach((f, i) => {
+      const t = now + (opts.arp ? i * 0.16 : 0);
+      const osc = actx.createOscillator();
+      const gain = actx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.value = f;
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(peak, t + 0.02);
+      gain.gain.linearRampToValueAtTime(peak * 0.7, t + dur * 0.55);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      osc.connect(gain); gain.connect(out());
+      trackNode(osc);
+      osc.start(t); osc.stop(t + dur + 0.05);
+    });
+  }
   // The old synthesized menu bark was retired (it read as a "recurring noise").
   function startBarkLoop() {}
   function stopBarkLoop() {}
@@ -316,7 +341,7 @@ window.YAKO.audio = (function () {
     setMuted: setMuted, isMuted: isMuted,
     setVolume: setVolume, getVolume: getVolume,
     ensureAudio: ensureAudio, stopAllSounds: stopAllSounds,
-    playApplause: playApplause, playChime: playChime, playTryAgainTone: playTryAgainTone, playNote: playNote,
+    playApplause: playApplause, playChime: playChime, playTryAgainTone: playTryAgainTone, playNote: playNote, playTone: playTone,
     startBarkLoop: startBarkLoop, stopBarkLoop: stopBarkLoop,
     setPersona: setPersona, getPersona: getPersona, pickVoice: pickVoice,
     speak: speak, speakName: speakName,
