@@ -43,8 +43,8 @@
 
   /* ---------- Start screen ---------- */
   #start {
-    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-    z-index: 10; overflow: hidden; background: #3b6b86;
+    position: fixed; inset: 0; display: flex; align-items: flex-start; justify-content: center;
+    padding-top: 3vh; z-index: 10; overflow-x: hidden; overflow-y: auto; background: #3b6b86;
   }
   #bgvid { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
 
@@ -185,8 +185,8 @@
     transition: transform .12s ease; }
   #lessonsBack:hover { transform: translateY(-1px); }
   #lessonsBack:active { transform: scale(.94); }
-  .lessonsHead .lhTitle { flex: 1; text-align: center; font-family: 'Baloo 2', sans-serif; font-weight: 800;
-    color: #6e4f24; font-size: clamp(16px, 1.7vw, 23px); }
+  .lessonsHead .lhTitle { flex: 1; min-width: 0; text-align: center; font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    color: #6e4f24; font-size: clamp(15px, 1.6vw, 22px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* invisible mirror of the Back button so the title stays centered */
   .lessonsHead .lhSpacer { flex: 0 0 auto; visibility: hidden; border: 3px solid transparent;
     font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(13px, 1.2vw, 18px); padding: .7vh 1.6vw; }
