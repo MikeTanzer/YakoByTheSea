@@ -449,8 +449,10 @@
   }
 
   /* ---- Living storybook: gentle idle animations + an intro on load ---- */
-  @keyframes charIn   { from { transform: translateX(45%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-  @keyframes charBob  { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-1.1vh); } }
+  /* scaleX(-1) mirrors Yako so he waves with his RIGHT hand; baked into every
+     transform keyframe so the running animations don't drop the flip. */
+  @keyframes charIn   { from { transform: scaleX(-1) translateX(45%); opacity: 0; } to { transform: scaleX(-1) translateX(0); opacity: 1; } }
+  @keyframes charBob  { 0%,100% { transform: scaleX(-1) translateY(0); } 50% { transform: scaleX(-1) translateY(-1.1vh); } }
   @keyframes yakoWave { from { background-position-x: 0%; } to { background-position-x: 100%; } }
   @keyframes titleIn { 0% { transform: translateY(-28px) scale(.8); opacity: 0; } 60% { transform: translateY(0) scale(1.07); } 100% { transform: translateY(0) scale(1); opacity: 1; } }
   @keyframes cardIn  { from { transform: translateY(42px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
