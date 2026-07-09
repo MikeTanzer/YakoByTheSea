@@ -381,6 +381,9 @@
     color: #fff; font-weight: 900; font-family: Arial, sans-serif; }
   .pmConnectBtn.google .ci { background: #4285F4; }
   .pmConnectBtn.facebook .ci { background: #1877F2; }
+  .pmAccount { display: flex; flex-direction: column; gap: .45em; padding: .5em 0; border-top: 2px dashed #eadfbe; border-bottom: 2px dashed #eadfbe; }
+  .pmAccount[hidden] { display: none; }
+  .pmSynced { font-size: .78em; font-weight: 700; color: #2e8b57; text-align: center; }
 
   /* ===== Progress / success page ===== */
   #successPage { position: fixed; inset: 0; z-index: 120; background: rgba(20,30,50,.55);
@@ -1550,10 +1553,14 @@
         <div class="pmText"><span class="pmName" id="pmName">Player</span><span class="pmStars" id="pmStars">⭐ 0 stars earned</span></div>
       </div>
       <button class="pmBtn primary" id="pmProgress" type="button">📈 See my progress</button>
-      <div class="pmConnect">
+      <div class="pmConnect" id="pmConnect">
         <div class="pmConnectHint">Save your progress on any device</div>
         <button class="pmConnectBtn google" id="pmGoogle" type="button"><span class="ci">G</span> Continue with Google</button>
         <button class="pmConnectBtn facebook" id="pmFacebook" type="button"><span class="ci">f</span> Continue with Facebook</button>
+      </div>
+      <div class="pmAccount" id="pmAccount" hidden>
+        <div class="pmSynced">☁️ <span id="pmSyncedName">Signed in</span> — synced across devices</div>
+        <button class="pmBtn ghost" id="pmSignOut" type="button">Sign out</button>
       </div>
       <button class="pmBtn ghost" id="pmSwitch" type="button">🔄 Switch player</button>
     </div>
@@ -1577,6 +1584,7 @@
     </div>
   </div>
 
+<script src="data/firebase.js"></script>
 <script src="data/strings.en.js"></script>
 <script src="data/strings.fr.js"></script>
 <script src="data/strings.es.js"></script>
@@ -1587,6 +1595,7 @@
 <script src="data/music.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/audio.js"></script>
+<script src="js/cloud.js"></script>
 <script>
 (function () {
   // ---------- Elements ----------
@@ -2607,6 +2616,7 @@
     // overwritten, so "You went from 5:00 down to 0:30!" can compare first vs. fastest.
     if (getNum(firstKey) == null) { setNum(firstKey, levelElapsed); setNum(firstDayKey, Date.now()); }
     setNum(lastDayKey, Date.now());
+    try { document.dispatchEvent(new CustomEvent('yako:progress')); } catch (e) {}   // cloud sync (if signed in)
     // (How Many? difficulty now grows by level in buildCountObjects: sheep 1–5, then 6, then 9)
     const isBest = (prevBest == null) || (levelElapsed < prevBest);
     if (isBest) setNum(bestKey, levelElapsed);
@@ -3412,8 +3422,56 @@
   });
   const spCloseEl = document.getElementById('spClose'); if (spCloseEl) spCloseEl.addEventListener('click', () => { successPage.hidden = true; });
   if (successPage) successPage.addEventListener('click', (e) => { if (e.target === successPage) successPage.hidden = true; });
-  const pmGoogleEl = document.getElementById('pmGoogle'); if (pmGoogleEl) pmGoogleEl.addEventListener('click', () => connectStub('Google'));
-  const pmFacebookEl = document.getElementById('pmFacebook'); if (pmFacebookEl) pmFacebookEl.addEventListener('click', () => connectStub('Facebook'));
+  // ---- Cloud sign-in (Firebase, optional) ----
+  // Bridge the cloud layer uses to refresh the game after it merges pulled progress.
+  window.YAKO_GAME = {
+    reloadProgress: function () {
+      totalStars = getNum('yako_points') || 0;
+      updateScore();
+      refreshProfileChip();
+    }
+  };
+  const CLOUD = window.YAKO_CLOUD;
+  const pmConnectEl = document.getElementById('pmConnect');
+  const pmAccountEl = document.getElementById('pmAccount');
+  const pmSyncedNameEl = document.getElementById('pmSyncedName');
+  const pmSignOutEl = document.getElementById('pmSignOut');
+  function renderAccount(u) {
+    if (!pmConnectEl || !pmAccountEl) return;
+    if (u) {
+      pmAccountEl.hidden = false; pmConnectEl.hidden = true;
+      pmSyncedNameEl.textContent = u.displayName || u.email || 'Signed in';
+    } else {
+      pmAccountEl.hidden = true; pmConnectEl.hidden = false;   // show connect (real when configured, else the stub)
+    }
+  }
+  function doConnect(which) {
+    if (CLOUD && CLOUD.enabled) {
+      if (!CLOUD.isReady()) { alert('Still connecting to the cloud — try again in a moment.'); return; }
+      CLOUD.signIn(which).then(function () { menuOpen(false); }).catch(function (err) {
+        if (err && (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request')) return;
+        alert("Sign-in didn't finish: " + ((err && err.message) || err));
+      });
+    } else {
+      connectStub(which === 'facebook' ? 'Facebook' : 'Google');
+    }
+  }
+  const pmGoogleEl = document.getElementById('pmGoogle'); if (pmGoogleEl) pmGoogleEl.addEventListener('click', () => doConnect('google'));
+  const pmFacebookEl = document.getElementById('pmFacebook'); if (pmFacebookEl) pmFacebookEl.addEventListener('click', () => doConnect('facebook'));
+  if (pmSignOutEl) pmSignOutEl.addEventListener('click', () => { if (CLOUD) CLOUD.signOut(); menuOpen(false); });
+  if (CLOUD) {
+    CLOUD.onChange(function (u) {
+      if (u && !profileName()) {   // first sign-in with no local name → adopt the account's first name
+        const nm = ((u.displayName || '').trim().split(/\s+/)[0]) || '';
+        if (nm) { try { localStorage.setItem('kbfun_name', nm); } catch (e) {} }
+      }
+      renderAccount(u);
+      refreshProfileChip();
+    });
+    if (CLOUD.enabled) CLOUD.init();
+  }
+  renderAccount(null);
+
   refreshProfileChip();   // now safe: profile consts above are initialized (also refreshes the pill)
 
   // Touchscreen taps in free play make a burst
