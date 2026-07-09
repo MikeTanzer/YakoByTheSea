@@ -1387,6 +1387,7 @@
               <button class="modeBtn music" data-mode="pitchtrain"  aria-label="Pitch Training"><span class="title">Pitch Training</span><span class="icons">🎵 A B C</span></button>
               <button class="modeBtn music" data-mode="pitchlisten" aria-label="Listen and Match notes"><span class="title">Listen &amp; Match</span><span class="icons">👂 🎵 ❓</span></button>
               <button class="modeBtn music" data-mode="chords"      aria-label="Chords"><span class="title">Chords</span><span class="icons">🎹 🎶</span></button>
+              <button class="modeBtn music" data-mode="melody"      aria-label="Melodies"><span class="title">Melodies</span><span class="icons">🎶 🎵 🎼</span></button>
             </div>
           </section>
           <!-- Parity tile: shown only when the group count is odd, so the grid stays even -->
@@ -1550,6 +1551,7 @@
     ['pitchtrain',  'Pitch Training'],
     ['pitchlisten', 'Listen & Match'],
     ['chords',      'Chords'],
+    ['melody',      'Melodies'],
     // ----- Language Island: teach a new language by ear (tap-to-answer, no keyboard) -----
     ['hello',      'Hello Around the World'],
     ['wordsafari', 'Word Safari'],
@@ -2008,7 +2010,17 @@
     { name: 'G Major', notes: ['G', 'B', 'D'] }, { name: 'A Minor', notes: ['A', 'C', 'E'] },
     { name: 'D Minor', notes: ['D', 'F', 'A'] }, { name: 'E Minor', notes: ['E', 'G', 'B'] }
   ];
-  const MUSIC_MODES = ['pitchtrain', 'pitchlisten', 'chords'];
+  // simple starter melodies (short at first); the piper plays them note-by-note
+  const MELODIES = [
+    { name: 'Up We Go',       notes: ['C', 'D', 'E'] },
+    { name: 'Down We Come',   notes: ['E', 'D', 'C'] },
+    { name: 'Hot Cross Buns', notes: ['E', 'D', 'C'] },
+    { name: 'Three Steps',    notes: ['C', 'E', 'G'] },
+    { name: 'Twinkle Start',  notes: ['C', 'C', 'G', 'G'] },
+    { name: 'Merrily',        notes: ['E', 'D', 'C', 'D', 'E'] },
+    { name: 'Lightly Row',    notes: ['G', 'E', 'E', 'F', 'D'] }
+  ];
+  const MUSIC_MODES = ['pitchtrain', 'pitchlisten', 'chords', 'melody'];
   // grow the note set as the child improves: A B C first, then + D E, then + F G
   function notePool() {
     if (level <= 2) return ['A', 'B', 'C'];
@@ -2049,8 +2061,20 @@
           : '<span class="noteGlyph pipeNote">🎵</span>'));
         renderNoteChoices(pool);
       },
-      play() { playTone([NOTE_FREQ[note]]); },
+      // like Listen & Match: the piper plays the note, then re-plays it every 3s (up to 5×)
+      play() {
+        clearEar();
+        earCount = 1; playTone([NOTE_FREQ[note]]);
+        const self = this;
+        const tick = () => {
+          earCount++; playTone([NOTE_FREQ[note]]);
+          if (!showLetter && earCount >= 5) self.revealAnswer();   // Listen & Match reveals the note on the 5th play
+          else if (earCount < 5) earTimer = setTimeout(tick, 3000);
+        };
+        earTimer = setTimeout(tick, 3000);
+      },
       revealAnswer() {
+        clearEar();
         renderSpeakerTarget(piperHTML('<span class="noteBig pipeNote" style="color:' + NOTE_COLORS[note] + '">' + note + '</span>'));
         renderNoteChoices(pool);
       }
@@ -2079,11 +2103,32 @@
       revealAll() { renderChordCard(chord.name, this.seq, this.seq.length); }
     };
   }
+  // Melodies: hear a short tune (notes one at a time), play it back note by note.
+  function playMelody(seq, opts) {
+    clearEar();
+    let i = 0;
+    const step = () => { if (i >= seq.length) return; playTone([NOTE_FREQ[seq[i++]]], { dur: 0.45 }); earTimer = setTimeout(step, 480); };
+    step();
+  }
+  function buildMelody() {
+    const pool = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+    const choices = level <= 2 ? MELODIES.filter(m => m.notes.length <= 3) : MELODIES;
+    const mel = pick(choices.length ? choices : MELODIES);
+    const seq = mel.notes.slice();
+    return {
+      style: 'seq', word: mel.name, seq: seq, idx: 0, answer: seq[0], kind: 'note', choices: true,
+      name: 'mel_' + mel.name.replace(/\s/g, ''),
+      render() { renderChordCard(mel.name, this.seq, this.idx); renderNoteChoices(pool); },
+      play() { playMelody(seq); },                 // the piper plays the tune, one note at a time
+      revealAll() { renderChordCard(mel.name, this.seq, this.seq.length); }
+    };
+  }
 
   function buildChallenge() {
     if (mode === 'pitchtrain')  return buildPitch(true);
     if (mode === 'pitchlisten') return buildPitch(false);
     if (mode === 'chords')      return buildChords();
+    if (mode === 'melody')      return buildMelody();
     if (mode === 'hello')      return buildLangPick(true);
     if (mode === 'guesslang')  return buildLangPick(false);
     if (mode === 'wordsafari') return buildWordPick(ALL_ANIMALS);
@@ -2301,8 +2346,8 @@
     clearHintTimer();
     pressed = String(pressed).toUpperCase();
     if (pressed.length !== 1) return;
-    // Music: sound the pitch of whatever note was pressed (button OR keyboard key), right or wrong
-    if (MUSIC_MODES.indexOf(mode) >= 0 && NOTE_FREQ[pressed]) playTone([NOTE_FREQ[pressed]], { dur: 0.7, keep: true });
+    // Any letter A–G rings its musical pitch — in Music modes AND ordinary lessons (Letters, Letters & Numbers…)
+    if (NOTE_FREQ[pressed]) playTone([NOTE_FREQ[pressed]], { dur: 0.7, keep: true });
     if (challenge.style === 'seq') {
       if (pressed === challenge.answer) seqAdvance(pressed);
       else if (/[A-Z0-9]/.test(pressed)) { flashKey(pressed, false); wrong(pressed); }
@@ -2330,7 +2375,7 @@
     clearKeyHighlights();
     hintStage = 0; scheduleHint();
     if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>Nice!</b><span>Keep going!</span>'; }
-    if (mode !== 'chords') { const na = challenge.answer; playPersona(isNum(na) ? 'find_num_' + na : 'find_let_' + na, L().next(na), { rate: 1.0 }); }
+    if (mode !== 'chords' && mode !== 'melody') { const na = challenge.answer; playPersona(isNum(na) ? 'find_num_' + na : 'find_let_' + na, L().next(na), { rate: 1.0 }); }
   }
   function seqComplete() {
     locked = true;
@@ -2345,7 +2390,11 @@
     confetti(); showBuddy(); showFeedback(true); playReaction(true); playChime();
     const dur = 2.0 + Math.random() * 1.5;
     playApplause(dur);
-    if (mode === 'chords') {
+    if (mode === 'melody') {
+      if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>' + w + '! 🎶</b><span>You played the melody!</span>'; }
+      playMelody(challenge.seq);                                        // play the whole tune back-to-back as the reward
+      playPersona(['cheer_1', 'cheer_2', 'cheer_3', 'cheer_4', 'cheer_5', 'cheer_6', 'cheer_7', 'cheer_8'], nextCheer(), { rate: 1.0 });
+    } else if (mode === 'chords') {
       if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>' + w + '! 🎶</b><span>You made a chord!</span>'; }
       playTone(noteFreqs(challenge.seq), { dur: 1.5 });                 // ring the full chord in triumph
       // spell the chord back in the recorded voice: "C. E. G." + a cheer
@@ -2418,7 +2467,7 @@
     setTimeout(() => { targetEl.style.transform = 'scale(1)'; }, 150);
     playPersona('try', wrongPhrase(keyPressed));   // real-voice "try again" (synth fallback)
     // Listen & Match: after 2 wrong guesses, finally reveal the hidden letter/number
-    if (mode === 'earmatch') { targetWrong++; if (targetWrong >= 2 && challenge.revealAnswer) challenge.revealAnswer(); }
+    if (mode === 'earmatch' || mode === 'pitchlisten') { targetWrong++; if (targetWrong >= 2 && challenge.revealAnswer) challenge.revealAnswer(); }
     scheduleHint();   // restart the idle countdown toward the next hint
   }
 
@@ -2589,7 +2638,9 @@
     if (freeLetterEl) freeLetterEl.textContent = text;       // show touched key in the card
     popChar(text, color);
     flashBackground(color);
-    playNote(e.key);
+    const noteKey = e.key.length === 1 ? e.key.toUpperCase() : '';
+    if (NOTE_FREQ[noteKey]) playTone([NOTE_FREQ[noteKey]], { dur: 0.7, keep: true });   // A–G ring their true pitch
+    else playNote(e.key);                                                                // other keys keep the playful tone
     sprinkleEmojis(3);
     if (e.key === ' ')      { confetti(); sprinkleEmojis(12); playApplause(); }
     else if (e.key === 'Enter') { confetti(); playChime(); }
@@ -2677,7 +2728,7 @@
       setLevelScene();                     // pick the location for this lesson/level
       const pr = L().prompt;
       const musicMode = MUSIC_MODES.includes(mode);
-      const musicPrompt = { pitchtrain: 'The piper plays a note — match it!', pitchlisten: 'Which note did the piper play?', chords: "Build the piper's chord!" };
+      const musicPrompt = { pitchtrain: 'The piper plays a note — match it!', pitchlisten: 'Which note did the piper play?', chords: "Build the piper's chord!", melody: 'Play the piper\'s melody!' };
       const ptxt = musicMode ? musicPrompt[mode]
                  : (cat ? (answerStyle === 'number' ? pr.catNum : pr.cat) : (pr[mode] || pr.both));
       // category letter/number rounds get a taller two-line prompt (better balance vs. the star bar)
