@@ -340,6 +340,87 @@
   .profileChip .pcSwitch { cursor: pointer; border: none; background: rgba(0,0,0,.06); color: #6e4f24;
     border-radius: 999px; padding: .3em .7em; font-size: .72em; font-weight: 700; }
   .profileChip .pcSwitch:active { transform: scale(.94); }
+
+  /* ===== Player profile button + menu (upper-right, above everything) ===== */
+  #profileWrap { position: fixed; top: max(10px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right)); z-index: 90; }
+  #profileWrap[hidden] { display: none; }
+  #profileBtn { display: flex; align-items: center; gap: .5em; cursor: pointer;
+    background: linear-gradient(#fff7df, #f3e2b0); border: 3px solid var(--gold); border-radius: 999px;
+    padding: .28em .5em .28em .3em; box-shadow: 0 4px 12px rgba(60,45,15,.3); font: inherit; color: #6e4f24;
+    transition: transform .12s ease; max-width: min(56vw, 260px); }
+  #profileBtn:active { transform: scale(.95); }
+  #profileBtn .pbAv { display: grid; place-items: center; width: 1.9em; height: 1.9em; flex: none;
+    font-size: 1.15em; line-height: 1; background: #fff; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--gold); }
+  #profileBtn .pbInfo { display: flex; flex-direction: column; line-height: 1.05; min-width: 0; padding-right: .3em; }
+  #profileBtn .pbName { font-family: 'Baloo 2'; font-weight: 800; color: var(--blue-d); font-size: .95em;
+    max-width: 40vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #profileBtn .pbStars { font-weight: 800; color: #b8860b; font-size: .8em; }
+  #profileMenu { box-sizing: border-box; position: absolute; top: calc(100% + 8px); right: 0; width: 250px; max-width: 82vw;
+    background: #fff; border: 3px solid var(--gold); border-radius: 18px; box-shadow: 0 12px 34px rgba(40,30,10,.4);
+    padding: .9em; display: flex; flex-direction: column; gap: .6em; animation: cardIn .2s ease-out both; }
+  #profileMenu[hidden] { display: none; }
+  #profileMenu .pmHead { display: flex; align-items: center; gap: .6em; padding-bottom: .5em; border-bottom: 2px dashed #eadfbe; }
+  #profileMenu .pmAv { font-size: 2em; line-height: 1; width: 1.4em; height: 1.4em; display: grid; place-items: center;
+    background: #fff7df; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--gold); }
+  #profileMenu .pmText { display: flex; flex-direction: column; line-height: 1.1; min-width: 0; }
+  #profileMenu .pmName { font-family: 'Baloo 2'; font-weight: 800; color: var(--blue-d); font-size: 1.15em;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #profileMenu .pmStars { font-weight: 700; color: #b8860b; font-size: .82em; }
+  .pmBtn { cursor: pointer; border: none; border-radius: 12px; padding: .7em; font-family: 'Baloo 2'; font-weight: 800;
+    font-size: 1em; transition: transform .1s ease; }
+  .pmBtn:active { transform: scale(.96); }
+  .pmBtn.primary { background: linear-gradient(#6fc3ff, var(--blue)); color: #fff; box-shadow: 0 4px 0 #2f7fc0; }
+  .pmBtn.ghost { background: rgba(0,0,0,.05); color: #6e4f24; font-size: .9em; padding: .5em; }
+  .pmConnect { display: flex; flex-direction: column; gap: .45em; padding: .5em 0; border-top: 2px dashed #eadfbe; border-bottom: 2px dashed #eadfbe; }
+  .pmConnectHint { font-size: .72em; font-weight: 700; color: #8a6a35; text-align: center; }
+  .pmConnectBtn { display: flex; align-items: center; justify-content: center; gap: .55em; cursor: pointer;
+    border: 1.5px solid #dfd3ad; background: #fff; border-radius: 10px; padding: .55em; font-family: inherit;
+    font-weight: 700; font-size: .86em; color: #444; transition: transform .1s ease, background .15s ease; }
+  .pmConnectBtn:active { transform: scale(.97); }
+  .pmConnectBtn .ci { display: grid; place-items: center; width: 1.5em; height: 1.5em; border-radius: 50%;
+    color: #fff; font-weight: 900; font-family: Arial, sans-serif; }
+  .pmConnectBtn.google .ci { background: #4285F4; }
+  .pmConnectBtn.facebook .ci { background: #1877F2; }
+
+  /* ===== Progress / success page ===== */
+  #successPage { position: fixed; inset: 0; z-index: 120; background: rgba(20,30,50,.55);
+    backdrop-filter: blur(3px); display: grid; place-items: center; padding: 3vh 3vw; animation: fadeIn .2s ease-out both; }
+  #successPage[hidden] { display: none; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .spSheet { box-sizing: border-box; position: relative; width: min(680px, 96vw); max-height: 92vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    background: linear-gradient(#fffdf5, #fdf3d6); border: 4px solid var(--gold); border-radius: 26px;
+    box-shadow: 0 20px 60px rgba(20,15,5,.5); padding: 1.4em; animation: cardIn .3s ease-out both; }
+  .spClose { position: absolute; top: .7em; right: .7em; cursor: pointer; border: none; background: rgba(0,0,0,.08);
+    color: #6e4f24; width: 2em; height: 2em; border-radius: 50%; font-size: 1.1em; font-weight: 900; line-height: 1; }
+  .spClose:active { transform: scale(.9); }
+  .spHero { display: flex; align-items: center; gap: .7em; }
+  .spHero .spAv { font-size: 2.6em; line-height: 1; width: 1.3em; height: 1.3em; display: grid; place-items: center;
+    background: #fff; border-radius: 50%; box-shadow: inset 0 0 0 3px var(--gold); flex: none; }
+  .spTitle { font-family: 'Baloo 2'; font-weight: 800; color: var(--blue-d); font-size: 1.7em; line-height: 1; }
+  .spSub { color: #8a6a35; font-weight: 700; font-size: .85em; margin-top: .2em; }
+  .spHeadline { margin: 1em 0 .4em; padding: .9em 1em; border-radius: 16px; text-align: center;
+    background: linear-gradient(#fff6cf, #ffe89a); border: 2px solid var(--gold); color: #7a5a12;
+    font-family: 'Baloo 2'; font-weight: 800; font-size: 1.1em; line-height: 1.25; }
+  .spHeadline.none { background: #f3ecd6; border-color: #e2d5ab; color: #8a6a35; font-weight: 700; font-size: .95em; }
+  .spStats { display: flex; gap: .6em; margin-bottom: 1em; }
+  .spStats .spStat { flex: 1; text-align: center; background: #fff; border: 2px solid #eadfbe; border-radius: 14px; padding: .6em .3em; }
+  .spStats .spStatNum { font-family: 'Baloo 2'; font-weight: 800; color: var(--blue-d); font-size: 1.4em; line-height: 1; }
+  .spStats .spStatLbl { color: #8a6a35; font-weight: 700; font-size: .72em; margin-top: .25em; }
+  .spList { display: flex; flex-direction: column; gap: .6em; }
+  .spCard { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: .8em;
+    background: #fff; border: 2px solid #eadfbe; border-radius: 16px; padding: .7em .9em; }
+  .spCard .spIco { font-size: 1.8em; line-height: 1; }
+  .spCard .spBody { min-width: 0; }
+  .spCard .spName { font-family: 'Baloo 2'; font-weight: 800; color: var(--blue-d); font-size: 1.05em; }
+  .spCard .spMeta { color: #8a6a35; font-weight: 700; font-size: .78em; margin-top: .15em; display: flex; flex-wrap: wrap; gap: .1em .8em; }
+  .spCard .spMeta b { color: #5a4a20; }
+  .spBadge { flex: none; text-align: center; font-family: 'Baloo 2'; font-weight: 800; border-radius: 12px;
+    padding: .5em .7em; font-size: .8em; line-height: 1.1; min-width: 4.4em; }
+  .spBadge.big { background: linear-gradient(#8ef0a8, #34c264); color: #0c5227; box-shadow: 0 3px 0 #2a9c50; }
+  .spBadge.mid { background: linear-gradient(#bff0d0, #86dca4); color: #17603a; }
+  .spBadge.new { background: #eef5ff; color: #2f7fc0; box-shadow: inset 0 0 0 2px #cfe4fb; }
+  .spBadge .spBadgeSub { display: block; font-size: .7em; font-weight: 700; opacity: .85; }
+  .spEmpty { text-align: center; color: #8a6a35; font-weight: 700; padding: 1.5em 1em; }
   /* Yako (opaque, clean cutout) on the right, behind the menu so he can't overlap it */
   /* Yako waves & the puppy wags its tail — a transparent PNG sprite sheet (40 frames)
      stepped by CSS, ping-ponged with 'alternate' for a seamless loop. */
@@ -592,6 +673,9 @@
     color: #fff; z-index: 6; background: var(--blue); border: 4px solid #fff;
     padding: .4vh 1.2vw; border-radius: 16px; box-shadow: 0 6px 16px rgba(0,0,0,.3);
   }
+  /* When a named player is signed in, the upper-right profile pill shows the star
+     total, so the standalone #score badge is redundant — hide it to avoid overlap. */
+  #game.hasProfile #score { display: none; }
 
   /* the main "Find the key" panel */
   #panel {
@@ -1451,6 +1535,46 @@
       <div id="reactionCaption"></div>
     </div>
     <div id="win"></div>
+  </div>
+
+  <!-- Player profile: a round avatar pinned to the upper-right corner (both home & in-game).
+       Tap it for a little menu — name, total stars, and the progress ("success") page. -->
+  <div id="profileWrap" hidden>
+    <button id="profileBtn" type="button" aria-label="Your profile" aria-haspopup="true" aria-expanded="false">
+      <span class="pbAv" id="pbAv">🙂</span>
+      <span class="pbInfo"><span class="pbName" id="pbName">Player</span><span class="pbStars" id="pbStars">⭐ 0</span></span>
+    </button>
+    <div id="profileMenu" hidden>
+      <div class="pmHead">
+        <span class="pmAv" id="pmAv">🙂</span>
+        <div class="pmText"><span class="pmName" id="pmName">Player</span><span class="pmStars" id="pmStars">⭐ 0 stars earned</span></div>
+      </div>
+      <button class="pmBtn primary" id="pmProgress" type="button">📈 See my progress</button>
+      <div class="pmConnect">
+        <div class="pmConnectHint">Save your progress on any device</div>
+        <button class="pmConnectBtn google" id="pmGoogle" type="button"><span class="ci">G</span> Continue with Google</button>
+        <button class="pmConnectBtn facebook" id="pmFacebook" type="button"><span class="ci">f</span> Continue with Facebook</button>
+      </div>
+      <button class="pmBtn ghost" id="pmSwitch" type="button">🔄 Switch player</button>
+    </div>
+  </div>
+
+  <!-- Progress / "success" page: how much has this child played, and how much faster
+       have they gotten? Shown as a scrollable set of per-lesson cards. -->
+  <div id="successPage" hidden>
+    <div class="spSheet">
+      <button class="spClose" id="spClose" type="button" aria-label="Close">✕</button>
+      <div class="spHero">
+        <span class="spAv" id="spAv">🙂</span>
+        <div class="spHeroText">
+          <div class="spTitle" id="spTitle">My Progress</div>
+          <div class="spSub" id="spSub"></div>
+        </div>
+      </div>
+      <div class="spHeadline" id="spHeadline"></div>
+      <div class="spStats" id="spStats"></div>
+      <div class="spList" id="spList"></div>
+    </div>
   </div>
 
 <script src="data/strings.en.js"></script>
@@ -2338,7 +2462,7 @@
       starbarEl.appendChild(s);
     }
   }
-  function updateScore() { scoreEl.textContent = '⭐ ' + totalStars; }
+  function updateScore() { scoreEl.textContent = '⭐ ' + totalStars; if (typeof refreshProfile === 'function') refreshProfile(); }
 
   // ---------- Game logic ----------
   function tryAnswer(pressed) {
@@ -2476,8 +2600,13 @@
   function completeLevel() {
     stopAllSounds();
     const bestKey = 'yako_best_' + mode, lastKey = 'yako_last_' + mode, cntKey = 'yako_count_' + mode;
+    const firstKey = 'yako_first_' + mode, firstDayKey = 'yako_firstday_' + mode, lastDayKey = 'yako_lastday_' + mode;
     const prevBest = getNum(bestKey), prevLast = getNum(lastKey);
     setNum(cntKey, (getNum(cntKey) || 0) + 1);
+    // Progress-page history: the very first completion time is captured once and never
+    // overwritten, so "You went from 5:00 down to 0:30!" can compare first vs. fastest.
+    if (getNum(firstKey) == null) { setNum(firstKey, levelElapsed); setNum(firstDayKey, Date.now()); }
+    setNum(lastDayKey, Date.now());
     // (How Many? difficulty now grows by level in buildCountObjects: sheep 1–5, then 6, then 9)
     const isBest = (prevBest == null) || (levelElapsed < prevBest);
     if (isBest) setNum(bestKey, levelElapsed);
@@ -2676,6 +2805,7 @@
     if (playerName) {
       playerName = playerName.charAt(0).toUpperCase() + playerName.slice(1);
       try { localStorage.setItem('kbfun_name', playerName); } catch (e) {}
+      if (typeof refreshProfile === 'function') refreshProfile();   // profile pill appears once named
     }
     I.setPlayerName(playerName);   // the narrator greets the child by name
     if (typeof updateThemeMusic === 'function') updateThemeMusic();   // music keeps playing into the lesson
@@ -3123,6 +3253,7 @@
     const b = e.target.closest('.personaBtn'); if (!b) return;
     A.setPersona(b.dataset.persona); pickVoice(); refreshVoiceUI(); ensureAudio(); bump(personaValEl); closePops();
     if (profileChipEl && !profileChipEl.hidden) pcAvatarEl.textContent = PERSONA_EMOJI[A.getPersona()] || '🙂';
+    if (typeof refreshProfile === 'function') refreshProfile();
     stopAllSounds(); playPersona('greet', L().greet);   // hear the chosen narrator right away
   });
   document.addEventListener('click', closePops);   // tapping elsewhere closes the popover
@@ -3145,6 +3276,7 @@
       profileChipEl.hidden = false;
       if (nameInput && !nameInput.value) nameInput.value = name;
     } else { profileChipEl.hidden = true; }
+    refreshProfile();
   }
   if (pcSwitchEl) pcSwitchEl.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -3152,7 +3284,137 @@
     if (nameInput) { nameInput.value = ''; nameInput.focus(); }
     refreshProfileChip();
   });
-  refreshProfileChip();
+  // ===== Player profile pill (upper-right) + progress ("success") page =====
+  const profileWrap = document.getElementById('profileWrap');
+  const profileBtn  = document.getElementById('profileBtn');
+  const profileMenu = document.getElementById('profileMenu');
+  const successPage = document.getElementById('successPage');
+  const pbAvEl = document.getElementById('pbAv'), pbNameEl = document.getElementById('pbName'), pbStarsEl = document.getElementById('pbStars');
+  const pmAvEl = document.getElementById('pmAv'), pmNameEl = document.getElementById('pmName'), pmStarsEl = document.getElementById('pmStars');
+
+  const LESSON_ICON = { numbers:'🔢', letters:'🔤', both:'🔠', shapes:'🔷', colors:'🎨', animals:'🐾',
+    sounds:'🅰️', listen:'👂', earmatch:'🎧', countobj:'🐑', spelling:'✏️', counting:'🖐️', math:'➕',
+    pitchtrain:'🎵', pitchlisten:'🎼', chords:'🎹', melody:'🎶',
+    hello:'👋', wordsafari:'🦁', colormix:'🌈', countlang:'💬', guesslang:'🗺️', samediff:'⚖️' };
+  // Two lessons share the name "Listen & Match"; label the music one so cards don't collide.
+  const LESSON_LABEL = { pitchlisten: 'Listen & Match (Music)' };
+  const lessonLabel = m => LESSON_LABEL[m] || lessonName(m);
+  // Times read as m:ss once past a minute ("5:00"), else "12s" — so "5:00 → 0:30" makes sense.
+  function mmss(sec) { if (sec == null) return '—'; sec = Math.round(sec); if (sec < 60) return sec + 's'; const m = Math.floor(sec / 60), s = sec % 60; return m + ':' + String(s).padStart(2, '0'); }
+  function profileName() { try { return localStorage.getItem('kbfun_name') || ''; } catch (e) { return ''; } }
+
+  function refreshProfile() {
+    if (!profileWrap) return;
+    const name = profileName();
+    game.classList.toggle('hasProfile', !!name);   // hide the redundant in-game #score badge
+    if (!name) { profileWrap.hidden = true; if (profileMenu) profileMenu.hidden = true; if (profileBtn) profileBtn.setAttribute('aria-expanded', 'false'); return; }
+    const av = PERSONA_EMOJI[A.getPersona()] || '🙂';
+    const stars = getNum('yako_points') || 0;
+    pbAvEl.textContent = av; pbNameEl.textContent = name; pbStarsEl.textContent = '⭐ ' + stars;
+    pmAvEl.textContent = av; pmNameEl.textContent = name;
+    pmStarsEl.textContent = '⭐ ' + stars + ' star' + (stars === 1 ? '' : 's') + ' earned';
+    profileWrap.hidden = false;
+  }
+
+  function menuOpen(open) {
+    if (!profileMenu) return;
+    const show = (open == null) ? profileMenu.hidden : open;
+    profileMenu.hidden = !show;
+    profileBtn.setAttribute('aria-expanded', show ? 'true' : 'false');
+  }
+
+  // One lesson's saved stats → an improvement story (how much faster, over how many plays).
+  function lessonProgress(m) {
+    const count = getNum('yako_count_' + m) || 0;
+    if (!count) return null;
+    const first = getNum('yako_first_' + m), best = getNum('yako_best_' + m), last = getNum('yako_last_' + m);
+    let ratio = 1, saved = 0;
+    if (first != null && best != null && best > 0 && first > best) { ratio = first / best; saved = first - best; }
+    return { mode: m, count, first, best, last, ratio, saved };
+  }
+  function pctFaster(r) { return Math.round((1 - r.best / r.first) * 100); }
+  function timesFaster(r) { return Math.round(r.ratio * 10) / 10; }
+
+  function statBox(n, l) { return '<div class="spStat"><div class="spStatNum">' + n + '</div><div class="spStatLbl">' + l + '</div></div>'; }
+  function progressCard(r) {
+    const ico = LESSON_ICON[r.mode] || '⭐';
+    let badge;
+    if (r.count < 2 || r.ratio < 1.1) {
+      badge = '<div class="spBadge new">Just started<span class="spBadgeSub">' + r.count + ' play' + (r.count === 1 ? '' : 's') + '</span></div>';
+    } else {
+      const label = r.ratio >= 2 ? (timesFaster(r) + '×') : (pctFaster(r) + '%');
+      badge = '<div class="spBadge ' + (r.ratio >= 2 ? 'big' : 'mid') + '">' + label + ' faster<span class="spBadgeSub">saved ' + mmss(r.saved) + '</span></div>';
+    }
+    const meta = '<b>' + r.count + '</b> play' + (r.count === 1 ? '' : 's') +
+      (r.first != null ? ' · first <b>' + mmss(r.first) + '</b>' : '') +
+      (r.best != null ? ' · best <b>' + mmss(r.best) + '</b>' : '');
+    return '<div class="spCard"><div class="spIco">' + ico + '</div>' +
+      '<div class="spBody"><div class="spName">' + lessonLabel(r.mode) + '</div><div class="spMeta">' + meta + '</div></div>' +
+      badge + '</div>';
+  }
+
+  function openSuccess() {
+    menuOpen(false);
+    const name = profileName() || 'Player';
+    const av = PERSONA_EMOJI[A.getPersona()] || '🙂';
+    document.getElementById('spAv').textContent = av;
+    document.getElementById('spTitle').textContent = name + "'s Progress";
+    const stars = getNum('yako_points') || 0;
+
+    const rows = LESSONS.map(l => lessonProgress(l[0])).filter(Boolean);
+    const totalPlays = rows.reduce((a, r) => a + r.count, 0);
+    document.getElementById('spSub').textContent = rows.length + ' lesson' + (rows.length === 1 ? '' : 's') + ' explored';
+    document.getElementById('spStats').innerHTML = statBox(totalPlays, 'games played') + statBox(rows.length, 'lessons') + statBox(stars, 'stars');
+
+    // Headline: the single most impressive speed-up so far.
+    const star = rows.filter(r => r.count >= 2 && r.ratio >= 1.25).sort((a, b) => b.ratio - a.ratio)[0];
+    const hEl = document.getElementById('spHeadline');
+    if (star) {
+      const how = star.ratio >= 2 ? (timesFaster(star) + '× faster') : (pctFaster(star) + '% faster');
+      hEl.className = 'spHeadline';
+      hEl.innerHTML = '🚀 ' + how + ' at <b>' + lessonLabel(star.mode) + '</b>!<br>From ' + mmss(star.first) + ' down to ' + mmss(star.best) + ' in just ' + star.count + ' tr' + (star.count === 1 ? 'y' : 'ies') + '.';
+    } else if (rows.length) {
+      hEl.className = 'spHeadline none';
+      hEl.textContent = 'Play a lesson a few times and watch how much faster you get! ⭐';
+    } else {
+      hEl.className = 'spHeadline none'; hEl.textContent = '';
+    }
+
+    const list = document.getElementById('spList');
+    if (!rows.length) {
+      list.innerHTML = '<div class="spEmpty">No lessons played yet — pick a lesson and start learning! 🎈</div>';
+    } else {
+      rows.sort((a, b) => (b.ratio - a.ratio) || (b.count - a.count));   // most-improved first, then most-played
+      list.innerHTML = rows.map(progressCard).join('');
+    }
+    successPage.hidden = false;
+  }
+
+  // Cloud sign-in (Google/Facebook) needs a backend to store cross-device progress;
+  // until that's wired, be honest that today's progress lives on this device.
+  function connectStub(which) {
+    menuOpen(false);
+    alert('Sign in with ' + which + ' is coming soon!\n\n' +
+      'Right now Yako saves ' + (profileName() || 'your') + "'s stars and progress on this device. " +
+      'Cloud sign-in will let you keep them on any phone or tablet.');
+  }
+
+  if (profileBtn) profileBtn.addEventListener('click', (e) => { e.stopPropagation(); ensureAudio(); menuOpen(); });
+  document.addEventListener('click', (e) => { if (profileMenu && !profileMenu.hidden && !e.target.closest('#profileWrap')) menuOpen(false); });
+  const pmProgressEl = document.getElementById('pmProgress'); if (pmProgressEl) pmProgressEl.addEventListener('click', openSuccess);
+  const pmSwitchEl = document.getElementById('pmSwitch');
+  if (pmSwitchEl) pmSwitchEl.addEventListener('click', () => {
+    menuOpen(false);
+    try { localStorage.removeItem('kbfun_name'); } catch (e) {}
+    if (nameInput) nameInput.value = '';
+    refreshProfileChip();
+    if (typeof backToMenu === 'function') backToMenu();
+  });
+  const spCloseEl = document.getElementById('spClose'); if (spCloseEl) spCloseEl.addEventListener('click', () => { successPage.hidden = true; });
+  if (successPage) successPage.addEventListener('click', (e) => { if (e.target === successPage) successPage.hidden = true; });
+  const pmGoogleEl = document.getElementById('pmGoogle'); if (pmGoogleEl) pmGoogleEl.addEventListener('click', () => connectStub('Google'));
+  const pmFacebookEl = document.getElementById('pmFacebook'); if (pmFacebookEl) pmFacebookEl.addEventListener('click', () => connectStub('Facebook'));
+  refreshProfileChip();   // now safe: profile consts above are initialized (also refreshes the pill)
 
   // Touchscreen taps in free play make a burst
   document.addEventListener('pointerdown', (e) => {
