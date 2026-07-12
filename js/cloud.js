@@ -23,7 +23,7 @@ window.YAKO_CLOUD = (function () {
   // poison localStorage or the UI).
   var MAX_SECONDS = 86400, MAX_COUNT = 1000000;
   function num(v) { v = parseFloat(v); return (isNaN(v) || !isFinite(v) || v < 0) ? null : v; }
-  function cleanTime(v) { v = num(v); return v == null ? null : Math.min(v, MAX_SECONDS); }
+  function cleanTime(v, cap) { v = num(v); return v == null ? null : Math.min(v, cap || MAX_SECONDS); }
   function cleanCount(v) { v = num(v); return v == null ? null : Math.min(Math.round(v), MAX_COUNT); }
   function cleanName(s) { return String(s || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 20); }
   function cleanMode(m) { return /^[a-z]{1,24}$/.test(m) ? m : null; }
@@ -49,6 +49,7 @@ window.YAKO_CLOUD = (function () {
         else if ((mm = /^yako_first_(.+)$/.exec(k))) slot(mm[1]).first = num(localStorage.getItem(k));
         else if ((mm = /^yako_best_(.+)$/.exec(k))) slot(mm[1]).best = num(localStorage.getItem(k));
         else if ((mm = /^yako_last_(.+)$/.exec(k))) slot(mm[1]).last = num(localStorage.getItem(k));
+        else if ((mm = /^yako_sum_(.+)$/.exec(k))) slot(mm[1]).sum = num(localStorage.getItem(k));
       }
     } catch (e) {}
     var name = '', points = 0;
@@ -73,6 +74,9 @@ window.YAKO_CLOUD = (function () {
       o.best = cleanTime(minDef(l.best, c.best));                     // fastest ever
       o.first = cleanTime(minDef(l.first, c.first));                  // earliest baseline (min = the true first attempt)
       o.last = cleanTime((l.count || 0) >= (c.count || 0) ? (l.last != null ? l.last : c.last) : (c.last != null ? c.last : l.last));
+      // sum tracks with count (take the side with more plays) so average = sum/count stays coherent
+      var lc = l.count || 0, cc = c.count || 0;
+      o.sum = cleanTime(lc >= cc ? (l.sum != null ? l.sum : c.sum) : (c.sum != null ? c.sum : l.sum), MAX_SECONDS * 4096);
       out.modes[m] = o;
     });
     return out;
@@ -91,6 +95,7 @@ window.YAKO_CLOUD = (function () {
         if (o.best != null) localStorage.setItem('yako_best_' + m, String(o.best));
         if (o.first != null) localStorage.setItem('yako_first_' + m, String(o.first));
         if (o.last != null) localStorage.setItem('yako_last_' + m, String(o.last));
+        if (o.sum != null) localStorage.setItem('yako_sum_' + m, String(o.sum));
       });
     } catch (e) {}
   }

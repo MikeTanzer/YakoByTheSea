@@ -64,6 +64,7 @@
     scrollbar-width: thin; scrollbar-color: var(--gold) transparent; -webkit-overflow-scrolling: touch; }
   .homeCard::-webkit-scrollbar { width: 10px; }
   .homeCard::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 999px; border: 2px solid #f4e8c8; }
+  .homeCard .nameRow[hidden] { display: none; }
   .homeCard .nameRow { display: flex; align-items: center; gap: 1.2vw; font-size: 2.4vh; font-weight: 800; color: var(--ink);
     width: 100%; box-sizing: border-box; }   /* full width so the label can't be clipped by centering overflow */
   .homeCard .nameRow label { flex: 0 0 auto; white-space: nowrap; }   /* keep "My name is" on one line */
@@ -424,6 +425,46 @@
   .spBadge.new { background: #eef5ff; color: #2f7fc0; box-shadow: inset 0 0 0 2px #cfe4fb; }
   .spBadge .spBadgeSub { display: block; font-size: .7em; font-weight: 700; opacity: .85; }
   .spEmpty { text-align: center; color: #8a6a35; font-weight: 700; padding: 1.5em 1em; }
+  .spCard { cursor: pointer; transition: transform .1s ease, box-shadow .15s ease; }
+  .spCard:hover, .spCard:focus-visible { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(60,45,15,.18); outline: none; }
+  .spCard:active { transform: scale(.99); }
+  .spName .spMore { color: var(--blue); font-weight: 900; margin-left: .15em; }
+
+  /* ===== Per-lesson detail analytics ===== */
+  #lessonDetail { position: fixed; inset: 0; z-index: 130; background: rgba(20,30,50,.6);
+    backdrop-filter: blur(3px); display: grid; place-items: center; padding: 3vh 3vw; animation: fadeIn .18s ease-out both; }
+  #lessonDetail[hidden] { display: none; }
+  .ldSheet { box-sizing: border-box; position: relative; width: min(560px, 96vw); max-height: 92vh; overflow-y: auto;
+    background: linear-gradient(#fffdf5, #fdf3d6); border: 4px solid var(--gold); border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(20,15,5,.5); padding: 1.4em; animation: cardIn .28s ease-out both; }
+  .ldClose { position: absolute; top: .7em; right: .7em; cursor: pointer; border: none; background: rgba(0,0,0,.08);
+    color: #6e4f24; width: 2em; height: 2em; border-radius: 50%; font-size: 1.1em; font-weight: 900; }
+  .ldClose:active { transform: scale(.9); }
+  .ldHero { display: flex; align-items: center; gap: .7em; }
+  .ldHero .ldIco { font-size: 2.4em; line-height: 1; width: 1.35em; height: 1.35em; display: grid; place-items: center;
+    background: #fff; border-radius: 50%; box-shadow: inset 0 0 0 3px var(--gold); flex: none; }
+  .ldName { font-family: 'Baloo 2'; font-weight: 800; color: var(--blue-d); font-size: 1.5em; line-height: 1.05; }
+  .ldSince { color: #8a6a35; font-weight: 700; font-size: .8em; margin-top: .2em; }
+  .ldHeadline { margin: 1em 0; padding: .85em 1em; border-radius: 16px; text-align: center;
+    background: linear-gradient(#fff6cf, #ffe89a); border: 2px solid var(--gold); color: #7a5a12;
+    font-family: 'Baloo 2'; font-weight: 800; font-size: 1.05em; line-height: 1.3; }
+  .ldHeadline.calm { background: #f3ecd6; border-color: #e2d5ab; color: #8a6a35; font-weight: 700; font-size: .95em; }
+  .ldGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .55em; }
+  .ldStat { text-align: center; background: #fff; border: 2px solid #eadfbe; border-radius: 14px; padding: .7em .3em; }
+  .ldStat.hi { background: linear-gradient(#eafbf0, #cdf0da); border-color: #8fdcab; }
+  .ldStatNum { font-family: 'Baloo 2'; font-weight: 800; color: var(--blue-d); font-size: 1.35em; line-height: 1; }
+  .ldStat.hi .ldStatNum { color: #17603a; }
+  .ldStatLbl { color: #8a6a35; font-weight: 700; font-size: .72em; margin-top: .3em; }
+  .ldBars { margin-top: 1.1em; }
+  .ldBarsTitle { font-family: 'Baloo 2'; font-weight: 800; color: #5b4327; font-size: .95em; margin-bottom: .5em; text-align: center; }
+  .ldBarRow { display: grid; grid-template-columns: 4.2em 1fr 3.2em; align-items: center; gap: .5em; margin: .35em 0; }
+  .ldBarLbl { font-weight: 800; color: #6e4f24; font-size: .8em; }
+  .ldBarTrack { background: #efe6c9; border-radius: 999px; height: 1.1em; overflow: hidden; }
+  .ldBar { display: block; height: 100%; border-radius: 999px; transition: width .5s ease; }
+  .ldBar.first { background: linear-gradient(90deg, #f0b46a, #e0894a); }
+  .ldBar.avg   { background: linear-gradient(90deg, #6fc3ff, var(--blue)); }
+  .ldBar.best  { background: linear-gradient(90deg, #8ef0a8, #34c264); }
+  .ldBarVal { font-weight: 800; color: #5a4a20; font-size: .8em; text-align: right; }
   /* Yako (opaque, clean cutout) on the right, behind the menu so he can't overlap it */
   /* Yako waves & the puppy wags its tail — a transparent PNG sprite sheet (40 frames)
      stepped by CSS, ping-ponged with 'alternate' for a seamless loop. */
@@ -1483,6 +1524,7 @@
               <button class="modeBtn music" data-mode="pitchlisten" aria-label="Listen and Match notes"><span class="title">Listen &amp; Match</span><span class="icons">👂 🎵 ❓</span></button>
               <button class="modeBtn music" data-mode="chords"      aria-label="Chords"><span class="title">Chords</span><span class="icons">🎹 🎶</span></button>
               <button class="modeBtn music" data-mode="melody"      aria-label="Melodies"><span class="title">Melodies</span><span class="icons">🎶 🎵 🎼</span></button>
+              <button class="modeBtn music" data-mode="notefind"    aria-label="Note Letters"><span class="title">Note Letters</span><span class="icons">🎵 A B C</span></button>
             </div>
           </section>
           <!-- Parity tile: shown only when the group count is odd, so the grid stays even -->
@@ -1592,6 +1634,19 @@
     </div>
   </div>
 
+  <!-- Per-lesson detail analytics: opens when a progress card is tapped -->
+  <div id="lessonDetail" hidden>
+    <div class="ldSheet">
+      <button class="ldClose" id="ldClose" type="button" aria-label="Close">✕</button>
+      <div class="ldHero"><span class="ldIco" id="ldIco">⭐</span>
+        <div class="ldHeroText"><div class="ldName" id="ldName"></div><div class="ldSince" id="ldSince"></div></div>
+      </div>
+      <div class="ldHeadline" id="ldHeadline"></div>
+      <div class="ldGrid" id="ldGrid"></div>
+      <div class="ldBars" id="ldBars"></div>
+    </div>
+  </div>
+
 <script src="data/firebase.js"></script>
 <script src="data/strings.en.js"></script>
 <script src="data/strings.fr.js"></script>
@@ -1693,6 +1748,7 @@
     ['pitchlisten', 'Listen & Match'],
     ['chords',      'Chords'],
     ['melody',      'Melodies'],
+    ['notefind',    'Note Letters'],
     // ----- Language Island: teach a new language by ear (tap-to-answer, no keyboard) -----
     ['hello',      'Hello Around the World'],
     ['wordsafari', 'Word Safari'],
@@ -2160,7 +2216,7 @@
     { name: 'Merrily',        notes: ['E', 'D', 'C', 'D', 'E'] },
     { name: 'Lightly Row',    notes: ['G', 'E', 'E', 'F', 'D'] }
   ];
-  const MUSIC_MODES = ['pitchtrain', 'pitchlisten', 'chords', 'melody'];
+  const MUSIC_MODES = ['pitchtrain', 'pitchlisten', 'chords', 'melody', 'notefind'];
   // grow the note set as the child improves: A B C first, then + D E, then + F G
   function notePool() {
     if (level <= 2) return ['A', 'B', 'C'];
@@ -2220,6 +2276,23 @@
       }
     };
   }
+  // Note Letters: SEE a note letter (A–G) and tap the matching coloured note button —
+  // like "Find the letter", but for the seven musical notes. The tone plays once as a
+  // reward (no ear-training repeat — that's what Pitch Training / Listen & Match are for).
+  function buildNoteFind() {
+    const pool = notePool();
+    const note = pick(pool);
+    return {
+      answer: note, kind: 'note', style: 'pitch', choices: true, note: note,
+      name: 'notefind_' + note,
+      render() {
+        renderSpeakerTarget(piperHTML('<span class="noteBig pipeNote" style="color:' + NOTE_COLORS[note] + '">' + note + '</span>'));
+        renderNoteChoices(pool);
+      },
+      play() { playTone([NOTE_FREQ[note]]); },   // hear the note once
+      revealAnswer() {}
+    };
+  }
   function renderChordCard(name, seq, revealed) {
     targetEl.style.color = '';
     targetEl.innerHTML = '<div class="chordCard">' + piperHTML('') + '<div class="chordName">' + name + '</div>' +
@@ -2269,6 +2342,7 @@
     if (mode === 'pitchlisten') return buildPitch(false);
     if (mode === 'chords')      return buildChords();
     if (mode === 'melody')      return buildMelody();
+    if (mode === 'notefind')    return buildNoteFind();
     if (mode === 'hello')      return buildLangPick(true);
     if (mode === 'guesslang')  return buildLangPick(false);
     if (mode === 'wordsafari') return buildWordPick(ALL_ANIMALS);
@@ -2623,6 +2697,7 @@
     // overwritten, so "You went from 5:00 down to 0:30!" can compare first vs. fastest.
     if (getNum(firstKey) == null) { setNum(firstKey, levelElapsed); setNum(firstDayKey, Date.now()); }
     setNum(lastDayKey, Date.now());
+    setNum('yako_sum_' + mode, (getNum('yako_sum_' + mode) || 0) + levelElapsed);   // running total → average = sum / count
     try { document.dispatchEvent(new CustomEvent('yako:progress')); } catch (e) {}   // cloud sync (if signed in)
     // (How Many? difficulty now grows by level in buildCountObjects: sheep 1–5, then 6, then 9)
     const isBest = (prevBest == null) || (levelElapsed < prevBest);
@@ -2875,7 +2950,7 @@
       setLevelScene();                     // pick the location for this lesson/level
       const pr = L().prompt;
       const musicMode = MUSIC_MODES.includes(mode);
-      const musicPrompt = { pitchtrain: 'The piper plays a note — match it!', pitchlisten: 'Which note did the piper play?', chords: "Build the piper's chord!", melody: 'Play the piper\'s melody!' };
+      const musicPrompt = { pitchtrain: 'The piper plays a note — match it!', pitchlisten: 'Which note did the piper play?', chords: "Build the piper's chord!", melody: 'Play the piper\'s melody!', notefind: 'Find the note!' };
       const ptxt = musicMode ? musicPrompt[mode]
                  : (cat ? (answerStyle === 'number' ? pr.catNum : pr.cat) : (pr[mode] || pr.both));
       // category letter/number rounds get a taller two-line prompt (better balance vs. the star bar)
@@ -3283,6 +3358,7 @@
   const profileChipEl = document.getElementById('profileChip');
   const pcNameEl = document.getElementById('pcName'), pcStarsEl = document.getElementById('pcStars');
   const pcAvatarEl = document.getElementById('pcAvatar'), pcSwitchEl = document.getElementById('pcSwitch');
+  const nameRowEl = document.querySelector('.nameRow');
   function refreshProfileChip() {
     let name = ''; try { name = localStorage.getItem('kbfun_name') || ''; } catch (e) {}
     if (!profileChipEl) return;
@@ -3292,7 +3368,11 @@
       pcAvatarEl.textContent = PERSONA_EMOJI[A.getPersona()] || '🙂';
       profileChipEl.hidden = false;
       if (nameInput && !nameInput.value) nameInput.value = name;
-    } else { profileChipEl.hidden = true; }
+      if (nameRowEl) nameRowEl.hidden = true;    // returning player: the Welcome-back chip replaces the name field
+    } else {
+      profileChipEl.hidden = true;
+      if (nameRowEl) nameRowEl.hidden = false;   // new player (or after "switch"): ask for a name
+    }
     refreshProfile();
   }
   if (pcSwitchEl) pcSwitchEl.addEventListener('click', (e) => {
@@ -3306,6 +3386,7 @@
   const profileBtn  = document.getElementById('profileBtn');
   const profileMenu = document.getElementById('profileMenu');
   const successPage = document.getElementById('successPage');
+  const lessonDetail = document.getElementById('lessonDetail');
   const pbAvEl = document.getElementById('pbAv'), pbNameEl = document.getElementById('pbName'), pbStarsEl = document.getElementById('pbStars');
   const pmAvEl = document.getElementById('pmAv'), pmNameEl = document.getElementById('pmName'), pmStarsEl = document.getElementById('pmStars');
 
@@ -3345,9 +3426,12 @@
     const count = getNum('yako_count_' + m) || 0;
     if (!count) return null;
     const first = getNum('yako_first_' + m), best = getNum('yako_best_' + m), last = getNum('yako_last_' + m);
+    const sum = getNum('yako_sum_' + m);
+    const avg = (sum != null && count) ? sum / count : null;
+    const firstDay = getNum('yako_firstday_' + m), lastDay = getNum('yako_lastday_' + m);
     let ratio = 1, saved = 0;
     if (first != null && best != null && best > 0 && first > best) { ratio = first / best; saved = first - best; }
-    return { mode: m, count, first, best, last, ratio, saved };
+    return { mode: m, count, first, best, last, avg, firstDay, lastDay, ratio, saved };
   }
   function pctFaster(r) { return Math.round((1 - r.best / r.first) * 100); }
   function timesFaster(r) { return Math.round(r.ratio * 10) / 10; }
@@ -3364,10 +3448,60 @@
     }
     const meta = '<b>' + r.count + '</b> play' + (r.count === 1 ? '' : 's') +
       (r.first != null ? ' · first <b>' + mmss(r.first) + '</b>' : '') +
+      (r.avg != null ? ' · avg <b>' + mmss(r.avg) + '</b>' : '') +
       (r.best != null ? ' · best <b>' + mmss(r.best) + '</b>' : '');
-    return '<div class="spCard"><div class="spIco">' + ico + '</div>' +
-      '<div class="spBody"><div class="spName">' + lessonLabel(r.mode) + '</div><div class="spMeta">' + meta + '</div></div>' +
+    return '<div class="spCard" data-mode="' + r.mode + '" role="button" tabindex="0" aria-label="' + lessonLabel(r.mode) + ' details">' +
+      '<div class="spIco">' + ico + '</div>' +
+      '<div class="spBody"><div class="spName">' + lessonLabel(r.mode) + ' <span class="spMore">›</span></div><div class="spMeta">' + meta + '</div></div>' +
       badge + '</div>';
+  }
+
+  // ---- Per-lesson detail: tap a card to see the full analytics for that game ----
+  function fmtDay(ts) {
+    if (ts == null) return '';
+    try { return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); } catch (e) { return ''; }
+  }
+  function ldStat(num, lbl, cls) { return '<div class="ldStat' + (cls ? ' ' + cls : '') + '"><div class="ldStatNum">' + num + '</div><div class="ldStatLbl">' + lbl + '</div></div>'; }
+  function openLessonDetail(m) {
+    const r = lessonProgress(m);
+    if (!r) return;
+    document.getElementById('ldIco').textContent = LESSON_ICON[m] || '⭐';
+    document.getElementById('ldName').textContent = lessonLabel(m);
+    const since = r.firstDay ? ('Playing since ' + fmtDay(r.firstDay)) : '';
+    const lastSeen = r.lastDay ? (' · last played ' + fmtDay(r.lastDay)) : '';
+    document.getElementById('ldSince').textContent = since + lastSeen;
+
+    const hEl = document.getElementById('ldHeadline');
+    if (r.count >= 2 && r.ratio >= 1.25) {
+      const how = r.ratio >= 2 ? (timesFaster(r) + '× faster') : (pctFaster(r) + '% faster');
+      hEl.className = 'ldHeadline';
+      hEl.innerHTML = '🚀 ' + how + ' than the first try — from <b>' + mmss(r.first) + '</b> to <b>' + mmss(r.best) + '</b>!';
+    } else if (r.count >= 2) {
+      hEl.className = 'ldHeadline calm';
+      hEl.textContent = 'Keep practicing — every play builds speed! ⭐';
+    } else {
+      hEl.className = 'ldHeadline calm';
+      hEl.textContent = 'Play a few more times to see how much faster you get! 🎈';
+    }
+
+    document.getElementById('ldGrid').innerHTML =
+      ldStat(r.count, 'times played') +
+      ldStat(mmss(r.first), 'first time') +
+      ldStat(mmss(r.avg), 'average') +
+      ldStat(mmss(r.best), 'best time', 'hi') +
+      ldStat(mmss(r.last), 'last time');
+
+    // First vs Average vs Best comparison bars (longer = slower). Scaled to the first (slowest) time.
+    const barsEl = document.getElementById('ldBars');
+    const vals = [['First', r.first, 'first'], ['Average', r.avg, 'avg'], ['Best', r.best, 'best']].filter(v => v[1] != null);
+    const maxV = Math.max.apply(null, vals.map(v => v[1]).concat([0.001]));
+    barsEl.innerHTML = vals.length > 1 ? ('<div class="ldBarsTitle">How your time is shrinking</div>' + vals.map(v =>
+      '<div class="ldBarRow"><span class="ldBarLbl">' + v[0] + '</span>' +
+      '<span class="ldBarTrack"><span class="ldBar ' + v[2] + '" style="width:' + Math.max(8, Math.round(v[1] / maxV * 100)) + '%"></span></span>' +
+      '<span class="ldBarVal">' + mmss(v[1]) + '</span></div>').join('')) : '';
+
+    menuOpen(false);
+    lessonDetail.hidden = false;
   }
 
   function openSuccess() {
@@ -3429,6 +3563,14 @@
   });
   const spCloseEl = document.getElementById('spClose'); if (spCloseEl) spCloseEl.addEventListener('click', () => { successPage.hidden = true; });
   if (successPage) successPage.addEventListener('click', (e) => { if (e.target === successPage) successPage.hidden = true; });
+  // Tap/enter a progress card → its detailed analytics
+  const spListEl = document.getElementById('spList');
+  if (spListEl) {
+    spListEl.addEventListener('click', (e) => { const c = e.target.closest('.spCard'); if (c && c.dataset.mode) openLessonDetail(c.dataset.mode); });
+    spListEl.addEventListener('keydown', (e) => { if (e.key !== 'Enter' && e.key !== ' ') return; const c = e.target.closest('.spCard'); if (c && c.dataset.mode) { e.preventDefault(); openLessonDetail(c.dataset.mode); } });
+  }
+  const ldCloseEl = document.getElementById('ldClose'); if (ldCloseEl) ldCloseEl.addEventListener('click', () => { lessonDetail.hidden = true; });
+  if (lessonDetail) lessonDetail.addEventListener('click', (e) => { if (e.target === lessonDetail) lessonDetail.hidden = true; });
   // ---- Cloud sign-in (Firebase, optional) ----
   // Bridge the cloud layer uses to refresh the game after it merges pulled progress.
   window.YAKO_GAME = {
