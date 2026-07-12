@@ -678,9 +678,10 @@
     color: #fff; z-index: 6; background: var(--blue); border: 4px solid #fff;
     padding: .4vh 1.2vw; border-radius: 16px; box-shadow: 0 6px 16px rgba(0,0,0,.3);
   }
-  /* When a named player is signed in, the upper-right profile pill shows the star
-     total, so the standalone #score badge is redundant — hide it to avoid overlap. */
-  #game.hasProfile #score { display: none; }
+  /* The upper-right profile pill shows the star total now, so the standalone
+     #score badge is redundant — removed entirely (it used to overlap the pill).
+     !important so it also beats the higher-specificity #game.adv #score rules below. */
+  #score { display: none !important; }
 
   /* the main "Find the key" panel */
   #panel {
