@@ -1,5 +1,5 @@
 /* Yako by the Sea — service worker (offline + installable PWA) */
-const CORE = 'yako-core-v16';    // versioned: bumped whenever the code/art below changes
+const CORE = 'yako-core-v17';    // versioned: bumped whenever the code/art below changes
 const MEDIA = 'yako-media';      // persistent: recorded clips cached as they play (survives version bumps)
 const CORE_ASSETS = [
   './',
@@ -72,6 +72,13 @@ self.addEventListener('fetch', (e) => {
   // Looping background videos + any ranged request: never intercept, let the
   // range-capable server stream them (video seeking / the ping-pong loop).
   if (req.headers.has('range') || req.destination === 'video' || req.destination === 'audio') return;
+
+  // Runtime caching is limited to our own origin plus the Firebase SDK scripts.
+  // Never cache other cross-origin traffic (e.g. Firestore/auth API responses —
+  // they carry per-user data and must not be replayed stale from Cache Storage).
+  const cacheable = url.origin === location.origin ||
+    (url.origin === 'https://www.gstatic.com' && url.pathname.startsWith('/firebasejs/'));
+  if (!cacheable) return;   // let the network handle it untouched
 
   // Everything else (html/js/data/art): network-first when online, core cache when offline.
   e.respondWith(

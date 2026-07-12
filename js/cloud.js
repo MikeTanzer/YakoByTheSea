@@ -18,7 +18,15 @@ window.YAKO_CLOUD = (function () {
   var listeners = [];
   var pushTimer = null;
 
-  function num(v) { v = parseFloat(v); return isNaN(v) ? null : v; }
+  // Validation at the cloud↔local boundary: only finite, sane numbers and short
+  // printable names ever cross it (a tampered Firestore doc must not be able to
+  // poison localStorage or the UI).
+  var MAX_SECONDS = 86400, MAX_COUNT = 1000000;
+  function num(v) { v = parseFloat(v); return (isNaN(v) || !isFinite(v) || v < 0) ? null : v; }
+  function cleanTime(v) { v = num(v); return v == null ? null : Math.min(v, MAX_SECONDS); }
+  function cleanCount(v) { v = num(v); return v == null ? null : Math.min(Math.round(v), MAX_COUNT); }
+  function cleanName(s) { return String(s || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 20); }
+  function cleanMode(m) { return /^[a-z]{1,24}$/.test(m) ? m : null; }
   function on(fn) { listeners.push(fn); }
   function emit() { listeners.forEach(function (fn) { try { fn(user); } catch (e) {} }); }
 
@@ -49,19 +57,22 @@ window.YAKO_CLOUD = (function () {
   }
 
   // ---- Best-of merge: never lose a record, never inflate a play count ----
+  // Everything is passed through the clean* validators here, so whatever comes
+  // back from Firestore is clamped before it can reach localStorage or the UI.
   function merge(local, cloud) {
     local = local || { modes: {} }; cloud = cloud || { modes: {} };
     var out = { modes: {} };
-    out.points = Math.max(local.points || 0, cloud.points || 0);
-    out.name = local.name || cloud.name || '';
+    out.points = cleanCount(Math.max(local.points || 0, cloud.points || 0)) || 0;
+    out.name = cleanName(local.name || cloud.name || '');
     var keys = {}; Object.keys(local.modes || {}).forEach(function (m) { keys[m] = 1; }); Object.keys(cloud.modes || {}).forEach(function (m) { keys[m] = 1; });
-    Object.keys(keys).forEach(function (m) {
+    Object.keys(keys).slice(0, 200).forEach(function (m) {   // cap: a tampered doc can't spam thousands of keys
+      if (!cleanMode(m)) return;
       var l = (local.modes || {})[m] || {}, c = (cloud.modes || {})[m] || {};
       var o = {};
-      o.count = Math.max(l.count || 0, c.count || 0);                 // max, not sum → no double count across syncs
-      o.best = minDef(l.best, c.best);                                // fastest ever
-      o.first = minDef(l.first, c.first);                             // earliest baseline (min = the true first attempt)
-      o.last = (l.count || 0) >= (c.count || 0) ? (l.last != null ? l.last : c.last) : (c.last != null ? c.last : l.last);
+      o.count = cleanCount(Math.max(l.count || 0, c.count || 0));     // max, not sum → no double count across syncs
+      o.best = cleanTime(minDef(l.best, c.best));                     // fastest ever
+      o.first = cleanTime(minDef(l.first, c.first));                  // earliest baseline (min = the true first attempt)
+      o.last = cleanTime((l.count || 0) >= (c.count || 0) ? (l.last != null ? l.last : c.last) : (c.last != null ? c.last : l.last));
       out.modes[m] = o;
     });
     return out;
@@ -74,6 +85,7 @@ window.YAKO_CLOUD = (function () {
       if (data.name && !(localStorage.getItem('kbfun_name') || '')) localStorage.setItem('kbfun_name', data.name);
       var modes = data.modes || {};
       Object.keys(modes).forEach(function (m) {
+        if (!cleanMode(m)) return;   // defense in depth — only lesson-shaped keys reach localStorage
         var o = modes[m] || {};
         if (o.count != null) localStorage.setItem('yako_count_' + m, String(o.count));
         if (o.best != null) localStorage.setItem('yako_best_' + m, String(o.best));

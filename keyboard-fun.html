@@ -3464,7 +3464,8 @@
   if (CLOUD) {
     CLOUD.onChange(function (u) {
       if (u && !profileName()) {   // first sign-in with no local name → adopt the account's first name
-        const nm = ((u.displayName || '').trim().split(/\s+/)[0]) || '';
+        // clamp like the name input does (maxlength 20, no control chars/angle brackets)
+        const nm = ((u.displayName || '').replace(/[\u0000-\u001f<>]/g, '').trim().split(/\s+/)[0] || '').slice(0, 20);
         if (nm) { try { localStorage.setItem('kbfun_name', nm); } catch (e) {} }
       }
       renderAccount(u);

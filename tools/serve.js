@@ -6,9 +6,18 @@ const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/cs
   '.png': 'image/png', '.jpg': 'image/jpeg', '.mp4': 'video/mp4', '.mp3': 'audio/mpeg', '.wav': 'audio/wav',
   '.webmanifest': 'application/manifest+json', '.json': 'application/json' };
 const server = http.createServer((req, res) => {
-  let p = decodeURIComponent(req.url.split('?')[0]);
+  let p;
+  try { p = decodeURIComponent(req.url.split('?')[0]); } catch (e) { res.writeHead(400); res.end('Bad request'); return; }
   if (p === '/') p = '/keyboard-fun.html';
-  const file = path.join(root, p);
+  // SECURITY: this server is reachable from the whole LAN (phone play), so the
+  // resolved path must stay inside the project and never expose dot-dirs
+  // (.git, .claude, .ssh via traversal, etc.).
+  const file = path.resolve(root, '.' + '/' + p);
+  const rel = path.relative(root, file);
+  if (rel.startsWith('..') || path.isAbsolute(rel) ||
+      rel.split(path.sep).some((seg) => seg.startsWith('.'))) {
+    res.writeHead(404); res.end('Not found'); return;
+  }
   fs.stat(file, (err, st) => {
     if (err || !st.isFile()) { res.writeHead(404); res.end('Not found'); return; }
     const ext = path.extname(file).toLowerCase();
