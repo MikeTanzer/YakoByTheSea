@@ -826,18 +826,23 @@
   #game.adv #sceneScrim { display: block; }
   #game.adv .gameStage .bg { display: none; }                 /* hide the painted desk frame */
   #game.adv #gameRibbon, #game.adv #reactionBox { display: none; }
-  /* readable cream card centered over the scene (works at every width) */
-  #game.adv #panel { position: absolute; left: 50%; top: 13%; transform: translateX(-50%);
-    width: min(560px, 88vw); height: auto; min-height: 26vh; max-height: 52vh; padding: 2.4vh 2.4vw;
+  /* Readable cream card centered over the scene. Its bottom is pinned safely
+     ABOVE the keyboard bar (which sits at bottom:13vh) so it can never cover it —
+     the card lives in the band between the top status row and the keyboard, and
+     scrolls internally in the rare case its content is taller than that band. */
+  #game.adv #panel { position: fixed; left: 50%; top: 10vh; bottom: 40vh; transform: translateX(-50%);
+    width: min(560px, 88vw); height: auto; padding: 2vh 2.4vw;
     background: linear-gradient(rgba(247,233,197,.95), rgba(239,220,171,.95));
-    border: 6px solid var(--gold); border-radius: 26px; overflow: hidden;
+    border: 6px solid var(--gold); border-radius: 26px; overflow-x: hidden; overflow-y: auto;
     box-shadow: 0 16px 34px rgba(40,30,10,.5), inset 0 0 0 3px rgba(255,255,255,.55);
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.4vh; pointer-events: none; }
-  #game.adv #panel #prompt { position: static; left: auto; top: auto; width: auto; transform: none;
-    font-family: 'Baloo 2'; font-weight: 800; font-size: min(3.8vh, 6.6vw); line-height: 1.1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1vh; pointer-events: none; }
+  #game.adv #panel #prompt { position: static; left: auto; top: auto; width: 100%; max-width: 100%; transform: none;
+    font-family: 'Baloo 2'; font-weight: 800; font-size: min(3.6vh, 6.2vw); line-height: 1.12;
+    text-align: center; overflow-wrap: break-word; word-break: normal;
     color: #5b4327; text-shadow: 0 2px 2px rgba(255,255,255,.6); z-index: 2; }
-  #game.adv #panel #target { position: static; left: auto; top: auto; width: 100%; height: auto; transform: none;
-    display: flex; align-items: center; justify-content: center; font-size: inherit; text-shadow: none; }
+  #game.adv #panel #target { position: static; left: auto; top: auto; width: 100%; max-width: 100%; height: auto; transform: none;
+    display: flex; align-items: center; justify-content: center; font-size: inherit; text-shadow: none;
+    overflow-wrap: break-word; }
   #game.adv .advCount { display: flex; flex-wrap: wrap; gap: 1vh 1.2vw; align-items: center; justify-content: center; max-width: 100%; }
   #game.adv .advCount .cobj { font-size: min(8.5vh, 12vw); line-height: 1; }
   #game.adv #choices { position: fixed; top: auto; bottom: 11vh; left: 0; width: 100%; }
@@ -2120,8 +2125,7 @@
     const place = MONT.PLACES[curPlaceIdx];
     setSceneBg(place.scene);
     const tag = document.getElementById('placeTag');
-    if (tag) tag.innerHTML = '<span class="ptTop"><span class="plName">' + place.name + '</span><span class="chev">▾</span></span>' +
-                             '<img class="pThumb" src="' + place.scene + '" alt="">';
+    if (tag) tag.innerHTML = '<span class="ptTop"><span class="plName">' + place.name + '</span><span class="chev">▾</span></span>';
     document.querySelectorAll('#placePop button').forEach((b, j) => b.classList.toggle('sel', j === curPlaceIdx));
   }
   function setLevelScene() {
