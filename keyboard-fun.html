@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Yako by the Sea — Learn & Play!</title>
 <link rel="icon" type="image/png" href="ui/favicon.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -388,7 +388,7 @@
 
   /* ===== Progress / success page ===== */
   #successPage { position: fixed; inset: 0; z-index: 120; background: rgba(20,30,50,.55);
-    backdrop-filter: blur(3px); display: grid; place-items: center; padding: 3vh 3vw; animation: fadeIn .2s ease-out both; }
+    -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); display: grid; place-items: center; padding: 3vh 3vw; animation: fadeIn .2s ease-out both; }
   #successPage[hidden] { display: none; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   .spSheet { box-sizing: border-box; position: relative; width: min(680px, 96vw); max-height: 92vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
@@ -432,7 +432,7 @@
 
   /* ===== Per-lesson detail analytics ===== */
   #lessonDetail { position: fixed; inset: 0; z-index: 130; background: rgba(20,30,50,.6);
-    backdrop-filter: blur(3px); display: grid; place-items: center; padding: 3vh 3vw; animation: fadeIn .18s ease-out both; }
+    -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); display: grid; place-items: center; padding: 3vh 3vw; animation: fadeIn .18s ease-out both; }
   #lessonDetail[hidden] { display: none; }
   .ldSheet { box-sizing: border-box; position: relative; width: min(560px, 96vw); max-height: 92vh; overflow-y: auto;
     background: linear-gradient(#fffdf5, #fdf3d6); border: 4px solid var(--gold); border-radius: 24px;
@@ -706,7 +706,7 @@
 
   /* level star progress bar */
   #starbar {
-    position: fixed; top: 1.6vh; left: 50%; transform: translateX(-50%); z-index: 6;
+    position: fixed; top: calc(1.6vh + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 6;
     display: flex; gap: 1vw; padding: .6vh 2vw; background: var(--parch);
     border: 4px solid var(--gold); border-radius: 999px; box-shadow: 0 6px 16px rgba(60,45,15,.3);
   }
@@ -896,12 +896,12 @@
   #game.adv #exit, #game.adv #sound { position: fixed; bottom: calc(2.5vh + env(safe-area-inset-bottom, 0px)); top: auto; width: min(8vh,13vw); height: min(8vh,13vw);
     border-radius: 50%; background-color: var(--blue); background-repeat: no-repeat; background-position: center; background-size: 52%;
     border: 3px solid var(--blue-d); box-shadow: 0 5px 12px rgba(0,0,0,.4); z-index: 12; }
-  #game.adv #exit  { left: 3vw; right: auto;
+  #game.adv #exit  { left: calc(3vw + env(safe-area-inset-left, 0px)); right: auto;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M12 3 2.4 11h2.7v8.4h4.2v-5h5.4v5h4.2V11H21.6z'/></svg>"); }
-  #game.adv #sound { right: 3vw; left: auto;
+  #game.adv #sound { right: calc(3vw + env(safe-area-inset-right, 0px)); left: auto;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='white' d='M3 9v6h4l5 4V5L7 9H3z'/><path fill='none' stroke='white' stroke-width='2' stroke-linecap='round' d='M15.5 8.6a4.6 4.6 0 0 1 0 6.8M18.2 6a8 8 0 0 1 0 12'/></svg>"); }
   /* Just-for-Fun home button (Free Play hides the painted frame, so it needs its own) */
-  #freeHome { position: fixed; left: 3vw; bottom: 2.5vh; z-index: 7; display: none;
+  #freeHome { position: fixed; left: calc(3vw + env(safe-area-inset-left, 0px)); bottom: calc(2.5vh + env(safe-area-inset-bottom, 0px)); z-index: 7; display: none;
     width: min(8vh,13vw); height: min(8vh,13vw); align-items: center; justify-content: center;
     font-size: min(3.8vh,6vw); line-height: 1; cursor: pointer;
     background: #fff6e0; color: #6e4f24; border: 3px solid var(--gold-d); border-radius: 50%;
@@ -941,6 +941,29 @@
   #gamePlayer .gpBtn:active { transform: scale(.9); }
   #gamePlayer .gpPlay { background: linear-gradient(#ffe9a8, #f0c869); }
   #gamePlayer .gpBtn svg { width: 52%; height: 52%; fill: #6e4f24; display: block; pointer-events: none; }
+  /* ===== Play / pause / next icons drawn in pure CSS (no SVG or emoji) =====
+     iOS/iPadOS Safari was collapsing the percentage-sized inline <svg> in these
+     flex buttons to nothing, so the buttons looked empty. CSS borders/bars render
+     identically everywhere. Sized in em; font-size below sets the scale. */
+  .micon { position: relative; }
+  .homeFoot .mBtn.micon { font-size: clamp(30px, 3.2vw, 38px); }
+  #gamePlayer .gpBtn.micon { font-size: min(6.4vh, 10.5vw); }
+  .micon::before, .micon::after { pointer-events: none; }
+  /* PLAY: a right-pointing triangle */
+  .micon-play::before { content: ''; position: absolute; left: 52%; top: 50%; transform: translate(-50%, -50%);
+    width: 0; height: 0; border-style: solid; border-width: .34em 0 .34em .52em;
+    border-color: transparent transparent transparent #6e4f24; }
+  /* PLAYING → PAUSE: two vertical bars (the ::before becomes the left bar) */
+  .micon-play.is-playing::before { border-width: 0; width: .16em; height: .74em; background: #6e4f24;
+    border-radius: 1px; left: 50%; transform: translate(-160%, -50%); }
+  .micon-play.is-playing::after { content: ''; position: absolute; left: 50%; top: 50%; width: .16em; height: .74em;
+    background: #6e4f24; border-radius: 1px; transform: translate(60%, -50%); }
+  /* NEXT: a triangle followed by a bar */
+  .micon-next::before { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-78%, -50%);
+    width: 0; height: 0; border-style: solid; border-width: .32em 0 .32em .46em;
+    border-color: transparent transparent transparent #6e4f24; }
+  .micon-next::after { content: ''; position: absolute; left: 50%; top: 50%; width: .15em; height: .64em;
+    background: #6e4f24; border-radius: 1px; transform: translate(150%, -50%); }
   #volSlider { width: min(160px, 34vw); accent-color: var(--gold-d); cursor: pointer; }
   /* ----- scene layout now hosts EVERY lesson: size the card target + on-screen keyboard ----- */
   #game.adv #panel #target { font-size: min(15vh, 20vw); color: var(--blue); }
@@ -1537,7 +1560,7 @@
       </div>
     </div>
     <div class="homeChar" role="img" aria-label="Yako waving with his puppy"></div>
-    <div class="homeFoot" id="musicBar"><span class="footIcon" id="footShell" role="button" tabindex="-1" aria-label="🐚">🐚</span><span class="footText"><b>Collect 5 stars to win a level!</b><em id="footSub">Tip: turn your volume up &amp; press F11.</em></span><span class="footMusic"><button class="mBtn mPlay" id="mPlay" type="button" title="Play or pause music" aria-label="Play or pause music"></button><button class="mBtn" id="mNext" type="button" title="Next song" aria-label="Next song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5v14l9.5-7L5 5z"/><rect x="16" y="5" width="3.4" height="14" rx="1.2"/></svg></button></span></div>
+    <div class="homeFoot" id="musicBar"><span class="footIcon" id="footShell" role="button" tabindex="-1" aria-label="🐚">🐚</span><span class="footText"><b>Collect 5 stars to win a level!</b><em id="footSub">Tip: turn your volume up &amp; press F11.</em></span><span class="footMusic"><button class="mBtn mPlay micon micon-play" id="mPlay" type="button" title="Play or pause music" aria-label="Play or pause music"></button><button class="mBtn micon micon-next" id="mNext" type="button" title="Next song" aria-label="Next song"></button></span></div>
   </div>
 
   <!-- GAME: the painted interface illustration with live overlays -->
@@ -1562,8 +1585,8 @@
       <div class="volRow"><span class="vIco">🗣️</span><input type="range" id="volVoice" min="0" max="100" step="1" aria-label="Voice volume"></div>
     </div>
     <div id="gamePlayer" aria-label="Music player">
-      <button class="gpBtn gpPlay" id="gpPlay" type="button" title="Play or pause music" aria-label="Play or pause music"></button>
-      <button class="gpBtn" id="gpNext" type="button" title="Next song" aria-label="Next song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5v14l9.5-7L5 5z"/><rect x="16" y="5" width="3.4" height="14" rx="1.2"/></svg></button>
+      <button class="gpBtn gpPlay micon micon-play" id="gpPlay" type="button" title="Play or pause music" aria-label="Play or pause music"></button>
+      <button class="gpBtn micon micon-next" id="gpNext" type="button" title="Next song" aria-label="Next song"></button>
     </div>
     <div class="gameStage">
       <video id="gameBg" class="bg" src="gameui_anim.mp4" poster="gameui.png" muted loop autoplay playsinline preload="auto"></video>
@@ -3049,14 +3072,14 @@
   function musicShouldPlay() {                                   // music now plays on the menu AND during lessons
     return !A.isMuted() && !musicPaused;
   }
-  // theme-colored SVG icons (emoji glyphs render as flat black on some platforms)
-  const SVG_PLAY  = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.8v14.4L19 12 7 4.8z"/></svg>';
-  const SVG_PAUSE = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.5" y="4.5" width="4.4" height="15" rx="1.4"/><rect x="14.1" y="4.5" width="4.4" height="15" rx="1.4"/></svg>';
+  // Play/pause + next icons are drawn in pure CSS (see .micon-* rules) — no SVG or
+  // emoji, so they render identically on every browser, including iOS/iPadOS Safari
+  // (where percentage-sized inline SVG in a flex button was collapsing to nothing).
   function updateMusicUI() {
     const playing = musicShouldPlay();
     const solo = list().length <= 1;
-    if (mPlayEl)  mPlayEl.innerHTML = playing ? SVG_PAUSE : SVG_PLAY;
-    if (gpPlayEl) gpPlayEl.innerHTML = playing ? SVG_PAUSE : SVG_PLAY;
+    if (mPlayEl)  mPlayEl.classList.toggle('is-playing', playing);
+    if (gpPlayEl) gpPlayEl.classList.toggle('is-playing', playing);
     if (mNextEl)  mNextEl.style.display  = solo ? 'none' : '';   // one song → nothing to skip to
     if (gpNextEl) gpNextEl.style.display = solo ? 'none' : '';
   }

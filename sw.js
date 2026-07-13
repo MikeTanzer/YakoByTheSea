@@ -1,6 +1,7 @@
 /* Yako by the Sea — service worker (offline + installable PWA) */
-const CORE = 'yako-core-v22';    // versioned: bumped whenever the code/art below changes
-const MEDIA = 'yako-media';      // persistent: recorded clips cached as they play (survives version bumps)
+const CORE = 'yako-core-v24';    // versioned: bumped whenever the code/art below changes
+const MEDIA = 'yako-media';      // persistent: clips + scene stills cached as played (survives version bumps)
+const FONTS = 'yako-fonts';      // persistent: Google Fonts CSS + woff2 (so text looks right offline)
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -29,18 +30,34 @@ const CORE_ASSETS = [
   './ui/icon-512.png',
   './ui/icon-maskable-512.png'
 ];
+// Painted scene stills + the piper are small; precache them so backgrounds show
+// OFFLINE even before the (large, runtime-cached) looping videos are downloaded.
+const MEDIA_PRECACHE = [
+  './scenes/mission.png', './scenes/bigsur.png', './scenes/carmelvalley.png',
+  './scenes/pebble.png', './scenes/pacificgrove.png', './scenes/montereybay.png',
+  './scenes/piper.png'
+];
+
+// Add a list to a cache one-by-one so a single missing/renamed file can't fail the
+// whole install (which would silently break offline for everyone).
+function addAllSafe(cacheName, urls) {
+  return caches.open(cacheName).then((c) =>
+    Promise.all(urls.map((u) => c.add(u).catch(() => {})))
+  );
+}
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CORE).then((c) => c.addAll(CORE_ASSETS)).then(() => self.skipWaiting())
+    Promise.all([addAllSafe(CORE, CORE_ASSETS), addAllSafe(MEDIA, MEDIA_PRECACHE)])
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      // drop stale CORE versions, but keep the persistent MEDIA cache of downloaded clips
-      .then((keys) => Promise.all(keys.filter((k) => k !== CORE && k !== MEDIA).map((k) => caches.delete(k))))
+      // drop stale CORE versions; keep the persistent MEDIA + FONTS caches
+      .then((keys) => Promise.all(keys.filter((k) => k !== CORE && k !== MEDIA && k !== FONTS).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -50,22 +67,32 @@ const isMedia = (url) => url.origin === location.origin &&
   (url.pathname.includes('/voice/') ||
    (/\.(mp3|jpg|jpeg|png|mp4)$/i.test(url.pathname) && url.pathname.includes('/scenes/')));
 
+// Cache-first helper for immutable, persistent assets (media, fonts).
+function cacheFirst(cacheName, req) {
+  return caches.open(cacheName).then((c) => c.match(req).then((hit) =>
+    hit || fetch(req).then((res) => {
+      if (res && (res.ok || res.type === 'opaque')) c.put(req, res.clone());
+      return res;
+    }).catch(() => hit)
+  ));
+}
+
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // Recorded voice clips (and static scene images): cache-first so replays work OFFLINE.
-  // Stored full (they are played start-to-finish, never range-seeked).
+  // Google Fonts (stylesheet + woff2 files): cache-first so text renders in the
+  // right font OFFLINE after the first online visit.
+  if (url.host === 'fonts.googleapis.com' || url.host === 'fonts.gstatic.com') {
+    e.respondWith(cacheFirst(FONTS, req));
+    return;
+  }
+
+  // Recorded voice clips + painted scene stills: cache-first so replays work OFFLINE.
+  // Stored full (played start-to-finish, never range-seeked).
   if (isMedia(url) && !req.headers.has('range')) {
-    e.respondWith(
-      caches.open(MEDIA).then((c) => c.match(req).then((hit) =>
-        hit || fetch(req).then((res) => {
-          if (res && res.status === 200) c.put(req, res.clone());
-          return res;
-        }).catch(() => hit)
-      ))
-    );
+    e.respondWith(cacheFirst(MEDIA, req));
     return;
   }
 
