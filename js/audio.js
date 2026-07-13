@@ -43,6 +43,23 @@ window.YAKO.audio = (function () {
     if (actx.state === 'suspended') actx.resume();
   }
   const out = () => master || actx.destination;
+  // Route an <audio> element through the Web Audio graph and return a GainNode that
+  // controls its volume. On iOS/iPadOS, HTMLMediaElement.volume is READ-ONLY (ignored),
+  // so a page fader can't change music loudness via el.volume — a GainNode can.
+  // createMediaElementSource may be called only once per element, so we cache it.
+  function musicChannel(el) {
+    ensureAudio();
+    if (el._yakoGain === undefined) {
+      try {
+        const src = actx.createMediaElementSource(el);
+        const g = actx.createGain();
+        src.connect(g); g.connect(actx.destination);   // independent of the voice/SFX master
+        el._yakoGain = g;
+        el.volume = 1;                                  // volume now lives on the gain node
+      } catch (e) { el._yakoGain = null; }              // fall back to el.volume if routing fails
+    }
+    return el._yakoGain;
+  }
   let activeNodes = [];
   function trackNode(node) {
     activeNodes.push(node);
@@ -340,7 +357,7 @@ window.YAKO.audio = (function () {
   return {
     setMuted: setMuted, isMuted: isMuted,
     setVolume: setVolume, getVolume: getVolume,
-    ensureAudio: ensureAudio, stopAllSounds: stopAllSounds,
+    ensureAudio: ensureAudio, musicChannel: musicChannel, stopAllSounds: stopAllSounds,
     playApplause: playApplause, playChime: playChime, playTryAgainTone: playTryAgainTone, playNote: playNote, playTone: playTone,
     startBarkLoop: startBarkLoop, stopBarkLoop: stopBarkLoop,
     setPersona: setPersona, getPersona: getPersona, pickVoice: pickVoice,

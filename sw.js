@@ -1,5 +1,5 @@
 /* Yako by the Sea — service worker (offline + installable PWA) */
-const CORE = 'yako-core-v21';    // versioned: bumped whenever the code/art below changes
+const CORE = 'yako-core-v22';    // versioned: bumped whenever the code/art below changes
 const MEDIA = 'yako-media';      // persistent: recorded clips cached as they play (survives version bumps)
 const CORE_ASSETS = [
   './',
