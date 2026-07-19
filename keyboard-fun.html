@@ -2610,7 +2610,7 @@
   // A correct letter/digit in a Spelling/Counting word: advance, or finish the word.
   function seqAdvance(pressed) {
     stopAllSounds();
-    clearEar();               // the child has started playing it back — stop the melody's auto-repeat
+    clearEar();               // stop the current melody repeat (it restarts below with only the notes left)
     clearHintTimer();
     flashKey(pressed, true);
     popChar(pressed, '#2bb673');
@@ -2624,7 +2624,11 @@
     clearKeyHighlights();
     hintStage = 0; scheduleHint();
     if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>Nice!</b><span>Keep going!</span>'; }
-    if (mode !== 'chords' && mode !== 'melody') { const na = challenge.answer; playPersona(isNum(na) ? 'find_num_' + na : 'find_let_' + na, L().next(na), { rate: 1.0 }); }
+    if (mode === 'melody') {
+      // Replay only the notes STILL to go, repeating, so the child hears what comes next.
+      const remaining = challenge.seq.slice(challenge.idx);
+      earTimer = setTimeout(() => playMelody(remaining, { repeat: true }), 900);
+    } else if (mode !== 'chords') { const na = challenge.answer; playPersona(isNum(na) ? 'find_num_' + na : 'find_let_' + na, L().next(na), { rate: 1.0 }); }
   }
   function seqComplete() {
     locked = true;
