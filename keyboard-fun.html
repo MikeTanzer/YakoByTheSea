@@ -2345,8 +2345,16 @@
   // Melodies: hear a short tune (notes one at a time), play it back note by note.
   function playMelody(seq, opts) {
     clearEar();
+    opts = opts || {};
     let i = 0;
-    const step = () => { if (i >= seq.length) return; playTone([NOTE_FREQ[seq[i++]]], { dur: 0.45 }); earTimer = setTimeout(step, 480); };
+    const step = () => {
+      if (i >= seq.length) {
+        if (opts.repeat) earTimer = setTimeout(() => playMelody(seq, opts), 2600);   // replay the whole tune after a short pause
+        return;
+      }
+      playTone([NOTE_FREQ[seq[i++]]], { dur: 0.45 });
+      earTimer = setTimeout(step, 480);
+    };
     step();
   }
   function buildMelody() {
@@ -2358,7 +2366,7 @@
       style: 'seq', word: mel.name, seq: seq, idx: 0, answer: seq[0], kind: 'note', choices: true,
       name: 'mel_' + mel.name.replace(/\s/g, ''),
       render() { renderChordCard(mel.name, this.seq, this.idx); renderNoteChoices(pool); },
-      play() { playMelody(seq); },                 // the piper plays the tune, one note at a time
+      play() { playMelody(seq, { repeat: true }); },   // the piper plays the tune, then repeats it until the child plays it back
       revealAll() { renderChordCard(mel.name, this.seq, this.seq.length); }
     };
   }
@@ -2602,6 +2610,7 @@
   // A correct letter/digit in a Spelling/Counting word: advance, or finish the word.
   function seqAdvance(pressed) {
     stopAllSounds();
+    clearEar();               // the child has started playing it back — stop the melody's auto-repeat
     clearHintTimer();
     flashKey(pressed, true);
     popChar(pressed, '#2bb673');
@@ -2927,7 +2936,10 @@
     }
     I.setPlayerName(playerName);   // the narrator greets the child by name
     if (typeof updateThemeMusic === 'function') updateThemeMusic();   // music keeps playing into the lesson
-    if (typeof fadeMusicDuck === 'function') fadeMusicDuck(0.6, 1200);  // slowly dip the music −40% so the narrator is clear
+    // Melodies fully mutes the background music so the tune is crystal clear; every
+    // other lesson just dips it −40%. Because startGame runs for each lesson, the
+    // music automatically comes back to the −40% level on the NEXT lesson.
+    if (typeof fadeMusicDuck === 'function') fadeMusicDuck(mode === 'melody' ? 0 : 0.6, mode === 'melody' ? 500 : 1200);
     ensureAudio();
     speak(" ");
     startScreen.style.display = 'none';
