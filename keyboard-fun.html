@@ -490,12 +490,11 @@
   /* Yako waves & the puppy wags its tail — a transparent PNG sprite sheet (40 frames)
      stepped by CSS, ping-ponged with 'alternate' for a seamless loop. */
   .homeChar { position: fixed; right: 0; bottom: 0; z-index: 1; pointer-events: none;
-    height: 52vh; width: calc(52vh * 0.7037);
-    background-image: url('ui/yako_wave.png'); background-repeat: no-repeat;
-    background-size: 4000% 100%; background-position: 0% 0%;
+    height: 52vh; width: calc(52vh * 0.582);
+    background-image: url('ui/yako_home.png'); background-repeat: no-repeat;
+    background-size: contain; background-position: center bottom;
     filter: drop-shadow(0 8px 14px rgba(0,0,0,.35));
     animation: charIn .8s ease-out both,
-               yakoWave 3.4s steps(39) .8s infinite alternate,
                charBob 4.5s ease-in-out .8s infinite; }
   .homeUI { margin-left: 0; }
   /* Desktop: a single NARROW, centered card (phone-style) — START never grows
@@ -504,18 +503,23 @@
     #start { justify-content: center; }
     .homeUI { max-width: none; }
     .homeCard { width: min(440px, 92vw); max-height: 66vh; }   /* room for the big desktop title above + foot ribbon below */
-    .homeChar { height: 58vh; width: calc(58vh * 0.7037); right: 1vw; }
+    .homeChar { height: 58vh; width: calc(58vh * 0.582); right: 1vw; }
   }
   @media (min-width: 761px) and (min-aspect-ratio: 16/9) {
-    .homeChar { height: 64vh; width: calc(64vh * 0.7037); }
+    .homeChar { height: 64vh; width: calc(64vh * 0.582); }
   }
 
   /* ---- Living storybook: gentle idle animations + an intro on load ---- */
   /* scaleX(-1) mirrors Yako so he waves with his RIGHT hand; baked into every
      transform keyframe so the running animations don't drop the flip. */
   @keyframes charIn   { from { transform: scaleX(-1) translateX(45%); opacity: 0; } to { transform: scaleX(-1) translateX(0); opacity: 1; } }
-  @keyframes charBob  { 0%,100% { transform: scaleX(-1) translateY(0); } 50% { transform: scaleX(-1) translateY(-1.1vh); } }
-  @keyframes yakoWave { from { background-position-x: 0%; } to { background-position-x: 100%; } }
+  /* lively idle: the boy + puppy bob and gently rock (scaleX(-1) keeps him waving with his right hand) */
+  @keyframes charBob  {
+    0%,100% { transform: scaleX(-1) translateY(0) rotate(0deg); }
+    25%     { transform: scaleX(-1) translateY(-1.3vh) rotate(1.5deg); }
+    50%     { transform: scaleX(-1) translateY(0) rotate(0deg); }
+    75%     { transform: scaleX(-1) translateY(-1.3vh) rotate(-1.5deg); }
+  }
   @keyframes titleIn { 0% { transform: translateY(-28px) scale(.8); opacity: 0; } 60% { transform: translateY(0) scale(1.07); } 100% { transform: translateY(0) scale(1); opacity: 1; } }
   @keyframes cardIn  { from { transform: translateY(42px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   @keyframes ribbonIn{ 0% { transform: scale(.6); opacity: 0; } 70% { transform: scale(1.12); } 100% { transform: scale(1); opacity: 1; } }
