@@ -173,6 +173,13 @@ window.YAKO.audio = (function () {
   }
   // Music lesson: play a pure note or a chord (array of frequencies) with a soft
   // triangle voice + gentle ADSR. Chords play together; pass {arp:true} to roll them.
+  // Note timbre: 'default' (soft triangle) everywhere, or 'bagpipe' (reedy) — used
+  // only in the Music lessons so those A–G notes match the bagpiper. No samples:
+  // it's synthesized, so it's exactly pitched, works offline, and is instant.
+  let noteTimbre = 'default';
+  function setNoteTimbre(t) { noteTimbre = (t === 'bagpipe') ? 'bagpipe' : 'default'; }
+  function getNoteTimbre() { return noteTimbre; }
+
   function playTone(freqs, opts) {
     ensureAudio();
     if (muted || !actx) return;
@@ -180,20 +187,48 @@ window.YAKO.audio = (function () {
     freqs = Array.isArray(freqs) ? freqs : [freqs];
     const now = actx.currentTime;
     const dur = opts.dur || 0.95;
-    const peak = (opts.gain || 0.34) / Math.max(1, Math.sqrt(freqs.length));   // keep chords from clipping
+    const bagpipe = opts.bagpipe || noteTimbre === 'bagpipe';
+    const peak = (opts.gain || (bagpipe ? 0.26 : 0.34)) / Math.max(1, Math.sqrt(freqs.length));   // keep chords from clipping
     freqs.forEach((f, i) => {
       const t = now + (opts.arp ? i * 0.16 : 0);
-      const osc = actx.createOscillator();
       const gain = actx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.value = f;
-      gain.gain.setValueAtTime(0.0001, t);
-      gain.gain.exponentialRampToValueAtTime(peak, t + 0.02);
-      gain.gain.linearRampToValueAtTime(peak * 0.7, t + dur * 0.55);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
-      osc.connect(gain); gain.connect(out());
-      if (!opts.keep) trackNode(osc);   // keep:true lets the note ring out even through stopAllSounds()
-      osc.start(t); osc.stop(t + dur + 0.05);
+      gain.connect(out());
+      if (bagpipe) {
+        // Reedy bagpipe chanter: two slightly-detuned sawtooths through a low-pass +
+        // a peaking "reed" formant (~1.9 kHz), with a gentle 5.4 Hz vibrato.
+        const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4200; lp.Q.value = 0.6;
+        const reed = actx.createBiquadFilter(); reed.type = 'peaking'; reed.frequency.value = 1900; reed.Q.value = 1.4; reed.gain.value = 9;
+        lp.connect(reed); reed.connect(gain);
+        const vibLfo = actx.createOscillator(); vibLfo.type = 'sine'; vibLfo.frequency.value = 5.4;
+        const vibDepth = actx.createGain(); vibDepth.gain.value = 14;   // ±14 cents of pitch wobble
+        vibLfo.connect(vibDepth);
+        [0, 7].forEach((det) => {
+          const o = actx.createOscillator();
+          o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = det;
+          vibDepth.connect(o.detune);
+          o.connect(lp);
+          if (!opts.keep) trackNode(o);
+          o.start(t); o.stop(t + dur + 0.05);
+        });
+        vibLfo.start(t); vibLfo.stop(t + dur + 0.05);
+        if (!opts.keep) trackNode(vibLfo);
+        // quick reed onset, steady sustain, short release (bagpipes barely decay)
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(peak, t + 0.05);
+        gain.gain.setValueAtTime(peak, t + dur * 0.8);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      } else {
+        const osc = actx.createOscillator();
+        osc.type = 'triangle';
+        osc.frequency.value = f;
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(peak, t + 0.02);
+        gain.gain.linearRampToValueAtTime(peak * 0.7, t + dur * 0.55);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+        osc.connect(gain);
+        if (!opts.keep) trackNode(osc);   // keep:true lets the note ring out even through stopAllSounds()
+        osc.start(t); osc.stop(t + dur + 0.05);
+      }
     });
   }
   // The old synthesized menu bark was retired (it read as a "recurring noise").
@@ -359,6 +394,7 @@ window.YAKO.audio = (function () {
     setVolume: setVolume, getVolume: getVolume,
     ensureAudio: ensureAudio, musicChannel: musicChannel, stopAllSounds: stopAllSounds,
     playApplause: playApplause, playChime: playChime, playTryAgainTone: playTryAgainTone, playNote: playNote, playTone: playTone,
+    setNoteTimbre: setNoteTimbre, getNoteTimbre: getNoteTimbre,
     startBarkLoop: startBarkLoop, stopBarkLoop: stopBarkLoop,
     setPersona: setPersona, getPersona: getPersona, pickVoice: pickVoice,
     speak: speak, speakName: speakName,

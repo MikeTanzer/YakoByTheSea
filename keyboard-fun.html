@@ -2938,6 +2938,9 @@
   // ---------- Start / menu ----------
   function startGame(m) {
     mode = m;
+    // Music lessons play the A–G notes with a reedy bagpipe timbre (to match the
+    // piper); every other lesson uses the soft default tone.
+    if (A.setNoteTimbre) A.setNoteTimbre(MUSIC_MODES.indexOf(mode) >= 0 ? 'bagpipe' : 'default');
     playerName = ((nameInput && nameInput.value) || '').trim().replace(/\s{2,}/g, ' ');
     if (playerName) {
       playerName = playerName.charAt(0).toUpperCase() + playerName.slice(1);
