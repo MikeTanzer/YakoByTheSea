@@ -148,7 +148,7 @@
   #start .modeBtn[data-mode="listen"] .title { font-size: clamp(15px, 1.5vw, 23px); }
 
   /* ===== START (campaign) button + lesson chooser ===== */
-  #startBtn {
+  #startBtn, #storyBtn {
     --bg: #e0a11c; position: relative; width: 100%; box-sizing: border-box; min-height: clamp(88px, 11vh, 120px);
     border: 4px solid #f2d274; border-radius: 24px; padding: 1.4vh 1vw 1.1vh; cursor: pointer; text-align: center;
     color: #fff7e5; font-family: Georgia, serif; overflow: hidden;
@@ -159,37 +159,56 @@
     outline: 3px solid color-mix(in srgb, var(--bg), #000 30%);
     transition: transform .12s ease, box-shadow .12s ease;
   }
-  #startBtn::before { content: ''; position: absolute; inset: 6px; pointer-events: none;
+  /* Stories get a friendly storybook blue so kids can tell the two big buttons apart */
+  #storyBtn { --bg: #3f8fb0; border-color: #bfe3f2; }
+  #startBtn::before, #storyBtn::before { content: ''; position: absolute; inset: 6px; pointer-events: none;
     border: 2px solid rgba(255,255,255,.7); border-radius: 18px; }
-  #startBtn:hover { transform: translateY(-2px); }
-  #startBtn:active { transform: translateY(5px);
+  #startBtn:hover, #storyBtn:hover { transform: translateY(-2px); }
+  #startBtn:active, #storyBtn:active { transform: translateY(5px);
     box-shadow: 0 3px 0 color-mix(in srgb, var(--bg), #000 38%), 0 6px 10px rgba(34,21,4,.18); }
-  #startBtn .title { display: block; font-weight: 900; line-height: 1; font-size: clamp(28px, 3vw, 44px);
+  #startBtn .title, #storyBtn .title { display: block; font-weight: 900; line-height: 1; font-size: clamp(28px, 3vw, 44px);
     letter-spacing: .1em; margin-bottom: .6vh; text-shadow: 2px 2px 0 rgba(35,22,8,.85); }
-  #startBtn .sub { display: block; font-weight: 900; font-size: clamp(13px, 1.3vw, 20px);
+  #startBtn .sub, #storyBtn .sub { display: block; font-weight: 900; font-size: clamp(13px, 1.3vw, 20px);
     font-family: 'Trebuchet MS', Georgia, serif; letter-spacing: .06em; text-shadow: 1px 1px 0 rgba(35,22,8,.7); }
-  #chooseBtn { cursor: pointer; border: 3px solid var(--gold); border-radius: 999px;
+  #chooseBtn, #chooseStoryBtn { cursor: pointer; border: 3px solid var(--gold); border-radius: 999px;
     background: #fff7df; color: #7a5a2e; font-family: 'Baloo 2', Georgia, serif; font-weight: 800;
     font-size: clamp(14px, 1.3vw, 20px); padding: .8vh 2.4vw; box-shadow: 0 4px 10px rgba(60,45,15,.25);
     transition: transform .12s ease; }
-  #chooseBtn:hover { transform: translateY(-2px); }
-  #chooseBtn .chev { display: inline-block; transition: transform .2s ease; }
+  #chooseStoryBtn { border-color: var(--blue); color: #2b587f; background: #eef6fc; }
+  #chooseBtn:hover, #chooseStoryBtn:hover { transform: translateY(-2px); }
+  #chooseBtn .chev, #chooseStoryBtn .chev { display: inline-block; transition: transform .2s ease; }
   .homeCard:not(.lessonsOpen) .lessonGroups { display: none; }
-  /* ===== "Choose a lesson" swaps the whole card to a dedicated lessons page ===== */
+  .homeCard:not(.storiesOpen) .storyList { display: none; }
+  /* ===== "Choose a lesson"/"Choose a story" swap the whole card to a dedicated page ===== */
   .homeCard.lessonsOpen > :not(.lessonGroups):not(.lessonsHead) { display: none !important; }
+  .homeCard.storiesOpen > :not(.storyList):not(.storiesHead) { display: none !important; }
+  .homeCard.storiesOpen { max-height: 80vh; }
+  .homeCard.storiesOpen #chooseStoryBtn .chev { transform: rotate(180deg); }
+  .storiesHead { display: none; width: 100%; align-items: center; gap: 1vw; }
+  .homeCard.storiesOpen .storiesHead { display: flex; }
+  .storyList { display: flex; flex-direction: column; gap: 1.1vh; width: 100%; }
+  .storyPick { cursor: pointer; display: flex; align-items: center; gap: .8em; text-align: left;
+    border: 3px solid var(--blue); border-radius: 18px; background: #eef6fc; color: #234; padding: 1.2vh 1.1em;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(15px, 1.5vw, 22px);
+    box-shadow: 0 4px 10px rgba(20,45,75,.18); transition: transform .12s ease, box-shadow .12s ease; }
+  .storyPick:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(20,45,75,.26); }
+  .storyPick:active { transform: translateY(2px); }
+  .storyPick .spEmoji { font-size: 1.6em; line-height: 1; flex: 0 0 auto; }
+  .storyPick .spText { display: flex; flex-direction: column; line-height: 1.1; min-width: 0; }
+  .storyPick .spDone { font-size: .7em; color: #2f7d3a; font-weight: 800; }
   .homeCard.lessonsOpen { max-height: 80vh; }
   .lessonsHead { display: none; width: 100%; align-items: center; gap: 1vw; }
   .homeCard.lessonsOpen .lessonsHead { display: flex; }
-  #lessonsBack { cursor: pointer; flex: 0 0 auto; border: 3px solid var(--gold); border-radius: 999px;
+  #lessonsBack, #storiesBack { cursor: pointer; flex: 0 0 auto; border: 3px solid var(--gold); border-radius: 999px;
     background: #fff7df; color: #7a5a2e; font-family: 'Baloo 2', sans-serif; font-weight: 800;
     font-size: clamp(13px, 1.2vw, 18px); padding: .7vh 1.6vw; box-shadow: 0 3px 8px rgba(60,45,15,.22);
     transition: transform .12s ease; }
-  #lessonsBack:hover { transform: translateY(-1px); }
-  #lessonsBack:active { transform: scale(.94); }
-  .lessonsHead .lhTitle { flex: 1; min-width: 0; text-align: center; font-family: 'Baloo 2', sans-serif; font-weight: 800;
+  #lessonsBack:hover, #storiesBack:hover { transform: translateY(-1px); }
+  #lessonsBack:active, #storiesBack:active { transform: scale(.94); }
+  .lessonsHead .lhTitle, .storiesHead .lhTitle { flex: 1; min-width: 0; text-align: center; font-family: 'Baloo 2', sans-serif; font-weight: 800;
     color: #6e4f24; font-size: clamp(15px, 1.6vw, 22px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* invisible mirror of the Back button so the title stays centered */
-  .lessonsHead .lhSpacer { flex: 0 0 auto; visibility: hidden; border: 3px solid transparent;
+  .lessonsHead .lhSpacer, .storiesHead .lhSpacer { flex: 0 0 auto; visibility: hidden; border: 3px solid transparent;
     font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(13px, 1.2vw, 18px); padding: .7vh 1.6vw; }
   #lessonsFun { cursor: pointer; flex: 0 0 auto; border: 3px solid var(--gold); border-radius: 999px;
     background: linear-gradient(180deg, #ffd977, #f0b73c); color: #5b4327;
@@ -1355,12 +1374,13 @@
     .homeCard { width: 92vw; max-width: 92vw; box-sizing: border-box; padding: 2.4vh 4vw; gap: 1.6vh; border-width: 4px; }
 
     /* START + lesson chooser sized for phones */
-    #startBtn { width: 100%; min-height: 14vh; border-radius: 22px; }
-    #startBtn .title { font-size: 8.5vw; }
-    #startBtn .sub { font-size: 3.6vw; }
+    #startBtn, #storyBtn { width: 100%; min-height: 14vh; border-radius: 22px; }
+    #startBtn .title, #storyBtn .title { font-size: 8.5vw; }
+    #startBtn .sub, #storyBtn .sub { font-size: 3.6vw; }
     /* controls stack neatly: chooser on top, then language + narrator cards */
     .homeControls { flex-direction: column; align-items: stretch; width: 100%; gap: 1.2vh; }
-    #chooseBtn { font-size: 4.6vw; padding: 1.4vh 6vw; width: 100%; box-sizing: border-box; }
+    #chooseBtn, #chooseStoryBtn { font-size: 4.6vw; padding: 1.4vh 6vw; width: 100%; box-sizing: border-box; }
+    .storyPick { font-size: 4.4vw; }
     .ctrlGroup { width: 100%; box-sizing: border-box; padding: 1vh 2vw 1.2vh; }
     .ctrlLabel { font-size: 3vw; }
     .toggleRow { justify-content: center; gap: 2.4vw; }
@@ -1511,7 +1531,96 @@
 
     /* keep the celebratory popups from cluttering the small screen */
     #game #buddy { display: none; }
+
+    /* ===== Story Time on phones ===== */
+    .storyCard { max-width: 94vw; padding: 2.4vh 5vw; }
+    #storyText { font-size: 4.6vw; }
+    #storyArt { font-size: 12vw; }
+    #storyTitle { font-size: 4.4vw; }
+    .stKey { font-size: 6vw; min-width: 12vw; }
+    .stChoice { font-size: 9vw; }
+    .stTile, .stSlot { font-size: 4.6vw; }
   }
+
+  /* ================= Story Time ================= */
+  #story { position: fixed; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center;
+    overflow: hidden; background: #123; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+  #story.show { display: flex; }
+  #storyBg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  #storyScrim { position: absolute; inset: 0; background: radial-gradient(120% 90% at 50% 40%, rgba(10,20,35,.12), rgba(10,20,35,.55)); }
+  #storyHome { position: absolute; top: max(2vh, env(safe-area-inset-top)); left: max(2vw, env(safe-area-inset-left)); z-index: 3;
+    cursor: pointer; border: 3px solid #fff; border-radius: 999px; background: rgba(0,0,0,.35); color: #fff;
+    font-size: clamp(20px, 2.4vw, 30px); width: clamp(46px, 5vw, 60px); height: clamp(46px, 5vw, 60px); line-height: 1;
+    box-shadow: 0 4px 12px rgba(0,0,0,.35); transition: transform .12s ease; }
+  #storyHome:hover { transform: translateY(-2px); }
+  #storyHome:active { transform: scale(.92); }
+  #storyStars { position: absolute; top: max(2vh, env(safe-area-inset-top)); right: max(2vw, env(safe-area-inset-right)); z-index: 3;
+    font-family: 'Baloo 2', sans-serif; font-weight: 900; color: #fff; font-size: clamp(18px, 2vw, 26px);
+    background: rgba(0,0,0,.35); border: 2px solid rgba(255,255,255,.7); border-radius: 999px; padding: .5vh 1.1vw;
+    text-shadow: 0 2px 4px rgba(0,0,0,.4); }
+  .storyCard { position: relative; z-index: 2; width: min(760px, 88vw); max-height: 86vh; overflow-y: auto;
+    display: flex; flex-direction: column; align-items: center; gap: 1.4vh; text-align: center;
+    background: #f4e8c8; border: 5px solid var(--gold); border-radius: 26px; padding: 3vh 3vw;
+    box-shadow: 0 16px 36px rgba(40,30,10,.5), inset 0 0 0 3px rgba(255,255,255,.4); }
+  #storyTitle { font-family: 'Baloo 2', sans-serif; font-weight: 900; color: var(--blue-d); font-size: clamp(18px, 2vw, 28px); }
+  #storyDots { display: flex; gap: .5em; justify-content: center; }
+  #storyDots span { width: clamp(8px, .9vw, 12px); height: clamp(8px, .9vw, 12px); border-radius: 999px;
+    background: rgba(120,95,45,.28); transition: background .2s ease, transform .2s ease; }
+  #storyDots span.on { background: var(--gold-d); }
+  #storyDots span.cur { background: var(--blue); transform: scale(1.3); }
+  #storyArt { font-size: clamp(48px, 6vw, 88px); line-height: 1.1; min-height: 1.1em; letter-spacing: .06em; }
+  #storyArt .stPop { display: inline-block; animation: stPop .4s ease both; }
+  @keyframes stPop { 0% { transform: scale(0) rotate(-20deg); opacity: 0; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+  #storyText { font-family: 'Baloo 2', sans-serif; font-weight: 700; color: var(--ink); font-size: clamp(18px, 1.9vw, 27px);
+    line-height: 1.35; max-width: 32em; }
+  #storyTask { display: flex; flex-wrap: wrap; gap: clamp(8px, 1vw, 14px); justify-content: center; align-items: center; width: 100%; }
+  /* find-a-key pad */
+  .stKey { cursor: pointer; border: 3px solid var(--blue); border-radius: 16px; background: #fff; color: var(--blue-d);
+    font-family: 'Baloo 2', sans-serif; font-weight: 900; font-size: clamp(22px, 2.4vw, 34px);
+    min-width: clamp(48px, 4vw, 64px); padding: .8vh .6em; box-shadow: 0 4px 0 var(--blue-d); transition: transform .1s ease, box-shadow .1s ease; }
+  .stKey:hover { transform: translateY(-2px); }
+  .stKey:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--blue-d); }
+  .stKey.wrong { animation: stShake .4s; border-color: #c0392b; }
+  .stKey.right { background: #dff5df; border-color: #2f7d3a; box-shadow: 0 4px 0 #2f7d3a; }
+  @keyframes stShake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+  /* count emoji + number buttons */
+  .stCount { display: flex; flex-wrap: wrap; gap: .3em; justify-content: center; width: 100%; margin-bottom: .6vh; }
+  .stCount span { font-size: clamp(30px, 4vw, 56px); animation: stPop .4s ease both; }
+  /* choose-a-picture */
+  .stChoice { cursor: pointer; border: 4px solid var(--gold); border-radius: 20px; background: #fff7df;
+    font-size: clamp(40px, 5vw, 72px); padding: 1.2vh 1.4vw; line-height: 1; box-shadow: 0 5px 0 var(--gold-d);
+    transition: transform .1s ease, box-shadow .1s ease; }
+  .stChoice:hover { transform: translateY(-3px); }
+  .stChoice:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--gold-d); }
+  .stChoice.wrong { animation: stShake .4s; }
+  .stChoice.right { border-color: #2f7d3a; box-shadow: 0 5px 0 #2f7d3a; background: #dff5df; }
+  /* tap-to-build tiles */
+  .stSlots { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; width: 100%; margin-bottom: 1vh; }
+  .stSlot { min-width: 3.4em; min-height: 1.8em; border-bottom: 4px dashed var(--gold-d); color: var(--blue-d);
+    font-family: 'Baloo 2', sans-serif; font-weight: 900; font-size: clamp(18px, 2vw, 28px); padding: .2em .5em;
+    display: inline-flex; align-items: center; justify-content: center; }
+  .stSlot.filled { border-bottom-style: solid; }
+  .stTile { cursor: pointer; border: 3px solid var(--blue); border-radius: 14px; background: #eef6fc; color: var(--blue-d);
+    font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(18px, 2vw, 28px); padding: .7vh .9em;
+    box-shadow: 0 4px 0 var(--blue-d); transition: transform .1s ease, opacity .15s ease; }
+  .stTile:hover { transform: translateY(-2px); }
+  .stTile:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--blue-d); }
+  .stTile.used { opacity: .25; pointer-events: none; }
+  .stTile.wrong { animation: stShake .4s; }
+  #storyNav { display: flex; gap: 14px; justify-content: center; min-height: 1px; }
+  .stNext { cursor: pointer; border: 3px solid var(--gold); border-radius: 999px;
+    background: linear-gradient(180deg, #ffd977, #f0b73c); color: #5b4327;
+    font-family: 'Baloo 2', Georgia, serif; font-weight: 800; font-size: clamp(16px, 1.6vw, 24px);
+    padding: 1.1vh 2.8vw; box-shadow: 0 5px 0 #b8862a, 0 8px 14px rgba(60,45,15,.3); transition: transform .12s ease, box-shadow .12s ease; }
+  .stNext:hover { transform: translateY(-2px); }
+  .stNext:active { transform: translateY(3px); box-shadow: 0 2px 0 #b8862a; }
+  /* gentle nudge after a couple of wrong taps — pulse the right answer */
+  .stHint { animation: stPulse 1s ease-in-out infinite; box-shadow: 0 0 0 4px #b6e3b6, 0 4px 0 #2f7d3a !important; border-color: #2f7d3a !important; }
+  @keyframes stPulse { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+  /* ending card reuses the level-complete .winCard styles */
+  #storyWin { position: absolute; inset: 0; z-index: 5; display: none; align-items: center; justify-content: center;
+    background: rgba(20,50,70,.45); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+  #storyWin.show { display: flex; }
 </style>
 </head>
 <body>
@@ -1536,11 +1645,16 @@
           <input id="nameInput" type="text" maxlength="20" autocomplete="off" spellcheck="false" placeholder="type your name">
         </div>
         <button id="startBtn" aria-label="Start the lessons">
-          <span class="title">▶ START</span>
+          <span class="title">▶ START GAME</span>
           <span class="sub" id="startSub">Play all the lessons in order</span>
         </button>
         <div class="homeControls">
           <button id="chooseBtn" aria-expanded="false">📚 Choose a lesson <span class="chev">▾</span></button>
+          <button id="storyBtn" aria-label="Play the story adventures">
+            <span class="title">📖 STORY TIME</span>
+            <span class="sub" id="storySub">Play all the stories together</span>
+          </button>
+          <button id="chooseStoryBtn" aria-expanded="false">📖 Choose a story <span class="chev">▾</span></button>
           <div class="pickRow">
             <div class="picker">
               <button class="pickBtn" id="langPickBtn" aria-haspopup="true" aria-expanded="false">
@@ -1627,6 +1741,12 @@
             <button class="groupHead" type="button" data-mode="free" aria-label="Just for Fun"><span class="ghIcon">🎉</span><span class="ghName">Just for Fun</span></button>
           </section>
         </div>
+        <div class="storiesHead">
+          <button id="storiesBack" type="button" aria-label="Back">🏠 Back</button>
+          <span class="lhTitle">📖 Pick a story</span>
+          <span class="lhSpacer" aria-hidden="true">🏠 Back</span>
+        </div>
+        <div class="storyList" id="storyList"></div>
       </div>
     </div>
     <div class="homeChar" role="img" aria-label="Yako waving"></div>
@@ -1685,6 +1805,23 @@
       <div id="reactionCaption"></div>
     </div>
     <div id="win"></div>
+  </div>
+
+  <!-- STORY TIME: a self-contained storybook player over a painted Monterey scene -->
+  <div id="story">
+    <video id="storyBg" muted loop playsinline preload="auto"></video>
+    <div id="storyScrim"></div>
+    <button id="storyHome" type="button" title="Back to menu" aria-label="Back to menu">🏠</button>
+    <div id="storyStars">⭐ 0</div>
+    <div class="storyCard">
+      <div id="storyTitle"></div>
+      <div id="storyDots" aria-hidden="true"></div>
+      <div id="storyArt" aria-hidden="true"></div>
+      <div id="storyText"></div>
+      <div id="storyTask"></div>
+      <div id="storyNav"></div>
+    </div>
+    <div id="storyWin"></div>
   </div>
 
   <!-- Player profile: a round avatar pinned to the upper-right corner (both home & in-game).
@@ -1764,6 +1901,7 @@
 <script src="data/lessons.js"></script>
 <script src="data/vocab.js"></script>
 <script src="data/music.js"></script>
+<script src="data/stories.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/cloud.js"></script>
@@ -3022,6 +3160,268 @@
   }
   winEl.addEventListener('click', () => finishWin(defaultWinAct));
 
+  // ================= Story Time =================
+  // A self-contained storybook player, parallel to the lesson game. Stories live in
+  // data/stories.js (window.YAKO_STORIES); each is a list of "beats" (a narration line,
+  // optionally with a little tap-task). Correct taps earn the same stars as lessons.
+  const STORIES = (window.YAKO_STORIES && window.YAKO_STORIES.length) ? window.YAKO_STORIES : [];
+  const storyEl      = document.getElementById('story');
+  const storyBgEl    = document.getElementById('storyBg');
+  const storyStarsEl = document.getElementById('storyStars');
+  const storyTitleEl = document.getElementById('storyTitle');
+  const storyDotsEl  = document.getElementById('storyDots');
+  const storyArtEl   = document.getElementById('storyArt');
+  const storyTextEl  = document.getElementById('storyText');
+  const storyTaskEl  = document.getElementById('storyTask');
+  const storyNavEl   = document.getElementById('storyNav');
+  const storyWinEl   = document.getElementById('storyWin');
+  const storyListEl  = document.getElementById('storyList');
+  let curStoryIdx = 0, curStory = null, curBeat = 0, storyCampaign = false;
+  let storyLocked = false, storyTimer = null, beatWrongs = 0;
+
+  function setStoryScene(id) {
+    if (!storyBgEl || !id) return;
+    const png = 'scenes/' + id + '.png';
+    const mp4 = png.replace(/\.png$/, '.mp4') + '?v=' + SCENE_V;
+    if (storyBgEl.getAttribute('src') === mp4) return;   // already showing this place
+    storyBgEl.poster = png;
+    storyBgEl.src = mp4;
+    try { storyBgEl.load(); } catch (e) {}
+    storyBgEl.play().catch(() => {});
+  }
+  if (storyBgEl) storyBgEl.addEventListener('play', () => { try { storyBgEl.playbackRate = 0.40; } catch (e) {} });
+
+  function sayStory(text) { try { stopAllSounds(); } catch (e) {} if (text) speak(text, { rate: 1.0 }); }
+  function storyTry() {
+    try { if (A.playTryAgainTone) playTryAgainTone(); } catch (e) {}
+    const tries = (L().tries && L().tries.length) ? L().tries : [L().again || 'Oops! Try again!'];
+    speak(pick(tries), { rate: 1.0 });
+  }
+  function storyCheer() {
+    try { playChime(); } catch (e) {}
+    try { confetti(); } catch (e) {}
+    const key = (typeof nextCheer === 'function') ? nextCheer() : 'cheer';
+    playPersona(key, pick(L().cheers), { rate: 1.05 });
+  }
+  function storyAward() {
+    totalStars = (getNum('yako_points') || 0) + 1;
+    setNum('yako_points', totalStars);
+    updateScore();
+    if (storyStarsEl) storyStarsEl.textContent = '⭐ ' + totalStars;
+    storyCheer();
+  }
+  function storyArt(html) { if (storyArtEl) storyArtEl.innerHTML = html; }
+  function popEmoji(e) { return '<span class="stPop">' + e + '</span>'; }
+
+  function renderDots() {
+    if (!storyDotsEl || !curStory) return;
+    storyDotsEl.innerHTML = curStory.beats.map((b, i) =>
+      '<span class="' + (i < curBeat ? 'on' : (i === curBeat ? 'cur' : '')) + '"></span>').join('');
+  }
+  function advanceSoon(ms) {
+    clearTimeout(storyTimer);
+    storyTimer = setTimeout(() => { curBeat++; renderBeat(); }, ms || 1200);
+  }
+  function beatNext() { clearTimeout(storyTimer); curBeat++; renderBeat(); }
+
+  // Reveal the answer as a gentle nudge after a couple of wrong taps (kids shouldn't get stuck).
+  function maybeHint(correctEl) { if (beatWrongs >= 2 && correctEl) correctEl.classList.add('stHint'); }
+
+  function renderBeat() {
+    if (!curStory) return;
+    if (curBeat >= curStory.beats.length) { finishStory(); return; }
+    const B = curStory.beats[curBeat];
+    storyLocked = false; beatWrongs = 0;
+    renderDots();
+    if (B.scene) setStoryScene(B.scene);
+    if (storyTitleEl) storyTitleEl.textContent = curStory.emoji + ' ' + curStory.title;
+    if (storyTextEl) storyTextEl.textContent = B.say || '';
+    storyTaskEl.innerHTML = '';
+    storyNavEl.innerHTML = '';
+    const task = B.task;
+    if (!task) {
+      storyArt(popEmoji(curStory.emoji));
+      const last = curBeat >= curStory.beats.length - 1;
+      const b = document.createElement('button');
+      b.className = 'stNext'; b.type = 'button';
+      b.textContent = last ? '🎉 Finish' : 'Next ▶';
+      b.addEventListener('click', () => { if (last) finishStory(); else beatNext(); });
+      storyNavEl.appendChild(b);
+      setTimeout(() => sayStory(B.say), 260);
+      return;
+    }
+    if (task.kind === 'find')   renderFind(task, B);
+    else if (task.kind === 'count')  renderCount(task, B);
+    else if (task.kind === 'choose') renderChoose(task, B);
+    else if (task.kind === 'tiles')  renderTiles(task, B);
+    setTimeout(() => sayStory(B.say), 260);
+  }
+
+  function solved() {
+    storyLocked = true;
+    storyAward();
+    advanceSoon(1250);
+  }
+
+  function renderFind(task, B) {
+    const ans = String(task.answer).toUpperCase();
+    storyArt(popEmoji(ans));
+    const isDigit = /^[0-9]$/.test(ans);
+    const pool = (isDigit ? '0123456789' : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ').split('').filter(c => c !== ans);
+    const opts = shuffle(shuffle(pool).slice(0, 3).concat(ans));
+    const correctBtns = [];
+    opts.forEach(c => {
+      const b = document.createElement('button');
+      b.className = 'stKey'; b.type = 'button'; b.textContent = c;
+      if (c === ans) correctBtns.push(b);
+      b.addEventListener('click', () => {
+        if (storyLocked) return;
+        if (c === ans) { b.classList.add('right'); solved(); }
+        else { b.classList.add('wrong'); beatWrongs++; storyTry(); setTimeout(() => b.classList.remove('wrong'), 450); maybeHint(correctBtns[0]); }
+      });
+      storyTaskEl.appendChild(b);
+    });
+  }
+
+  function renderCount(task, B) {
+    const n = task.n;
+    storyArt(Array.from({ length: n }, () => popEmoji(task.emoji || '⭐')).join(''));
+    const maxN = Math.min(9, Math.max(n + 2, 5));
+    let correctBtn = null;
+    for (let k = 1; k <= maxN; k++) {
+      const b = document.createElement('button');
+      b.className = 'stKey'; b.type = 'button'; b.textContent = String(k);
+      if (k === n) correctBtn = b;
+      b.addEventListener('click', () => {
+        if (storyLocked) return;
+        if (k === n) { b.classList.add('right'); solved(); }
+        else { b.classList.add('wrong'); beatWrongs++; storyTry(); setTimeout(() => b.classList.remove('wrong'), 450); maybeHint(correctBtn); }
+      });
+      storyTaskEl.appendChild(b);
+    }
+  }
+
+  function renderChoose(task, B) {
+    storyArt(popEmoji('❓'));
+    let correctBtn = null;
+    shuffle(task.options.slice()).forEach(o => {
+      const b = document.createElement('button');
+      b.className = 'stChoice'; b.type = 'button'; b.textContent = o.emoji;
+      if (o.label) b.title = o.label;
+      if (o.correct) correctBtn = b;
+      b.addEventListener('click', () => {
+        if (storyLocked) return;
+        if (o.correct) { b.classList.add('right'); solved(); }
+        else { b.classList.add('wrong'); beatWrongs++; storyTry(); setTimeout(() => b.classList.remove('wrong'), 450); maybeHint(correctBtn); }
+      });
+      storyTaskEl.appendChild(b);
+    });
+  }
+
+  function renderTiles(task, B) {
+    storyArt(popEmoji('💬'));
+    const target = task.target;
+    let filled = 0;
+    const slotsWrap = document.createElement('div'); slotsWrap.className = 'stSlots';
+    const slots = target.map(() => { const s = document.createElement('div'); s.className = 'stSlot'; slotsWrap.appendChild(s); return s; });
+    const tilesWrap = document.createElement('div'); tilesWrap.className = 'stTiles'; tilesWrap.style.display = 'flex';
+    tilesWrap.style.flexWrap = 'wrap'; tilesWrap.style.gap = 'clamp(8px,1vw,14px)'; tilesWrap.style.justifyContent = 'center';
+    const tileBtns = shuffle(target.map((w, i) => ({ w, i }))).map(({ w }) => {
+      const b = document.createElement('button');
+      b.className = 'stTile'; b.type = 'button'; b.textContent = w; b.dataset.word = w;
+      b.addEventListener('click', () => {
+        if (storyLocked || b.classList.contains('used')) return;
+        if (w === target[filled]) {
+          slots[filled].textContent = w; slots[filled].classList.add('filled');
+          b.classList.add('used'); b.classList.remove('stHint'); filled++;
+          if (filled >= target.length) { speak(target.join(' '), { rate: 1.0 }); solved(); }
+        } else {
+          b.classList.add('wrong'); beatWrongs++; storyTry(); setTimeout(() => b.classList.remove('wrong'), 450);
+          if (beatWrongs >= 2) { const nb = tileBtns.find(t => t.dataset.word === target[filled] && !t.classList.contains('used')); if (nb) nb.classList.add('stHint'); }
+        }
+      });
+      tilesWrap.appendChild(b);
+      return b;
+    });
+    storyTaskEl.appendChild(slotsWrap);
+    storyTaskEl.appendChild(tilesWrap);
+  }
+
+  function finishStory() {
+    clearTimeout(storyTimer);
+    storyLocked = true;
+    try { stopAllSounds(); } catch (e) {}
+    try { localStorage.setItem('yako_story_done_' + curStory.id, '1'); } catch (e) {}
+    const nextIdx = curStoryIdx + 1;
+    const moreInCampaign = storyCampaign && nextIdx < STORIES.length;
+    if (storyCampaign) setNum('yako_story', nextIdx < STORIES.length ? nextIdx : 0);
+    const allDone = storyCampaign && nextIdx >= STORIES.length;
+    const title = allDone ? '🏆 You finished every story!' : 'The End 🌟';
+    const msg = allDone ? "What a wonderful storyteller you are!" : 'Great reading with Yako and his puppy!';
+    let buttons = '';
+    if (moreInCampaign) buttons += '<button class="winBtn" data-act="nextstory">▶ Next story: ' + STORIES[nextIdx].title + '</button>';
+    buttons += '<button class="winBtn alt" data-act="home">🏖️ Back to the beach</button>';
+    storyWinEl.innerHTML =
+      '<div class="winCard">' +
+        '<img class="winYako" src="yako_cheer.png" alt="" onerror="this.style.display=\'none\'">' +
+        '<div class="winTitle">' + title + '</div>' +
+        '<div class="winStars">★★★★★</div>' +
+        '<div class="winVerdict">' + msg + '</div>' +
+        '<div class="winBtns">' + buttons + '</div>' +
+      '</div>';
+    storyWinEl.classList.add('show');
+    storyWinEl.querySelectorAll('.winBtn').forEach(b =>
+      b.addEventListener('click', e => { e.stopPropagation(); storyWinAct(b.dataset.act, nextIdx); }));
+    confetti(); showBuddy(); try { playChime(); } catch (e) {} try { playApplause(4.5); } catch (e) {}
+    playPersonaChain(['level', 'verdict_perfect'], title + ' ' + msg, { rate: 1.0 });
+    clearTimeout(storyTimer);
+    storyTimer = setTimeout(() => storyWinAct(moreInCampaign ? 'nextstory' : 'home', nextIdx), 13000);
+  }
+  function storyWinAct(act, nextIdx) {
+    clearTimeout(storyTimer);
+    storyWinEl.classList.remove('show');
+    if (act === 'nextstory') { openStory(nextIdx, true); return; }
+    storyHome();
+  }
+
+  function openStory(idx, campaign) {
+    if (!STORIES.length) return;
+    curStoryIdx = Math.max(0, Math.min(idx, STORIES.length - 1));
+    curStory = STORIES[curStoryIdx];
+    storyCampaign = !!campaign;
+    curBeat = 0; storyLocked = false;
+    totalStars = getNum('yako_points') || 0;
+    ensureAudio();
+    // leave the home / lesson screens
+    const card = document.querySelector('.homeCard');
+    if (card) card.classList.remove('lessonsOpen', 'subOpen', 'storiesOpen');
+    startScreen.style.display = 'none';
+    game.style.display = 'none';
+    { const pw = document.getElementById('profileWrap'); if (pw) pw.style.display = 'none'; }
+    storyWinEl.classList.remove('show');
+    storyEl.classList.add('show');
+    if (storyStarsEl) storyStarsEl.textContent = '⭐ ' + totalStars;
+    if (typeof fadeMusicDuck === 'function') fadeMusicDuck(0.45, 800);   // dip music under the narration
+    if (typeof updateThemeMusic === 'function') updateThemeMusic();
+    setStoryScene(curStory.scene);
+    renderBeat();
+  }
+  function storyHome() {
+    clearTimeout(storyTimer);
+    try { stopAllSounds(); } catch (e) {}
+    storyEl.classList.remove('show');
+    storyWinEl.classList.remove('show');
+    try { storyBgEl.pause(); } catch (e) {}
+    { const pw = document.getElementById('profileWrap'); if (pw) pw.style.display = ''; }
+    startScreen.style.display = 'flex';
+    if (typeof fadeMusicDuck === 'function') fadeMusicDuck(1, 900);
+    if (typeof updateThemeMusic === 'function') updateThemeMusic();
+    if (typeof refreshStorySub === 'function') refreshStorySub();
+    if (typeof refreshStartSub === 'function') refreshStartSub();
+    if (typeof refreshProfileChip === 'function') refreshProfileChip();
+    startBarkLoop();
+  }
+
   // ---------- Free play ----------
   const freeLabels = {
     ' ': 'SPACE', 'Enter': '↵', 'Backspace': '⌫', 'Tab': '⇥',
@@ -3205,7 +3605,7 @@
   // backgrounded). A watchdog re-starts whichever background should be visible right now.
   (function loopBackgrounds() {
     const RATE = 0.40;                                        // 40% speed, as before
-    const vids = [document.getElementById('bgvid'), document.getElementById('freeBg'), document.getElementById('gameBg'), document.getElementById('sceneBg')].filter(Boolean);
+    const vids = [document.getElementById('bgvid'), document.getElementById('freeBg'), document.getElementById('gameBg'), document.getElementById('sceneBg'), document.getElementById('storyBg')].filter(Boolean);
     // NOTE: offsetParent is always null for position:fixed elements — use
     // getClientRects() to test real visibility (it also sees hidden ancestors).
     const showing = v => v.getClientRects().length > 0;
@@ -3386,6 +3786,7 @@
   }
   if (chooseBtnEl) chooseBtnEl.addEventListener('click', () => {
     const card = document.querySelector('.homeCard');
+    card.classList.remove('storiesOpen');                // only one page open at a time
     const open = card.classList.toggle('lessonsOpen');   // swaps the card to the lessons page
     chooseBtnEl.setAttribute('aria-expanded', open ? 'true' : 'false');
     if (open) showCategories();
@@ -3405,6 +3806,55 @@
       openGroup(h.closest('.lgroup'));
     });
   });
+
+  // ---- Story Time entry points (home) ----
+  const storyBtnEl = document.getElementById('storyBtn');
+  const chooseStoryBtnEl = document.getElementById('chooseStoryBtn');
+  function refreshStorySub() {
+    const el = document.getElementById('storySub');
+    if (!el) return;
+    if (!STORIES.length) { el.textContent = 'Stories coming soon!'; return; }
+    const idx = Math.min(getNum('yako_story') || 0, STORIES.length - 1);
+    el.textContent = idx > 0 ? ('Continue: ' + STORIES[idx].title) : 'Play all the stories together';
+  }
+  function buildStoryList() {
+    if (!storyListEl) return;
+    storyListEl.innerHTML = '';
+    STORIES.forEach((s, i) => {
+      const done = (function () { try { return localStorage.getItem('yako_story_done_' + s.id) === '1'; } catch (e) { return false; } })();
+      const b = document.createElement('button');
+      b.className = 'storyPick'; b.type = 'button';
+      b.innerHTML = '<span class="spEmoji">' + s.emoji + '</span>' +
+        '<span class="spText"><span>' + s.title + '</span>' + (done ? '<span class="spDone">✓ Played</span>' : '') + '</span>';
+      b.addEventListener('click', () => {
+        const card = document.querySelector('.homeCard'); if (card) card.classList.remove('storiesOpen');
+        openStory(i, false);
+      });
+      storyListEl.appendChild(b);
+    });
+  }
+  if (storyBtnEl) storyBtnEl.addEventListener('click', () => {
+    if (!STORIES.length) return;
+    const idx = Math.min(getNum('yako_story') || 0, STORIES.length - 1);
+    openStory(idx, true);   // Story Time = play every story in order (resumes where they left off)
+  });
+  if (chooseStoryBtnEl) chooseStoryBtnEl.addEventListener('click', () => {
+    const card = document.querySelector('.homeCard');
+    card.classList.remove('lessonsOpen', 'subOpen');   // only one page open at a time
+    const open = card.classList.toggle('storiesOpen');
+    chooseStoryBtnEl.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) { buildStoryList(); card.scrollTop = 0; }
+  });
+  { const sb = document.getElementById('storiesBack');
+    if (sb) sb.addEventListener('click', () => {
+      const card = document.querySelector('.homeCard');
+      card.classList.remove('storiesOpen');
+      if (chooseStoryBtnEl) chooseStoryBtnEl.setAttribute('aria-expanded', 'false');
+      card.scrollTop = 0;
+    }); }
+  { const sh = document.getElementById('storyHome'); if (sh) sh.addEventListener('click', storyHome); }
+  refreshStorySub();
+
   refreshStartSub();
   exitBtn.addEventListener('click', backToMenu);
   document.getElementById('logo').addEventListener('click', backToMenu);

@@ -1,5 +1,5 @@
 /* Yako by the Sea — service worker (offline + installable PWA) */
-const CORE = 'yako-core-v44';    // versioned: bumped whenever the code/art below changes
+const CORE = 'yako-core-v45';    // versioned: bumped whenever the code/art below changes
 const MEDIA = 'yako-media';      // persistent: clips + scene stills cached as played (survives version bumps)
 const FONTS = 'yako-fonts';      // persistent: Google Fonts CSS + woff2 (so text looks right offline)
 const CORE_ASSETS = [
@@ -14,6 +14,7 @@ const CORE_ASSETS = [
   './data/lessons.js',
   './data/vocab.js',
   './data/music.js',
+  './data/stories.js',
   './data/strings.en.js',
   './data/strings.fr.js',
   './data/strings.es.js',
