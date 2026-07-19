@@ -1549,7 +1549,7 @@
               <button class="modeBtn music" data-mode="pitchlisten" aria-label="Listen and Match notes"><span class="title">Listen &amp; Match</span><span class="icons">👂 🎵 ❓</span></button>
               <button class="modeBtn music" data-mode="chords"      aria-label="Chords"><span class="title">Chords</span><span class="icons">🎹 🎶</span></button>
               <button class="modeBtn music" data-mode="melody"      aria-label="Melodies"><span class="title">Melodies</span><span class="icons">🎶 🎵 🎼</span></button>
-              <button class="modeBtn music" data-mode="notefind"    aria-label="Note Letters"><span class="title">Note Letters</span><span class="icons">🎵 A B C</span></button>
+              <button class="modeBtn music" data-mode="notefind"    aria-label="Musical Letters"><span class="title">Musical Letters</span><span class="icons">🎵 A B C</span></button>
             </div>
           </section>
           <!-- Parity tile: shown only when the group count is odd, so the grid stays even -->
@@ -1773,7 +1773,7 @@
     ['pitchlisten', 'Listen & Match'],
     ['chords',      'Chords'],
     ['melody',      'Melodies'],
-    ['notefind',    'Note Letters'],
+    ['notefind',    'Musical Letters'],
     // ----- Language Island: teach a new language by ear (tap-to-answer, no keyboard) -----
     ['hello',      'Hello Around the World'],
     ['wordsafari', 'Word Safari'],
@@ -2242,8 +2242,11 @@
     { name: 'Lightly Row',    notes: ['G', 'E', 'E', 'F', 'D'] }
   ];
   const MUSIC_MODES = ['pitchtrain', 'pitchlisten', 'chords', 'melody', 'notefind'];
-  // Always the full set of seven note letters (A–G) in every note game.
+  // Pitch Training / Listen & Match ramp up: A B C first, then + D E, then + F G.
+  // (Musical Letters always uses the full set — see buildNoteFind.)
   function notePool() {
+    if (level <= 2) return ['A', 'B', 'C'];
+    if (level <= 4) return ['A', 'B', 'C', 'D', 'E'];
     return ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
   }
   function noteFreqs(names) { return names.map(n => NOTE_FREQ[n]); }
