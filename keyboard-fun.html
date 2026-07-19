@@ -834,6 +834,8 @@
     font-size: min(4.6vh, 6vw); text-shadow: 2px 2px 0 rgba(35,22,8,.55); }
   #choices .noteBtn .noteMark { font-size: min(1.8vh, 2.6vw); color: rgba(255,255,255,.85); line-height: 1; }
   #choices { gap: 1.6vw; }   /* tighter so all 7 notes fit a row */
+  /* forces a balanced 2-row split (e.g. 7 notes → 4+3) when they can't fit one line */
+  #choices .choiceBreak { flex-basis: 100%; width: 100%; height: 0; margin: 0; padding: 0; }
   #choices .noteBtn:active { transform: translateY(4px); box-shadow: 0 2px 0 color-mix(in srgb, var(--nbg), #000 35%); }
   #target .noteBig  { font-family: Georgia, serif; font-weight: 900; font-size: min(18vh, 24vw); line-height: 1; }
   #target .noteGlyph { font-size: min(15vh, 20vw); line-height: 1; }
@@ -2276,7 +2278,40 @@
       div.addEventListener('click', () => tryAnswer(n));   // the pitch is played by tryAnswer (also covers keyboard keys)
       choicesEl.appendChild(div);
     });
+    balanceChoiceRows();
   }
+  // If the note buttons don't all fit on one line, split them into two BALANCED rows
+  // (7 → 4+3, 5 → 3+2) instead of leaving a single note stranded on its own line.
+  // Detects the real wrap from the laid-out buttons' offsetTop (robust to any width).
+  function balanceChoiceRows() {
+    const oldB = choicesEl.querySelector('.choiceBreak'); if (oldB) oldB.remove();
+    const btns = [].slice.call(choicesEl.querySelectorAll('.noteBtn'));
+    const n = btns.length;
+    if (n < 5) return;                                     // 3–4 always fit one line
+    if (!choicesEl.offsetWidth || !btns[0].offsetWidth) return;   // not laid out yet — the observer re-runs when it is
+    const tops = {}; btns.forEach(b => { tops[Math.round(b.offsetTop)] = 1; });
+    if (Object.keys(tops).length < 2) return;             // all on one row → leave it
+    const cols = Math.ceil(n / 2);                        // top row gets the extra when odd (7 → 4+3)
+    const brk = document.createElement('div');
+    brk.className = 'choiceBreak';
+    if (choicesEl.children[cols]) choicesEl.insertBefore(brk, choicesEl.children[cols]);
+  }
+  // The choices bar often lays out a beat AFTER render (screen transition), and its
+  // width changes on rotation — a width-triggered observer rebalances at the right
+  // moment. The width guard ignores the height change our own break causes (no loop).
+  if (window.ResizeObserver) {
+    let lastChoiceW = -1;
+    new ResizeObserver((entries) => {
+      const w = Math.round(entries[0].contentRect.width);
+      if (w === lastChoiceW) return;
+      lastChoiceW = w;
+      balanceChoiceRows();
+    }).observe(choicesEl);
+  }
+  // Rotation / window resize: re-balance on the next frame (after the new width applies).
+  ['resize', 'orientationchange'].forEach((ev) => window.addEventListener(ev, () => {
+    if (choicesEl.querySelector('.noteBtn')) requestAnimationFrame(balanceChoiceRows);
+  }));
   function buildPitch(showLetter) {
     const pool = notePool();
     const note = pick(pool);
