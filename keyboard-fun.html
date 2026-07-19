@@ -490,12 +490,19 @@
   /* Yako waves & the puppy wags its tail — a transparent PNG sprite sheet (40 frames)
      stepped by CSS, ping-ponged with 'alternate' for a seamless loop. */
   .homeChar { position: fixed; right: 0; bottom: 0; z-index: 1; pointer-events: none;
-    height: 52vh; width: calc(52vh * 0.582);
+    height: 52vh; width: calc(52vh * 0.514);
     background-image: url('ui/yako_home.png'); background-repeat: no-repeat;
     background-size: contain; background-position: center bottom;
     filter: drop-shadow(0 8px 14px rgba(0,0,0,.35));
     animation: charIn .8s ease-out both,
                charBob 4.5s ease-in-out .8s infinite; }
+  /* the puppy as its OWN layer, at the boy's feet — bounces + wags independently */
+  .homeDog { position: fixed; right: 13vh; bottom: 0; z-index: 2; pointer-events: none;
+    height: 17vh; width: calc(17vh * 0.653);
+    background-image: url('ui/yako_dog.png'); background-repeat: no-repeat;
+    background-size: contain; background-position: center bottom;
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,.3)); transform-origin: 50% 100%;
+    animation: dogIn 1s ease-out both, dogBounce 1.7s ease-in-out 1s infinite; }
   .homeUI { margin-left: 0; }
   /* Desktop: a single NARROW, centered card (phone-style) — START never grows
      wider than the name field. Yako + puppy sit bottom-right, clear of the card. */
@@ -503,10 +510,12 @@
     #start { justify-content: center; }
     .homeUI { max-width: none; }
     .homeCard { width: min(440px, 92vw); max-height: 66vh; }   /* room for the big desktop title above + foot ribbon below */
-    .homeChar { height: 58vh; width: calc(58vh * 0.582); right: 1vw; }
+    .homeChar { height: 58vh; width: calc(58vh * 0.514); right: 1vw; }
+    .homeDog { height: 19vh; width: calc(19vh * 0.653); right: calc(1vw + 14vh); }
   }
   @media (min-width: 761px) and (min-aspect-ratio: 16/9) {
-    .homeChar { height: 64vh; width: calc(64vh * 0.582); }
+    .homeChar { height: 64vh; width: calc(64vh * 0.514); }
+    .homeDog { height: 21vh; width: calc(21vh * 0.653); right: calc(1vw + 15.5vh); }
   }
 
   /* ---- Living storybook: gentle idle animations + an intro on load ---- */
@@ -519,6 +528,13 @@
     25%     { transform: scaleX(-1) translateY(-1.3vh) rotate(1.5deg); }
     50%     { transform: scaleX(-1) translateY(0) rotate(0deg); }
     75%     { transform: scaleX(-1) translateY(-1.3vh) rotate(-1.5deg); }
+  }
+  /* the puppy: a happy little hop + wiggle, on its own rhythm (out of phase with the boy) */
+  @keyframes dogIn    { from { transform: translateY(30%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes dogBounce {
+    0%,100% { transform: translateY(0) rotate(0deg); }
+    30%     { transform: translateY(-1.6vh) rotate(-4deg); }
+    60%     { transform: translateY(0) rotate(4deg); }
   }
   @keyframes titleIn { 0% { transform: translateY(-28px) scale(.8); opacity: 0; } 60% { transform: translateY(0) scale(1.07); } 100% { transform: translateY(0) scale(1); opacity: 1; } }
   @keyframes cardIn  { from { transform: translateY(42px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -539,7 +555,7 @@
   #start .btnGrid .modeBtn:nth-child(8) .icons { animation-delay: .5s; }
   #start .btnGrid .modeBtn:nth-child(9) .icons { animation-delay: .7s; }
   #start .modeBtn[data-mode="free"] .sub { animation: iconBob 2.2s ease-in-out .3s infinite; display: inline-block; }
-  @media (prefers-reduced-motion: reduce) { .homeChar,.homeTitle,.homeRibbon,.homeCard,.modeBtn .icons,.modeBtn .sub { animation: none !important; } }
+  @media (prefers-reduced-motion: reduce) { .homeChar,.homeDog,.homeTitle,.homeRibbon,.homeCard,.modeBtn .icons,.modeBtn .sub { animation: none !important; } }
   /* CSS pill (real text) instead of a stretched PNG — never distorts as the window grows */
   .homeFoot { position: fixed; bottom: 1.4vh; left: 50%; transform: translateX(-50%); z-index: 2;
     width: auto; max-width: 94vw; height: auto;
@@ -1315,7 +1331,7 @@
 
     /* scrollable column, no side character cluttering the frame */
     #start { align-items: flex-start; justify-content: flex-start; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-    .homeChar { display: none; }
+    .homeChar, .homeDog { display: none; }
     .homeUI { margin-left: 0; gap: 1.4vh; max-height: none; width: 100vw; padding: 2vh 0 22vh; box-sizing: border-box; }
     .homeTitle { font-size: 13vw; }
     .homeRibbon { font-size: 3.6vw; padding: .6vh 3.2vw; border-width: 2px; }
@@ -1596,7 +1612,8 @@
         </div>
       </div>
     </div>
-    <div class="homeChar" role="img" aria-label="Yako waving with his puppy"></div>
+    <div class="homeChar" role="img" aria-label="Yako waving"></div>
+    <div class="homeDog" role="img" aria-label="Yako's puppy"></div>
     <div class="homeFoot" id="musicBar"><span class="footIcon" id="footShell" role="button" tabindex="-1" aria-label="🐚">🐚</span><span class="footText"><b>Collect 5 stars to win a level!</b><em id="footSub">Tip: turn your volume up &amp; press F11.</em></span><span class="footMusic"><button class="mBtn mPlay micon micon-play" id="mPlay" type="button" title="Play or pause music" aria-label="Play or pause music"></button><button class="mBtn micon micon-next" id="mNext" type="button" title="Next song" aria-label="Next song"></button></span></div>
   </div>
 
