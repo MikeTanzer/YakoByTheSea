@@ -2408,7 +2408,14 @@
         renderSpeakerTarget(piperHTML('<span class="noteBig pipeNote" style="color:' + NOTE_COLORS[note] + '">' + note + '</span>'));
         renderNoteChoices(pool);
       },
-      play() { playTone([NOTE_FREQ[note]]); },   // hear the note once
+      // Repeat the reference tone every few seconds so the child keeps hearing the
+      // note to match (stops as soon as they answer — clearEar runs in correct/newTarget).
+      play() {
+        clearEar();
+        earCount = 1; playTone([NOTE_FREQ[note]]);
+        const tick = () => { earCount++; playTone([NOTE_FREQ[note]]); if (earCount < 6) earTimer = setTimeout(tick, 3200); };
+        earTimer = setTimeout(tick, 3200);
+      },
       revealAnswer() {}
     };
   }
