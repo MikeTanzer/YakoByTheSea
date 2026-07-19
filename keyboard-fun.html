@@ -2242,10 +2242,8 @@
     { name: 'Lightly Row',    notes: ['G', 'E', 'E', 'F', 'D'] }
   ];
   const MUSIC_MODES = ['pitchtrain', 'pitchlisten', 'chords', 'melody', 'notefind'];
-  // grow the note set as the child improves: A B C first, then + D E, then + F G
+  // Always the full set of seven note letters (A–G) in every note game.
   function notePool() {
-    if (level <= 2) return ['A', 'B', 'C'];
-    if (level <= 4) return ['A', 'B', 'C', 'D', 'E'];
     return ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
   }
   function noteFreqs(names) { return names.map(n => NOTE_FREQ[n]); }
