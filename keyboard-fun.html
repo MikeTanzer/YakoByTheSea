@@ -845,7 +845,13 @@
   #target .piperWrap.noimg::before { content: '🎼'; font-size: min(12vh, 16vw); line-height: 1; }
   #target .piperWrap .noteBig { font-size: min(9vh, 13vw); }     /* note shown smaller beside the piper */
   #target .piperWrap .noteGlyph { font-size: min(8vh, 12vw); }
-  #target .chordCard { display: flex; flex-direction: column; align-items: center; gap: 1.4vh; }
+  #target .chordCard { display: flex; flex-direction: column; align-items: center; gap: 1.1vh; }
+  /* Chords/Melodies pack the most into the card (piper + name + slots + replay button),
+     so shrink the piper and the replay speaker here — otherwise the card overflows the
+     height-constrained panel and the piper crowds the prompt / the speaker gets clipped. */
+  #target .chordCard .piperImg { width: min(9vh, 14vw); margin-top: .4vh; }
+  #target .chordCard .speakerBtn { width: min(8vh, 11vw); height: min(8vh, 11vw); font-size: min(4.2vh, 5.6vw);
+    border-width: 4px; margin-top: .2vh; }
   #target .chordName { font-family: 'Baloo 2'; font-weight: 900; color: var(--blue); font-size: min(5vh, 8vw); }
   #target .chordRow { display: flex; gap: min(2vh, 3vw); }
   #target .chordRow .cn { font-family: Georgia, serif; font-weight: 900; color: #fff; line-height: 1;
