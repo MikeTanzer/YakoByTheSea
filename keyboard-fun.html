@@ -3395,7 +3395,7 @@
     img.src = card;
     // a different Yako-and-puppy pose per place (hug, fetch, walk, scratch…); falls back to the cheer art
     const yk = placeCardEl.querySelector('.pcYako');
-    const ykSrc = p.scene.replace(/\.png$/, '_yako.png');
+    const ykSrc = p.scene.replace(/\.png$/, '_yako.png') + '?v=2';   // ?v bump = fetch the new character art past the cache-first MEDIA cache
     yk.onerror = () => { yk.onerror = null; yk.src = 'yako_cheer.png'; };
     yk.style.display = '';
     yk.src = ykSrc;
