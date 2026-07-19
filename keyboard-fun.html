@@ -2305,7 +2305,7 @@
   // like "Find the letter", but for the seven musical notes. The tone plays once as a
   // reward (no ear-training repeat — that's what Pitch Training / Listen & Match are for).
   function buildNoteFind() {
-    const pool = notePool();
+    const pool = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];   // always all seven note letters (not level-scaled)
     const note = pick(pool);
     return {
       answer: note, kind: 'note', style: 'pitch', choices: true, note: note,
