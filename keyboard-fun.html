@@ -1945,12 +1945,18 @@
     return parts.slice(0, best + 1).join(' ') + '<br>' + parts.slice(best + 1).join(' ');
   }
   function renderItemWithLetter(item, kind, letter) {
-    // Just the letter to find, big and clear (the picture clue was removed for a cleaner card).
+    // Show the reference picture + its word so the child connects the letter to a thing
+    // it starts with (e.g. 🐱 "C is for Cat"), then finds that key.
     letter = letter || item.letter;
+    const nm = (locName(item.name) || item.name || '');
+    const Name = nm.charAt(0).toUpperCase() + nm.slice(1);
+    const connector = langPrefix() === 'fr' ? ' comme ' : (langPrefix() === 'es' ? ' — ' : ' is for ');
     targetEl.style.color = '';
     targetEl.innerHTML =
-      '<div class="itemCol">' +
-      '<span class="bigletter" style="color:' + (kind === 'color' ? item.hex : 'var(--blue)') + '">' + letter + '</span>' +
+      '<div class="phonCol">' +
+      '<span class="phonPic">' + picHTML(item, kind) + '</span>' +
+      '<span class="bigletter" style="color:var(--blue)">' + letter + '</span>' +
+      '<div class="phonWord">' + letter + connector + Name + '</div>' +
       '</div>';
   }
   function renderChoices(opts, kind) {
@@ -1985,8 +1991,7 @@
       render() { renderItemWithLetter(item, kind, lletter); },
       revealAnswer() {
         const bl = targetEl.querySelector('.bigletter');
-        if (bl) { bl.textContent = lletter; bl.classList.remove('answerSlot');
-          bl.style.color = (kind === 'color' ? item.hex : 'var(--blue)'); }
+        if (bl) { bl.textContent = lletter; bl.classList.remove('answerSlot'); bl.style.color = 'var(--blue)'; }
       } };
   }
   // ----- Sequence games (Spelling / Counting): find each letter/digit in order -----
