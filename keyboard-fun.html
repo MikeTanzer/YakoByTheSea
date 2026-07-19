@@ -430,6 +430,27 @@
   .spCard:active { transform: scale(.99); }
   .spName .spMore { color: var(--blue); font-weight: 900; margin-left: .15em; }
 
+  /* ===== Progress / Leaderboard tabs ===== */
+  .spTabs { display: flex; gap: .5em; margin: 1em 0 .8em; }
+  .spTab { flex: 1; cursor: pointer; border: 2px solid #eadfbe; background: #fff; border-radius: 12px;
+    padding: .6em; font-family: 'Baloo 2'; font-weight: 800; font-size: .92em; color: #8a6a35; transition: all .12s ease; }
+  .spTab.active { background: linear-gradient(#6fc3ff, var(--blue)); color: #fff; border-color: var(--blue-d); box-shadow: 0 3px 0 #2f7fc0; }
+  #spLeaderTab[hidden], #spProgressTab[hidden] { display: none; }
+  .lbYou { text-align: center; font-family: 'Baloo 2'; font-weight: 800; color: #7a5a12; font-size: 1.05em;
+    background: linear-gradient(#fff6cf, #ffe89a); border: 2px solid var(--gold); border-radius: 14px; padding: .7em; margin-bottom: .8em; }
+  .lbList { display: flex; flex-direction: column; gap: .45em; }
+  .lbRow { display: grid; grid-template-columns: 2.2em auto 1fr auto; align-items: center; gap: .6em;
+    background: #fff; border: 2px solid #eadfbe; border-radius: 14px; padding: .55em .8em; }
+  .lbRow.you { background: linear-gradient(#eafbf0, #cdf0da); border-color: #8fdcab; }
+  .lbRank { font-family: 'Baloo 2'; font-weight: 800; color: var(--blue-d); font-size: 1.05em; text-align: center; }
+  .lbRow.you .lbRank { color: #17603a; }
+  .lbAv { font-size: 1.5em; line-height: 1; }
+  .lbName { font-family: 'Baloo 2'; font-weight: 800; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lbRow.you .lbName::after { content: ' (you)'; color: #2e8b57; font-size: .8em; }
+  .lbStars { font-weight: 800; color: #b8860b; font-size: .9em; white-space: nowrap; }
+  .lbTop1 .lbRank::before { content: '🥇 '; } .lbTop2 .lbRank::before { content: '🥈 '; } .lbTop3 .lbRank::before { content: '🥉 '; }
+  .lbNote { text-align: center; color: #8a6a35; font-weight: 700; font-size: .74em; margin-top: 1em; line-height: 1.35; }
+
   /* ===== Per-lesson detail analytics ===== */
   #lessonDetail { position: fixed; inset: 0; z-index: 130; background: rgba(20,30,50,.6);
     -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); display: grid; place-items: center; padding: 3vh 3vw; animation: fadeIn .18s ease-out both; }
@@ -855,7 +876,7 @@
   #target .chordCard .speakerBtn { width: min(8vh, 11vw); height: min(8vh, 11vw); font-size: min(4.2vh, 5.6vw);
     border-width: 4px; margin-top: .2vh; }
   #target .chordName { font-family: 'Baloo 2'; font-weight: 900; color: var(--blue); font-size: min(5vh, 8vw); }
-  #target .chordRow { display: flex; gap: min(2vh, 3vw); }
+  #target .chordRow { display: flex; flex-wrap: wrap; justify-content: center; gap: min(1.4vh, 2.4vw); max-width: 100%; }
   #target .chordRow .cn { font-family: Georgia, serif; font-weight: 900; color: #fff; line-height: 1;
     width: min(9vh, 13vw); height: min(9vh, 13vw); display: flex; align-items: center; justify-content: center;
     font-size: min(5vh, 7vw); border-radius: 16px; border: 3px solid #fff; background: #c9b48a;
@@ -1661,9 +1682,20 @@
           <div class="spSub" id="spSub"></div>
         </div>
       </div>
-      <div class="spHeadline" id="spHeadline"></div>
-      <div class="spStats" id="spStats"></div>
-      <div class="spList" id="spList"></div>
+      <div class="spTabs">
+        <button class="spTab active" id="tabProgress" type="button" data-tab="progress">📈 My Progress</button>
+        <button class="spTab" id="tabLeader" type="button" data-tab="leader">🏆 Leaderboard</button>
+      </div>
+      <div id="spProgressTab">
+        <div class="spHeadline" id="spHeadline"></div>
+        <div class="spStats" id="spStats"></div>
+        <div class="spList" id="spList"></div>
+      </div>
+      <div id="spLeaderTab" hidden>
+        <div class="lbYou" id="lbYou"></div>
+        <div class="lbList" id="lbList"></div>
+        <div class="lbNote">🌐 Sign in with Google or Facebook (coming soon) to rank against players everywhere.</div>
+      </div>
     </div>
   </div>
 
@@ -2239,15 +2271,35 @@
     { name: 'G Major', notes: ['G', 'B', 'D'] }, { name: 'A Minor', notes: ['A', 'C', 'E'] },
     { name: 'D Minor', notes: ['D', 'F', 'A'] }, { name: 'E Minor', notes: ['E', 'G', 'B'] }
   ];
-  // simple starter melodies (short at first); the piper plays them note-by-note
+  // Melodies the piper plays note-by-note (all within the seven notes A–G). Each has a
+  // difficulty d: 1 = easy (levels 1–2), 2 = medium (levels 3–4), 3 = hard (level 5+).
+  // TO ADD A SONG: give it a name, a notes array (A–G only), and a difficulty d.
   const MELODIES = [
-    { name: 'Up We Go',       notes: ['C', 'D', 'E'] },
-    { name: 'Down We Come',   notes: ['E', 'D', 'C'] },
-    { name: 'Hot Cross Buns', notes: ['E', 'D', 'C'] },
-    { name: 'Three Steps',    notes: ['C', 'E', 'G'] },
-    { name: 'Twinkle Start',  notes: ['C', 'C', 'G', 'G'] },
-    { name: 'Merrily',        notes: ['E', 'D', 'C', 'D', 'E'] },
-    { name: 'Lightly Row',    notes: ['G', 'E', 'E', 'F', 'D'] }
+    // ---- d1: short & simple (3–4 notes) ----
+    { name: 'Up We Go',        d: 1, notes: ['C', 'D', 'E'] },
+    { name: 'Down We Come',    d: 1, notes: ['E', 'D', 'C'] },
+    { name: 'Hot Cross Buns',  d: 1, notes: ['E', 'D', 'C'] },
+    { name: 'Three Steps',     d: 1, notes: ['C', 'E', 'G'] },
+    { name: 'Twinkle Start',   d: 1, notes: ['C', 'C', 'G', 'G'] },
+    { name: 'See-Saw',         d: 1, notes: ['G', 'E', 'G', 'E'] },
+    { name: 'Ding Dong Bell',  d: 1, notes: ['E', 'C', 'E', 'C'] },
+    // ---- d2: medium (5 notes) ----
+    { name: 'Merrily',         d: 2, notes: ['E', 'D', 'C', 'D', 'E'] },
+    { name: 'Lightly Row',     d: 2, notes: ['G', 'E', 'E', 'F', 'D'] },
+    { name: "Mary's Lamb",     d: 2, notes: ['E', 'D', 'C', 'D', 'E'] },
+    { name: 'Rain, Rain',      d: 2, notes: ['A', 'G', 'A', 'G', 'E'] },
+    { name: 'Cuckoo Song',     d: 2, notes: ['G', 'E', 'G', 'E', 'C'] },
+    { name: 'Rock-a-Bye',      d: 2, notes: ['E', 'C', 'E', 'C', 'G'] },
+    { name: 'Ring the Bells',  d: 2, notes: ['A', 'A', 'G', 'A', 'G'] },
+    // ---- d3: hard, real tunes (6–7 notes) ----
+    { name: 'Twinkle Twinkle', d: 3, notes: ['C', 'C', 'G', 'G', 'A', 'A', 'G'] },
+    { name: 'Baa Baa Black Sheep', d: 3, notes: ['C', 'C', 'G', 'G', 'A', 'A', 'G'] },
+    { name: 'Happy Birthday',  d: 3, notes: ['C', 'C', 'D', 'C', 'F', 'E'] },
+    { name: 'Mary Had a Lamb', d: 3, notes: ['E', 'D', 'C', 'D', 'E', 'E', 'E'] },
+    { name: 'London Bridge',   d: 3, notes: ['G', 'A', 'G', 'F', 'E', 'F', 'G'] },
+    { name: 'Old MacDonald',   d: 3, notes: ['G', 'G', 'G', 'D', 'E', 'E', 'D'] },
+    { name: 'Wheels on the Bus', d: 3, notes: ['C', 'F', 'A', 'A', 'A', 'F'] },
+    { name: 'Row, Row, Row',   d: 3, notes: ['C', 'C', 'C', 'D', 'E', 'D'] }
   ];
   const MUSIC_MODES = ['pitchtrain', 'pitchlisten', 'chords', 'melody', 'notefind'];
   // Pitch Training / Listen & Match ramp up: A B C first, then + D E, then + F G.
@@ -2400,7 +2452,10 @@
   }
   function buildMelody() {
     const pool = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-    const choices = level <= 2 ? MELODIES.filter(m => m.notes.length <= 3) : MELODIES;
+    // easier songs early, harder later: level 1–2 → d1, 3–4 → d2, 5+ → d3.
+    const tier = level <= 2 ? 1 : (level <= 4 ? 2 : 3);
+    let choices = MELODIES.filter(m => m.d === tier);
+    if (!choices.length) choices = MELODIES.filter(m => m.d <= tier);   // fallback if a tier is empty
     const mel = pick(choices.length ? choices : MELODIES);
     const seq = mel.notes.slice();
     return {
@@ -3602,8 +3657,60 @@
     lessonDetail.hidden = false;
   }
 
+  // ---- Leaderboard (name-based for now; cloud sign-in will make it global later) ----
+  // A few friendly Yako-world characters act as pacers so there's always a next rank to beat.
+  const LB_FRIENDS = [
+    { name: 'Otto the Otter', av: '🦦', stars: 45 },
+    { name: 'Sandy Seal',     av: '🦭', stars: 110 },
+    { name: 'Denny Deer',     av: '🦌', stars: 185 },
+    { name: 'Wally Whale',    av: '🐳', stars: 280 },
+    { name: 'Gully the Gull', av: '🕊️', stars: 400 },
+    { name: 'Sunny Sea Lion', av: '🦁', stars: 560 }
+  ];
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  function lbLoad() { try { return JSON.parse(localStorage.getItem('yako_scores') || '{}'); } catch (e) { return {}; } }
+  function lbSave(o) { try { localStorage.setItem('yako_scores', JSON.stringify(o)); } catch (e) {} }
+  function lbRecord() {   // save the current player's total under their name
+    const name = profileName(); if (!name) return;
+    const s = lbLoad();
+    s[name] = { stars: getNum('yako_points') || 0, av: PERSONA_EMOJI[A.getPersona()] || '🙂' };
+    lbSave(s);
+  }
+  function renderLeaderboard() {
+    lbRecord();
+    const me = profileName();
+    const local = lbLoad();
+    const map = {};
+    LB_FRIENDS.forEach((f) => { map[f.name] = { name: f.name, av: f.av, stars: f.stars }; });
+    Object.keys(local).forEach((n) => { map[n] = { name: n, av: (local[n] && local[n].av) || '🙂', stars: (local[n] && local[n].stars) || 0 }; });
+    const rows = Object.keys(map).map((k) => map[k]).sort((a, b) => b.stars - a.stars);
+    const myRank = me ? (rows.findIndex((r) => r.name === me) + 1) : 0;
+    document.getElementById('lbYou').innerHTML = me
+      ? ('🏆 ' + escapeHtml(me) + ' — rank <b>#' + myRank + '</b> of ' + rows.length)
+      : 'Type your name on the home screen to join the leaderboard!';
+    document.getElementById('lbList').innerHTML = rows.map((r, i) => {
+      const you = me && r.name === me;
+      const topCls = i === 0 ? ' lbTop1' : (i === 1 ? ' lbTop2' : (i === 2 ? ' lbTop3' : ''));
+      return '<div class="lbRow' + (you ? ' you' : '') + topCls + '">' +
+        '<span class="lbRank">' + (i + 1) + '</span>' +
+        '<span class="lbAv">' + r.av + '</span>' +
+        '<span class="lbName">' + escapeHtml(r.name) + '</span>' +
+        '<span class="lbStars">⭐ ' + r.stars + '</span></div>';
+    }).join('');
+  }
+  function showSuccessTab(which) {
+    const prog = which !== 'leader';
+    document.getElementById('spProgressTab').hidden = !prog;
+    document.getElementById('spLeaderTab').hidden = prog;
+    document.getElementById('tabProgress').classList.toggle('active', prog);
+    document.getElementById('tabLeader').classList.toggle('active', !prog);
+    if (!prog) renderLeaderboard();
+  }
+
   function openSuccess() {
     menuOpen(false);
+    lbRecord();                 // keep this player's score on the board even if they don't open the tab
+    showSuccessTab('progress'); // always open on the Progress tab
     const name = profileName() || 'Player';
     const av = PERSONA_EMOJI[A.getPersona()] || '🙂';
     document.getElementById('spAv').textContent = av;
@@ -3660,6 +3767,8 @@
     if (typeof backToMenu === 'function') backToMenu();
   });
   const spCloseEl = document.getElementById('spClose'); if (spCloseEl) spCloseEl.addEventListener('click', () => { successPage.hidden = true; });
+  const tabProgEl = document.getElementById('tabProgress'); if (tabProgEl) tabProgEl.addEventListener('click', () => showSuccessTab('progress'));
+  const tabLeadEl = document.getElementById('tabLeader'); if (tabLeadEl) tabLeadEl.addEventListener('click', () => showSuccessTab('leader'));
   if (successPage) successPage.addEventListener('click', (e) => { if (e.target === successPage) successPage.hidden = true; });
   // Tap/enter a progress card → its detailed analytics
   const spListEl = document.getElementById('spList');
