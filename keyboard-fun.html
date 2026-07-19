@@ -787,6 +787,10 @@
   .mathRow .grp { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .08em; }
   .mathRow .mop, .mathRow .meq { font-family: 'Baloo 2', sans-serif; font-weight: 800; color: #5b4327; font-size: min(9vh, 9vw); margin: 0 .14em; }
   .mathRow .mq { font-family: 'Baloo 2', sans-serif; font-weight: 800; color: var(--blue); font-size: min(12vh, 12vw); }
+  /* answer shown as countable sea shells (the icon-form answer) */
+  .mathRow .mshell { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    max-width: 40%; gap: .04em .08em; font-size: min(6vh, 6.5vw); line-height: 1; }
+  #game.adv #panel #target .mathRow .mshell { font-size: min(6.5vh, 8vw); max-width: 46%; }
   /* widen the painted desktop card so object groups fit */
   #game.big-target .gameStage #target { left: 25%; width: 50%; top: 25%; height: 34%; font-size: inherit; }
   /* hidden-answer placeholder (shown until the hint reveals it) */
@@ -2094,20 +2098,36 @@
       render() { targetEl.style.color = ''; targetEl.innerHTML = '<div class="countObjRow">' + objs(emoji, n) + '</div>'; },
       revealAnswer() {} };
   }
+  const SHELL = '🐚';
   function buildMath() {
     const c = pick(SEA), e = c[0]; let a, b, res, op;
-    if (Math.random() < 0.5) {                        // addition, sum <= 9
-      a = 1 + Math.floor(Math.random() * 8); b = 1 + Math.floor(Math.random() * (9 - a)); res = a + b; op = '+';
+    // Start tiny and grow: level 1 caps at 3 (1+1, 2+1, 3−2 …), then 5, 7, 9.
+    const cap = level <= 1 ? 3 : (level <= 2 ? 5 : (level <= 3 ? 7 : 9));
+    if (Math.random() < 0.5) {                        // addition, sum <= cap
+      a = 1 + Math.floor(Math.random() * (cap - 1)); b = 1 + Math.floor(Math.random() * (cap - a)); res = a + b; op = '+';
     } else {                                          // subtraction, result >= 1
-      a = 2 + Math.floor(Math.random() * 8); b = 1 + Math.floor(Math.random() * (a - 1)); res = a - b; op = '−';
+      a = 2 + Math.floor(Math.random() * (cap - 1)); b = 1 + Math.floor(Math.random() * (a - 1)); res = a - b; op = '−';
     }
+    // Answer presentation ramps with level (concrete → abstract):
+    //  L1: show the answer as a NUMBER  ·  L2: show it as SEA SHELLS (count them)
+    //  L3: hidden "?", reveal the NUMBER after the hint delay (~10s)
+    //  L4+: hidden "?", reveal it as SEA SHELLS
+    const amode = level <= 1 ? 'num' : (level <= 2 ? 'shells' : (level <= 3 ? 'hideNum' : 'hideShell'));
+    const shellHTML = n => '<span class="mshell">' + SHELL.repeat(n) + '</span>';
+    const answerHTML = amode === 'num' ? '<span class="mq" style="color:var(--blue)">' + res + '</span>'
+                     : amode === 'shells' ? shellHTML(res)
+                     : '<span class="mq">?</span>';
     return { answer: String(res), kind: 'number', name: 'math_' + a + op + b, style: 'math',
       a: a, b: b, op: op, creature: c[1],
       render() { targetEl.style.color = '';
         targetEl.innerHTML = '<div class="mathRow"><span class="grp">' + objs(e, a) + '</span>' +
           '<span class="mop">' + op + '</span><span class="grp">' + objs(e, b) + '</span>' +
-          '<span class="meq">=</span><span class="mq">?</span></div>'; },
-      revealAnswer() { const q = targetEl.querySelector('.mq'); if (q) { q.textContent = res; q.style.color = '#2bb673'; } } };
+          '<span class="meq">=</span>' + answerHTML + '</div>'; },
+      revealAnswer() {
+        const q = targetEl.querySelector('.mathRow .mq'); if (!q) return;   // only the hidden "?" reveals
+        if (amode === 'hideShell') q.outerHTML = shellHTML(res);
+        else { q.textContent = res; q.style.color = '#2bb673'; }
+      } };
   }
 
   // ================= Language Island (tap-to-answer, learn a tongue by ear) =================
