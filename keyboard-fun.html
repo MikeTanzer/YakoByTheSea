@@ -829,6 +829,16 @@
     font-size: min(13vh, 6vw); color: #cbb486; transition: color .2s ease, transform .2s ease; }
   .spellRow .sl.done { color: #2bb673; }
   .spellRow .sl.now  { color: var(--blue); transform: scale(1.14); text-shadow: 0 0 14px rgba(47,111,176,.5); }
+  /* ===== Sentences: a story sentence with the missing word being spelled in place ===== */
+  .sentCard { display: flex; flex-direction: column; align-items: center; gap: 1vh; max-width: 94%; text-align: center; }
+  .sentCard .sentTitle { font-family: 'Baloo 2', sans-serif; font-weight: 800; color: var(--gold-d); font-size: min(3vh, 3.4vw); }
+  .sentCard .sentText { font-family: 'Baloo 2', sans-serif; font-weight: 800; color: var(--ink); line-height: 1.4;
+    font-size: min(5vh, 4.6vw); display: block; }
+  .sentCard .sentBlank { display: inline-flex; gap: .12em; align-items: baseline; margin: 0 .12em; vertical-align: baseline; }
+  .sentCard .sentBlank .sl { font-family: 'Baloo 2', sans-serif; font-weight: 900; line-height: 1;
+    color: #cbb486; transition: color .2s ease, transform .2s ease; border-bottom: 4px solid var(--gold); padding: 0 .06em; min-width: .7em; }
+  .sentCard .sentBlank .sl.done { color: #2bb673; border-bottom-color: #2bb673; }
+  .sentCard .sentBlank .sl.now  { color: var(--blue); border-bottom-color: var(--blue); transform: scale(1.12); }
   /* give the multi-tile word room inside the painted desktop card */
   #game.seq-mode .gameStage #target { left: 27%; width: 50%; top: 26%; height: 32%; font-size: inherit; }
 
@@ -1707,6 +1717,7 @@
             <button class="groupHead" type="button" aria-expanded="false"><span class="ghIcon">📖</span><span class="ghName">Reading &amp; Counting</span><span class="chev">▾</span></button>
             <div class="btnGrid">
               <button class="modeBtn" data-mode="spelling" aria-label="Spelling"><span class="title">Spelling</span><span class="sub">CAT DOG</span></button>
+              <button class="modeBtn" data-mode="sentences" aria-label="Sentences"><span class="title">Sentences</span><span class="sub">The ___ ran</span></button>
               <button class="modeBtn" data-mode="sounds"   aria-label="Letter Sounds"><span class="title">Letter Sounds</span><span class="icons">🔊 A a</span></button>
               <button class="modeBtn" data-mode="listen"   aria-label="Listen and Find"><span class="title">Listen &amp; Find</span><span class="icons">👂 🔊 ❓</span></button>
               <button class="modeBtn" data-mode="earmatch" aria-label="Listen and Match"><span class="title">Listen &amp; Match</span><span class="icons">👂 🔊 ⌨️</span></button>
@@ -1902,6 +1913,7 @@
 <script src="data/vocab.js"></script>
 <script src="data/music.js"></script>
 <script src="data/stories.js"></script>
+<script src="data/sentences.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/cloud.js"></script>
@@ -1987,6 +1999,7 @@
     ['earmatch', 'Listen & Match'],
     ['countobj', 'How Many?'],
     ['spelling', 'Spelling'],
+    ['sentences', 'Sentences'],
     ['counting', 'Counting'],
     ['math',     'Add & Subtract'],
     // ----- Music: hear a pitch, match the note; build chords (synth tones) -----
@@ -2200,6 +2213,44 @@
     for (let i = 1; i < len; i++) s += String(Math.floor(Math.random() * 10));
     return seqChallenge(s, 'number');
   }
+  // ----- Sentences: spell the missing word to complete a sentence; the sentences of
+  //       each story flow together (like Story Time, but you build the word). -----
+  const SENTENCE_STORIES = (window.YAKO_SENTENCES && window.YAKO_SENTENCES.length) ? window.YAKO_SENTENCES : [];
+  // flatten every story's lines into one ordered list, tagged with its story
+  const SENTENCE_LINES = SENTENCE_STORIES.flatMap(st => st.lines.map(ln =>
+    ({ before: ln.before, answer: String(ln.answer).toUpperCase(), after: ln.after, title: st.title, emoji: st.emoji })));
+  let sentIdx = 0;                                                // flat cursor; advances one sentence per target
+  function renderSentenceCard(item, seq, revealed) {
+    targetEl.style.color = '';
+    const slots = seq.map((ch, i) => {
+      const cls = i < revealed ? 'sl done' : (i === revealed ? 'sl now' : 'sl');
+      return '<span class="' + cls + '">' + (i < revealed ? ch : '_') + '</span>';
+    }).join('');
+    targetEl.innerHTML =
+      '<div class="sentCard">' +
+        '<div class="sentTitle">' + item.emoji + ' ' + item.title + '</div>' +
+        '<div class="sentText">' +
+          (item.before ? '<span>' + item.before + '</span> ' : '') +
+          '<span class="sentBlank">' + slots + '</span>' +
+          (item.after ? ' <span>' + item.after + '</span>' : '') +
+        '</div>' +
+      '</div>';
+  }
+  function buildSentences() {
+    if (!SENTENCE_LINES.length) return buildSpell();             // safety: fall back to Spelling if data is missing
+    const i = sentIdx % SENTENCE_LINES.length;
+    sentIdx++;
+    const item = SENTENCE_LINES[i];
+    const seq = item.answer.split('');
+    return {
+      style: 'seq', word: item.answer, seq: seq, idx: 0, answer: seq[0], kind: 'letter',
+      name: 'sent_' + i, sentence: item,
+      render() { renderSentenceCard(item, this.seq, this.idx); },
+      revealAll() { renderSentenceCard(item, this.seq, this.seq.length); }
+    };
+  }
+  // Read a sentence aloud with the blank spoken as "blank" (synth — no recorded clips).
+  function sentenceSpoken(item) { return (item.before + ' blank ' + (item.after || '')).replace(/\s+/g, ' ').trim(); }
 
   // ----- Letter Sounds (phonics): letter + its sound + a keyword picture -----
   function buildSounds() {
@@ -2694,6 +2745,7 @@
     if (mode === 'countobj') return buildCountObjects();
     if (mode === 'math')     return buildMath();
     if (mode === 'spelling') return buildSpell();
+    if (mode === 'sentences') return buildSentences();
     if (mode === 'counting') return buildCount();
     if (mode === 'colors')  return categoryChallenge(COLORS_DATA, 'color');
     if (mode === 'shapes')  return categoryChallenge(SHAPES_DATA, 'shape');
@@ -2736,6 +2788,8 @@
     if (s === 'plain') { sayPrompt(isNum(ans) ? 'find_num_' + ans : 'find_let_' + ans, t.find(ans), { rate: 0.95 }); return; }
     // shapes/colors/animals: name the thing — "Find the letter R, for Rabbit!"
     if (s === 'letter') { sayPrompt('find_for_' + challenge.itemKey, t.findFor(cname, ans), { rate: 0.95 }); return; }
+    // sentences: read the sentence with a "blank", then ask them to spell the missing word
+    if (s === 'seq' && mode === 'sentences') { speak(sentenceSpoken(challenge.sentence) + " Let's spell " + challenge.word + '.', { rate: 0.98 }); return; }
     // spelling: say the word first — "Let's spell CAR. Find the letter C!"
     if (s === 'seq' && mode === 'spelling') { sayPrompt('spell_' + challenge.word, t.spell(challenge.word, ans), { rate: 0.95 }); return; }
     // counting: speak the FULL multi-digit number, then the first digit
@@ -2957,6 +3011,13 @@
       playTone(noteFreqs(challenge.seq), { dur: 1.5 });                 // ring the full chord in triumph
       // spell the chord back in the recorded voice: "C. E. G." + a cheer
       playPersonaChain(challenge.seq.map(n => 'name_' + n).concat('cheer_' + (1 + Math.floor(Math.random() * 8))), "That's " + w + '!', { rate: 1.0 });
+    } else if (mode === 'sentences') {
+      const it = challenge.sentence;
+      const full = ((it.before ? it.before + ' ' : '') + w + (it.after ? ' ' + it.after : '')).replace(/\s+([.!?,])/g, '$1');
+      if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>' + w + '!</b><span>You finished the sentence!</span>'; }
+      // read the letters back, then the whole completed sentence as the reward
+      playPersonaChain(w.split('').map(ch => 'name_' + ch), full, { rate: 1.0 });
+      setTimeout(() => speak(full, { rate: 0.98 }), 900);
     } else if (mode === 'spelling') {
       if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>You spelled ' + w + '!</b><span>Great job!</span>'; }
       // read the letters back in the recorded voice, then the completion clip: "C. U. P. You spelled it!"
@@ -3582,17 +3643,19 @@
         if (gb) { gb.play().catch(() => {}); }
       }
       level = 1; levelStars = 0; levelElapsed = 0; levelMistakes = 0;
+      if (mode === 'sentences') sentIdx = 0;   // start the sentence-stories from the beginning
       updateStarbar();
       levelStartTime = performance.now();
       const cat = (mode === 'colors' || mode === 'shapes' || mode === 'animals');
-      game.classList.toggle('seq-mode', mode === 'spelling' || mode === 'counting');
-      game.classList.toggle('big-target', mode === 'sounds' || mode === 'listen' || mode === 'countobj' || mode === 'math');
+      game.classList.toggle('seq-mode', mode === 'spelling' || mode === 'counting' || mode === 'sentences');
+      game.classList.toggle('big-target', mode === 'sounds' || mode === 'listen' || mode === 'countobj' || mode === 'math' || mode === 'sentences');
       game.classList.add('adv');          // every lesson plays over a painted Monterey scene
       setLevelScene();                     // pick the location for this lesson/level
       const pr = L().prompt;
       const musicMode = MUSIC_MODES.includes(mode);
       const musicPrompt = { pitchtrain: 'The piper plays a note — match it!', pitchlisten: 'Which note did the piper play?', chords: "Build the piper's chord!", melody: 'Play the piper\'s melody!', notefind: 'Find the note!' };
       const ptxt = musicMode ? musicPrompt[mode]
+                 : mode === 'sentences' ? 'Spell the missing word!'
                  : (cat ? (answerStyle === 'number' ? pr.catNum : pr.cat) : (pr[mode] || pr.both));
       // category letter/number rounds get a taller two-line prompt (better balance vs. the star bar)
       if (cat) promptEl.innerHTML = twoLine(ptxt); else promptEl.textContent = ptxt;
