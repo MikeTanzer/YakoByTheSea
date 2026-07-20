@@ -160,7 +160,12 @@
     transition: transform .12s ease, box-shadow .12s ease;
   }
   /* Stories get a friendly storybook blue so kids can tell the two big buttons apart */
-  #storyBtn { --bg: #3f8fb0; border-color: #bfe3f2; }
+  #storyBtn { --bg: #3f8fb0; border-color: #bfe3f2; overflow: visible; }
+  /* "under development" sticker — Story Time is still in beta (overhangs the corner) */
+  .betaBadge { position: absolute; top: -12px; right: -8px; z-index: 4; transform: rotate(9deg);
+    background: #e0466b; color: #fff; font-family: 'Baloo 2', sans-serif; font-weight: 900;
+    font-size: clamp(11px, 1.1vw, 15px); letter-spacing: .16em; padding: .3em .7em; border-radius: 999px;
+    border: 2px solid #fff; box-shadow: 0 3px 8px rgba(120,10,40,.4); text-shadow: none; pointer-events: none; }
   #startBtn::before, #storyBtn::before { content: ''; position: absolute; inset: 6px; pointer-events: none;
     border: 2px solid rgba(255,255,255,.7); border-radius: 18px; }
   #startBtn:hover, #storyBtn:hover { transform: translateY(-2px); }
@@ -1564,6 +1569,11 @@
     box-shadow: 0 4px 12px rgba(0,0,0,.35); transition: transform .12s ease; }
   #storyHome:hover { transform: translateY(-2px); }
   #storyHome:active { transform: scale(.92); }
+  #storyBeta { position: absolute; top: max(2vh, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 3;
+    font-family: 'Baloo 2', sans-serif; font-weight: 900; letter-spacing: .1em; font-size: clamp(11px, 1.2vw, 15px);
+    color: #fff; background: rgba(224,70,107,.92); border: 2px solid rgba(255,255,255,.85); border-radius: 999px;
+    padding: .4vh 1.1vw; box-shadow: 0 3px 10px rgba(0,0,0,.35); white-space: nowrap; }
+  @media (max-width: 760px) { #storyBeta { font-size: 3vw; padding: .5vh 3vw; } }
   #storyStars { position: absolute; top: max(2vh, env(safe-area-inset-top)); right: max(2vw, env(safe-area-inset-right)); z-index: 3;
     font-family: 'Baloo 2', sans-serif; font-weight: 900; color: #fff; font-size: clamp(18px, 2vw, 26px);
     background: rgba(0,0,0,.35); border: 2px solid rgba(255,255,255,.7); border-radius: 999px; padding: .5vh 1.1vw;
@@ -1660,7 +1670,8 @@
         </button>
         <div class="homeControls">
           <button id="chooseBtn" aria-expanded="false">📚 Choose a lesson <span class="chev">▾</span></button>
-          <button id="storyBtn" aria-label="Play the story adventures">
+          <button id="storyBtn" aria-label="Play the story adventures (beta)">
+            <span class="betaBadge" aria-hidden="true">BETA</span>
             <span class="title">📖 STORY TIME</span>
             <span class="sub" id="storySub">Play all the stories together</span>
           </button>
@@ -1823,6 +1834,7 @@
     <video id="storyBg" muted loop playsinline preload="auto"></video>
     <div id="storyScrim"></div>
     <button id="storyHome" type="button" title="Back to menu" aria-label="Back to menu">🏠</button>
+    <div id="storyBeta" aria-hidden="true">📖 STORY TIME · BETA</div>
     <div id="storyStars">⭐ 0</div>
     <div class="storyCard">
       <div id="storyTitle"></div>
