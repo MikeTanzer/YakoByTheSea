@@ -3421,6 +3421,34 @@
     if (typeof refreshProfileChip === 'function') refreshProfileChip();
     startBarkLoop();
   }
+  // Physical keyboard support for Story Time (mouse/touch already work via the buttons).
+  // A letter/number key "presses" the matching answer tile; digits pick the Nth picture /
+  // word when there's nothing to type; Enter/Space advances narration and the ending card.
+  function storyKey(e) {
+    if (storyWinEl.classList.contains('show')) {          // ending card
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const b = storyWinEl.querySelector('.winBtn'); if (b) b.click(); }
+      return;
+    }
+    if (e.key === 'Escape') { e.preventDefault(); storyHome(); return; }
+    if (storyLocked) { e.preventDefault(); return; }
+    if (e.key === 'Enter' || e.key === ' ') {             // advance narration beats
+      const nx = storyNavEl.querySelector('.stNext'); if (nx) { e.preventDefault(); nx.click(); }
+      return;
+    }
+    if (e.key.length !== 1) return;                       // ignore Shift/Arrows/etc.
+    e.preventDefault();
+    const up = e.key.toUpperCase();
+    // 1) exact match on a typed letter/number tile (find + count tasks)
+    const keys = Array.from(storyTaskEl.querySelectorAll('.stKey'));
+    const hit = keys.find(b => b.textContent === up || b.textContent === e.key);
+    if (hit) { hit.click(); return; }
+    // 2) otherwise a digit picks the Nth picture (choose) or word (tiles)
+    if (/[1-9]/.test(e.key)) {
+      const opts = Array.from(storyTaskEl.querySelectorAll('.stChoice, .stTile:not(.used)'));
+      const pickEl = opts[parseInt(e.key, 10) - 1];
+      if (pickEl) pickEl.click();
+    }
+  }
 
   // ---------- Free play ----------
   const freeLabels = {
@@ -3484,6 +3512,7 @@
 
   // ---------- Key handling ----------
   document.addEventListener('keydown', function (e) {
+    if (storyEl && storyEl.classList.contains('show')) { storyKey(e); return; }   // Story Time owns the keyboard
     if (e.key === 'Escape') { backToMenu(); return; }
     if (startScreen.style.display !== 'none') return;
     if (winEl.classList.contains('show')) { e.preventDefault(); finishWin(defaultWinAct); return; }
@@ -3730,8 +3759,26 @@
   // On the home screen, Yako waves and says hi with that first tap.
   document.addEventListener('pointerdown', () => {
     ensureAudio();
-    if (startScreen.style.display !== 'none') setTimeout(() => playPersona('greet', L().greet, { rate: 1.0 }), 120);
+    if (startScreen.style.display !== 'none') setTimeout(greetHome, 140);
   }, { once: true });
+  // The FIRST home visit of each calendar day, Yako greets in his own young-boy
+  // voice ("Hi, I'm Yako, let's play!"); later visits the same day use the normal
+  // narrator greeting. If the recorded clip is missing/blocked, fall back to it too.
+  function greetHome() {
+    if (A.isMuted && A.isMuted()) return;
+    const personaGreet = () => playPersona('greet', L().greet, { rate: 1.0 });
+    let lastHi = null;
+    try { lastHi = localStorage.getItem('yako_hi_day'); } catch (e) {}
+    const d = new Date();
+    const today = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+    if (lastHi === today) { personaGreet(); return; }
+    try { localStorage.setItem('yako_hi_day', today); } catch (e) {}
+    const hi = new Audio('voice/yako_hi.mp3');
+    try { hi.volume = A.getVolume ? A.getVolume() : 1; } catch (e) {}
+    hi.onerror = personaGreet;                          // clip absent → normal greeting
+    const p = hi.play();
+    if (p && p.catch) p.catch(personaGreet);
+  }
   try { const saved = localStorage.getItem('kbfun_name'); if (saved && nameInput) nameInput.value = saved; } catch (e) {}
   try {
     const a = localStorage.getItem('kbfun_ans');
