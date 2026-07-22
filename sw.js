@@ -1,5 +1,5 @@
 /* Yako by the Sea — service worker (offline + installable PWA) */
-const CORE = 'yako-core-v48';    // versioned: bumped whenever the code/art below changes
+const CORE = 'yako-core-v49';    // versioned: bumped whenever the code/art below changes
 const MEDIA = 'yako-media';      // persistent: clips + scene stills cached as played (survives version bumps)
 const FONTS = 'yako-fonts';      // persistent: Google Fonts CSS + woff2 (so text looks right offline)
 const CORE_ASSETS = [
@@ -68,6 +68,7 @@ self.addEventListener('activate', (e) => {
 // A clip/scene is immutable once recorded — cache-first, kept in the persistent MEDIA cache.
 const isMedia = (url) => url.origin === location.origin &&
   (url.pathname.includes('/voice/') ||
+   (/\.png$/i.test(url.pathname) && url.pathname.includes('/objects/')) ||
    (/\.(mp3|jpg|jpeg|png|mp4)$/i.test(url.pathname) && url.pathname.includes('/scenes/')));
 
 // Cache-first helper for immutable, persistent assets (media, fonts).

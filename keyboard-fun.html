@@ -291,6 +291,11 @@
   .phonCol .phonLetter { line-height: 1; }
   .phonCol .phonWord { max-width: 100%; white-space: normal; text-align: center; line-height: 1.15; }
   .phonCol .phonWord .objFirst { color: var(--blue); text-decoration: underline; }   /* Objects: reveal the starting letter */
+  /* Objects lesson: painted object picture */
+  .objPicWrap { display: inline-flex; align-items: center; justify-content: center; }
+  .objImg { display: inline-block; height: clamp(90px, 20vh, 220px); width: auto; max-width: 42vw; object-fit: contain;
+    filter: drop-shadow(0 6px 10px rgba(40,30,10,.28)); }
+  .spellPic .objImg { height: clamp(60px, 12vh, 140px); }
   .spellPic { text-align: center; line-height: 1; margin-top: .6vh; font-size: 8vh; }
   .listenPic { font-size: 16vh; }
 
@@ -2276,12 +2281,18 @@
     { word: 'SPOON', emoji: '🥄' }, { word: 'FORK', emoji: '🍴' }, { word: 'CHAIR', emoji: '🪑' }
   ];
   const titleCase = w => w.charAt(0) + w.slice(1).toLowerCase();
+  // Painted object picture (Higgsfield) with an emoji fallback if the PNG is missing.
+  function objPic(word, emoji) {
+    return '<span class="objPicWrap"><img class="objImg" src="objects/' + word.toLowerCase() + '.png" alt="" ' +
+      'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'inline-block\'">' +
+      '<span class="phonPic listenPic" style="display:none">' + emoji + '</span></span>';
+  }
   function buildObjects() {
     const o = pick(OBJECTS_DATA);
     const name = titleCase(o.word);
     if (level >= 3) {                                  // ramped up: spell the whole object
       const c = seqChallenge(o.word, 'letter');
-      c.pic = o.emoji; c.name = 'obj_' + o.word; c.objName = name;
+      c.pic = objPic(o.word, o.emoji); c.name = 'obj_' + o.word; c.objName = name;
       c.prompt = 'Spell ' + name + '!';
       return c;
     }
@@ -2292,11 +2303,11 @@
       word: o.word, emoji: o.emoji, objName: name, prompt: 'What letter does it start with?',
       render() {
         targetEl.style.color = '';
-        targetEl.innerHTML = '<div class="phonCol"><span class="phonPic listenPic">' + o.emoji + '</span>' +
+        targetEl.innerHTML = '<div class="phonCol">' + objPic(o.word, o.emoji) +
           '<div class="phonWord">' + name + '</div></div>';
       },
       revealAnswer() {
-        targetEl.innerHTML = '<div class="phonCol"><span class="phonPic listenPic">' + o.emoji + '</span>' +
+        targetEl.innerHTML = '<div class="phonCol">' + objPic(o.word, o.emoji) +
           '<div class="phonWord"><span class="objFirst">' + first + '</span>' + name.slice(1) + '</div></div>';
       }
     };
@@ -2843,7 +2854,7 @@
     // shapes/colors/animals: name the thing — "Find the letter R, for Rabbit!"
     if (s === 'letter') { sayPrompt('find_for_' + challenge.itemKey, t.findFor(cname, ans), { rate: 0.95 }); return; }
     // Objects — first-letter round: name the object, then ask for its starting letter
-    if (s === 'objfirst') { playPersona(isNum(ans) ? 'find_num_' + ans : 'find_let_' + ans, challenge.objName + ' starts with ' + ans + '. Find ' + ans + '!', { rate: 0.95 }); return; }
+    if (s === 'objfirst') { playPersona('obj_' + challenge.word, challenge.objName + ' starts with ' + ans + '. Find ' + ans + '!', { rate: 0.95 }); return; }
     // Objects — spelling round: "Let's spell CHAIR. Find the letter C!"
     if (s === 'seq' && mode === 'objects') { sayPrompt('spell_' + challenge.word, t.spell(challenge.word, ans), { rate: 0.95 }); return; }
     // sentences: read the sentence with a "blank", then ask them to spell the missing word
