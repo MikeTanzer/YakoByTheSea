@@ -290,6 +290,7 @@
   .itemCol .swatch, .itemCol .glyph { margin-top: .4vh; }
   .phonCol .phonLetter { line-height: 1; }
   .phonCol .phonWord { max-width: 100%; white-space: normal; text-align: center; line-height: 1.15; }
+  .phonCol .phonWord .objFirst { color: var(--blue); text-decoration: underline; }   /* Objects: reveal the starting letter */
   .spellPic { text-align: center; line-height: 1; margin-top: .6vh; font-size: 8vh; }
   .listenPic { font-size: 16vh; }
 
@@ -1722,6 +1723,7 @@
               <button class="modeBtn" data-mode="shapes"  aria-label="Shapes"><span class="title">Shapes</span><span class="icons">🔺 ■ ♥</span></button>
               <button class="modeBtn" data-mode="colors"  aria-label="Colors"><span class="title">Colors</span><span class="icons">🔴 🟢 🔵</span></button>
               <button class="modeBtn" data-mode="animals" aria-label="Animals"><span class="title">Animals</span><span class="icons">🐶 🐼 🦁</span></button>
+              <button class="modeBtn" data-mode="objects" aria-label="Objects"><span class="title">Objects</span><span class="icons">🥛 🚗 🪑</span></button>
             </div>
           </section>
           <section class="lgroup" data-group="reading">
@@ -2006,6 +2008,7 @@
     ['shapes',   'Shapes'],
     ['colors',   'Colors'],
     ['animals',  'Animals'],
+    ['objects',  'Objects'],
     ['sounds',   'Letter Sounds'],
     ['listen',   'Listen & Find'],
     ['earmatch', 'Listen & Match'],
@@ -2263,6 +2266,41 @@
   }
   // Read a sentence aloud with the blank spoken as "blank" (synth — no recorded clips).
   function sentenceSpoken(item) { return (item.before + ' blank ' + (item.after || '')).replace(/\s+/g, ' ').trim(); }
+  // ----- Objects: identify an everyday object. Early levels (1–2) = tap/type the letter it
+  //       STARTS with; from level 3 the child SPELLS the whole word (reuses the seq mechanic). -----
+  const OBJECTS_DATA = [
+    { word: 'MILK', emoji: '🥛' }, { word: 'TREE', emoji: '🌳' }, { word: 'BALL', emoji: '⚽' },
+    { word: 'PLANE', emoji: '✈️' }, { word: 'CUP', emoji: '🥤' }, { word: 'GIRL', emoji: '👧' },
+    { word: 'BOY', emoji: '👦' }, { word: 'GLASS', emoji: '🥃' }, { word: 'CAR', emoji: '🚗' },
+    { word: 'TRUCK', emoji: '🚚' }, { word: 'SHIRT', emoji: '👕' }, { word: 'SHOE', emoji: '👟' },
+    { word: 'SPOON', emoji: '🥄' }, { word: 'FORK', emoji: '🍴' }, { word: 'CHAIR', emoji: '🪑' }
+  ];
+  const titleCase = w => w.charAt(0) + w.slice(1).toLowerCase();
+  function buildObjects() {
+    const o = pick(OBJECTS_DATA);
+    const name = titleCase(o.word);
+    if (level >= 3) {                                  // ramped up: spell the whole object
+      const c = seqChallenge(o.word, 'letter');
+      c.pic = o.emoji; c.name = 'obj_' + o.word; c.objName = name;
+      c.prompt = 'Spell ' + name + '!';
+      return c;
+    }
+    // levels 1–2: find the first letter of the object
+    const first = o.word[0];
+    return {
+      answer: first, kind: 'letter', name: 'objfirst_' + o.word, style: 'objfirst',
+      word: o.word, emoji: o.emoji, objName: name, prompt: 'What letter does it start with?',
+      render() {
+        targetEl.style.color = '';
+        targetEl.innerHTML = '<div class="phonCol"><span class="phonPic listenPic">' + o.emoji + '</span>' +
+          '<div class="phonWord">' + name + '</div></div>';
+      },
+      revealAnswer() {
+        targetEl.innerHTML = '<div class="phonCol"><span class="phonPic listenPic">' + o.emoji + '</span>' +
+          '<div class="phonWord"><span class="objFirst">' + first + '</span>' + name.slice(1) + '</div></div>';
+      }
+    };
+  }
 
   // ----- Letter Sounds (phonics): letter + its sound + a keyword picture -----
   function buildSounds() {
@@ -2762,6 +2800,7 @@
     if (mode === 'colors')  return categoryChallenge(COLORS_DATA, 'color');
     if (mode === 'shapes')  return categoryChallenge(SHAPES_DATA, 'shape');
     if (mode === 'animals') return categoryChallenge(ANIMALS_DATA, 'animal');
+    if (mode === 'objects') return buildObjects();
     const pool = mode === 'letters' ? LETTERS : mode === 'numbers' ? NUMBERS : LETTERS.concat(NUMBERS);
     const ch = pick(pool);
     return { answer: ch, kind: /[0-9]/.test(ch) ? 'number' : 'letter', name: ch, style: 'plain',
@@ -2776,12 +2815,15 @@
     challenge = next;
     game.classList.toggle('num-answer', /^[0-9]$/.test(String(challenge.answer)));
     // wide centered target box for every picture-based challenge
-    game.classList.toggle('big-target', ['sound', 'listen', 'count', 'math', 'letter'].includes(challenge.style));
+    game.classList.toggle('big-target', ['sound', 'listen', 'count', 'math', 'letter', 'objfirst'].includes(challenge.style));
+    // spell-the-word layout follows the challenge itself (Objects flips between first-letter and spelling as it ramps)
+    game.classList.toggle('seq-mode', challenge.style === 'seq');
     choicesEl.innerHTML = '';
     game.classList.remove('choices-mode');
     clearFeedback();                 // both cards dim until they answer
     clearEar(); targetWrong = 0;     // reset the Listen & Match repeat/reveal state
     next.render();
+    if (next.prompt) promptEl.textContent = next.prompt;   // per-challenge prompt override (Objects)
     targetEl.style.transform = 'scale(1)';
     hintStage = 0;
     clearKeyHighlights();
@@ -2800,6 +2842,10 @@
     if (s === 'plain') { sayPrompt(isNum(ans) ? 'find_num_' + ans : 'find_let_' + ans, t.find(ans), { rate: 0.95 }); return; }
     // shapes/colors/animals: name the thing — "Find the letter R, for Rabbit!"
     if (s === 'letter') { sayPrompt('find_for_' + challenge.itemKey, t.findFor(cname, ans), { rate: 0.95 }); return; }
+    // Objects — first-letter round: name the object, then ask for its starting letter
+    if (s === 'objfirst') { playPersona(isNum(ans) ? 'find_num_' + ans : 'find_let_' + ans, challenge.objName + ' starts with ' + ans + '. Find ' + ans + '!', { rate: 0.95 }); return; }
+    // Objects — spelling round: "Let's spell CHAIR. Find the letter C!"
+    if (s === 'seq' && mode === 'objects') { sayPrompt('spell_' + challenge.word, t.spell(challenge.word, ans), { rate: 0.95 }); return; }
     // sentences: read the sentence with a "blank", then ask them to spell the missing word
     if (s === 'seq' && mode === 'sentences') { speak(sentenceSpoken(challenge.sentence) + " Let's spell " + challenge.word + '.', { rate: 0.98 }); return; }
     // spelling: say the word first — "Let's spell CAR. Find the letter C!"
@@ -3023,6 +3069,9 @@
       playTone(noteFreqs(challenge.seq), { dur: 1.5 });                 // ring the full chord in triumph
       // spell the chord back in the recorded voice: "C. E. G." + a cheer
       playPersonaChain(challenge.seq.map(n => 'name_' + n).concat('cheer_' + (1 + Math.floor(Math.random() * 8))), "That's " + w + '!', { rate: 1.0 });
+    } else if (mode === 'objects') {
+      if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>You spelled ' + w + '!</b><span>Great job!</span>'; }
+      playPersonaChain(w.split('').map(ch => 'name_' + ch).concat('done_spell'), L().doneSpell(w), { rate: 1.0 });
     } else if (mode === 'sentences') {
       const it = challenge.sentence;
       const full = ((it.before ? it.before + ' ' : '') + w + (it.after ? ' ' + it.after : '')).replace(/\s+([.!?,])/g, '$1');
