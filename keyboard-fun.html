@@ -3264,7 +3264,10 @@
   }
   if (storyBgEl) storyBgEl.addEventListener('play', () => { try { storyBgEl.playbackRate = 0.40; } catch (e) {} });
 
-  function sayStory(text) { try { stopAllSounds(); } catch (e) {} if (text) speak(text, { rate: 1.0 }); }
+  // Narrate a beat with the chosen narrator's recorded clip (voice/clips/<lang>/<persona>/
+  // sty_<story>_<beat>.mp3); synth reads the same line if the clip is missing/blocked.
+  function sayStory(key, text) { try { stopAllSounds(); } catch (e) {} if (text || key) playPersona(key, text, { rate: 1.0 }); }
+  function beatKey() { return 'sty_' + curStoryIdx + '_' + curBeat; }
   function storyTry() {
     try { if (A.playTryAgainTone) playTryAgainTone(); } catch (e) {}
     const tries = (L().tries && L().tries.length) ? L().tries : [L().again || 'Oops! Try again!'];
@@ -3320,14 +3323,16 @@
       b.textContent = last ? '🎉 Finish' : 'Next ▶';
       b.addEventListener('click', () => { if (last) finishStory(); else beatNext(); });
       storyNavEl.appendChild(b);
-      setTimeout(() => sayStory(B.say), 260);
+      const k = beatKey();
+      setTimeout(() => sayStory(k, B.say), 260);
       return;
     }
     if (task.kind === 'find')   renderFind(task, B);
     else if (task.kind === 'count')  renderCount(task, B);
     else if (task.kind === 'choose') renderChoose(task, B);
     else if (task.kind === 'tiles')  renderTiles(task, B);
-    setTimeout(() => sayStory(B.say), 260);
+    const k = beatKey();
+    setTimeout(() => sayStory(k, B.say), 260);
   }
 
   function solved() {
