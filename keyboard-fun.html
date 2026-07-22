@@ -1394,10 +1394,10 @@
     .homeRibbon { font-size: 3.6vw; padding: .6vh 3.2vw; border-width: 2px; }
     .homeCard { width: 92vw; max-width: 92vw; box-sizing: border-box; padding: 2.4vh 4vw; gap: 1.6vh; border-width: 4px; }
 
-    /* START + lesson chooser sized for phones */
-    #startBtn, #storyBtn { width: 100%; min-height: 14vh; border-radius: 22px; }
-    #startBtn .title, #storyBtn .title { font-size: 8.5vw; }
-    #startBtn .sub, #storyBtn .sub { font-size: 3.6vw; }
+    /* START + lesson chooser sized for phones — titles stay on one line, nothing clips */
+    #startBtn, #storyBtn { width: 100%; min-height: 12vh; border-radius: 22px; overflow: visible; padding: 1.8vh 3vw; }
+    #startBtn .title, #storyBtn .title { font-size: 6.8vw; line-height: 1.05; letter-spacing: .03em; white-space: nowrap; }
+    #startBtn .sub, #storyBtn .sub { font-size: 3.3vw; letter-spacing: .02em; }
     /* controls stack neatly: chooser on top, then language + narrator cards */
     .homeControls { flex-direction: column; align-items: stretch; width: 100%; gap: 1.2vh; }
     #chooseBtn, #chooseStoryBtn { font-size: 4.6vw; padding: 1.4vh 6vw; width: 100%; box-sizing: border-box; }
