@@ -15,6 +15,59 @@
 //   { say, fork:{ options:[{label,emoji,beats:[...]}, ...] } } → pick a path; its beats play next
 //
 // Every correct task earns a star. Stories are gentle: a wrong tap just says "try again".
+
+// ----- "Yako Holds the Leash" branch beats (a 3-way fork, with a 2-way sub-fork inside
+//        Park and Beach). Defined up here so the fork options can reference them. -----
+var LEASH_TOWN = [
+  { say: "They stroll into downtown Carmel-by-the-Sea. The friendly shopkeepers wave hello to Yako and all the dogs!", scene: 'carmeltown' },
+  { say: "The kind baker gives the dogs a treat. Treat starts with T — find T!", task: { kind: 'find', answer: 'T' } },
+  { say: "Count the little shops along the pretty street!", task: { kind: 'count', n: 5, emoji: '🏬' } },
+  { say: "Everyone waves goodbye! Which friend is a dog? Tap the dog!",
+    task: { kind: 'choose', prompt: 'Tap the dog!', options: [ { emoji: '🐶', label: 'Dog', correct: true }, { emoji: '🐱', label: 'Cat' }, { emoji: '🐦', label: 'Bird' } ] } }
+];
+var LEASH_PARK_HIKE = [
+  { say: "Up the trail they hike, higher and higher into the hills!", scene: 'bigsur' },
+  { say: "Hike starts with H — find H!", task: { kind: 'find', answer: 'H' } },
+  { say: "Count the birds soaring over the cliffs!", task: { kind: 'count', n: 3, emoji: '🐦' } }
+];
+var LEASH_PARK_FETCH = [
+  { say: "Out in the open field, Yako throws the ball. Go, dogs, go!", scene: 'carmelvalley' },
+  { say: "What do the dogs chase? Tap the ball!",
+    task: { kind: 'choose', prompt: 'Tap the ball!', options: [ { emoji: '⚽', label: 'Ball', correct: true }, { emoji: '🌳', label: 'Tree' }, { emoji: '🥤', label: 'Cup' } ] } },
+  { say: "Count how many times the puppy brings it back!", task: { kind: 'count', n: 4, emoji: '🎾' } }
+];
+var LEASH_PARK = [
+  { say: "They trot to the green park with big shady trees.", scene: 'carmelvalley' },
+  { say: "Count the dogs playing on the grass!", task: { kind: 'count', n: 4, emoji: '🐕' } },
+  { say: "Park starts with P — find P!", task: { kind: 'find', answer: 'P' } },
+  { say: "At the park, what should they do next?",
+    fork: { options: [
+      { label: 'Go on a hike', emoji: '🥾', beats: LEASH_PARK_HIKE },
+      { label: 'Play fetch in the field', emoji: '🎾', beats: LEASH_PARK_FETCH }
+    ] } }
+];
+var LEASH_BEACH_WALK = [
+  { say: "They stroll along the shore, paws splashing in the cool water.", scene: 'pebble' },
+  { say: "Walk starts with W — find W!", task: { kind: 'find', answer: 'W' } },
+  { say: "Count the little crabs on the sand!", task: { kind: 'count', n: 3, emoji: '🦀' } }
+];
+var LEASH_BEACH_STICK = [
+  { say: "Yako throws a stick and the dogs splash after it!", scene: 'montereybay' },
+  { say: "Stick starts with S — find S!", task: { kind: 'find', answer: 'S' } },
+  { say: "Which one floats back? Tap the stick!",
+    task: { kind: 'choose', prompt: 'Tap the stick!', options: [ { emoji: '🪵', label: 'Stick', correct: true }, { emoji: '🪨', label: 'Rock' }, { emoji: '🐚', label: 'Shell' } ] } }
+];
+var LEASH_BEACH = [
+  { say: "They race down to the sparkling beach by the waves.", scene: 'pebble' },
+  { say: "Beach starts with B — find B!", task: { kind: 'find', answer: 'B' } },
+  { say: "Count the seashells in the sand!", task: { kind: 'count', n: 4, emoji: '🐚' } },
+  { say: "At the beach, what should they do?",
+    fork: { options: [
+      { label: 'Walk on the beach', emoji: '🐾', beats: LEASH_BEACH_WALK },
+      { label: 'Throw a stick', emoji: '🦴', beats: LEASH_BEACH_STICK }
+    ] } }
+];
+
 window.YAKO_STORIES = [
   {
     id: 'leash-walk',
@@ -22,28 +75,24 @@ window.YAKO_STORIES = [
     emoji: '🦮',
     scene: 'carmelstreet',
     vox: 7,
-    // A branching story: at the fork the child chooses the park OR the beach, and the
-    // chosen path's beats play before the shared ending. (Engine: beat.fork.options[].beats)
+    // A branching story: pick up the dogs, then choose Town / Park / Beach. Park and
+    // Beach each split again (hike-or-fetch, walk-or-stick). Engine: beat.fork.options[].beats,
+    // and a branch's beats may themselves contain a fork (nested).
     beats: [
-      { say: "Welcome to Yako's Dog Walking Service! Yako clips the leash onto his happy puppy for a walk down the Carmel street." },
-      { say: "Leash starts with the letter L. Can you find L for Leash?",
+      { say: "Yako has a big idea — he's starting his very own dog-walking business! His dad helps him get everything ready." },
+      { say: "First, Yako leaves the house with his own dog, Coco, on the leash. Leash starts with L — find L!",
         task: { kind: 'find', answer: 'L' } },
-      { say: "The path splits in two. Which way should they walk the puppy today?",
+      { say: "Down the street, Yako picks up more dogs to walk. Count all the happy dogs!",
+        task: { kind: 'count', n: 5, emoji: '🐕' } },
+      { say: "Dad checks that every leash is safe and snug. Dad starts with D — find D!",
+        task: { kind: 'find', answer: 'D' } },
+      { say: "The dogs are all ready! Where should Yako take them today?",
         fork: { options: [
-          { label: 'Walk to the park', emoji: '🌳', beats: [
-            { say: "They stroll to the sunny park, full of big green trees.", scene: 'carmelvalley' },
-            { say: "So many friends came to play! Count the dogs at the park.",
-              task: { kind: 'count', n: 4, emoji: '🐕' } }
-          ] },
-          { label: 'Walk to the beach', emoji: '🏖️', beats: [
-            { say: "They wander down to the sandy beach beside the waves.", scene: 'pebble' },
-            { say: "The puppy found something in the sand. Tap the seashell!",
-              task: { kind: 'choose', prompt: 'Find the seashell!',
-                options: [ { emoji: '🐚', label: 'Shell', correct: true }, { emoji: '🌳', label: 'Tree' }, { emoji: '🚗', label: 'Car' } ] } }
-          ] }
+          { label: 'Walk around town', emoji: '🏙️', beats: LEASH_TOWN },
+          { label: 'Go to the park',   emoji: '🌳', beats: LEASH_PARK },
+          { label: 'Go to the beach',  emoji: '🏖️', beats: LEASH_BEACH }
         ] } },
-      { say: "Time to walk home. The puppy trots so nicely on the leash!", scene: 'carmelstreet' },
-      { say: "Great job walking the puppy, Yako! Here is a yummy treat. Woof woof!" }
+      { say: "What a wonderful first day! The happy dogs head home, and Yako's dog-walking business is a big success. Woof woof!", scene: 'carmelstreet' }
     ]
   },
   {
