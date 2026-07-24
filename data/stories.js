@@ -128,5 +128,34 @@ window.YAKO_STORIES = [
         task: { kind: 'tiles', target: ['I', 'am', 'tired'] } },
       { say: "When we use our words, everyone understands. Great job, little puppy!" }
     ]
+  },
+  {
+    id: 'leash-walk',
+    title: 'Yako Holds the Leash',
+    emoji: '🦮',
+    scene: 'carmelstreet',
+    // A branching story: at the fork the child chooses the park OR the beach, and the
+    // chosen path's beats play before the shared ending. (Engine: beat.fork.options[].beats)
+    beats: [
+      { say: "Welcome to Yako's Dog Walking Service! Yako clips the leash onto his happy puppy for a walk down the Carmel street." },
+      { say: "Leash starts with the letter L. Can you find L for Leash?",
+        task: { kind: 'find', answer: 'L' } },
+      { say: "The path splits in two. Which way should they walk the puppy today?",
+        fork: { options: [
+          { label: 'Walk to the park', emoji: '🌳', beats: [
+            { say: "They stroll to the sunny park, full of big green trees.", scene: 'carmelvalley' },
+            { say: "So many friends came to play! Count the dogs at the park.",
+              task: { kind: 'count', n: 4, emoji: '🐕' } }
+          ] },
+          { label: 'Walk to the beach', emoji: '🏖️', beats: [
+            { say: "They wander down to the sandy beach beside the waves.", scene: 'pebble' },
+            { say: "The puppy found something in the sand. Tap the seashell!",
+              task: { kind: 'choose', prompt: 'Find the seashell!',
+                options: [ { emoji: '🐚', label: 'Shell', correct: true }, { emoji: '🌳', label: 'Tree' }, { emoji: '🚗', label: 'Car' } ] } }
+          ] }
+        ] } },
+      { say: "Time to walk home. The puppy trots so nicely on the leash!", scene: 'carmelstreet' },
+      { say: "Great job walking the puppy, Yako! Here is a yummy treat. Woof woof!" }
+    ]
   }
 ];

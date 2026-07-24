@@ -262,9 +262,11 @@ window.YAKO.audio = (function () {
   }
   if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = pickVoice;
 
+  // Rough spoken length of a line (ms) — used to pace auto-advance when muted / no synth.
+  function readMs(t) { const w = String(t || '').split(/\s+/).filter(Boolean).length; return Math.min(8000, Math.max(1800, w * 360 + 900)); }
   function speak(text, opts) {
-    if (muted || !('speechSynthesis' in window)) return;
     opts = opts || {};
+    if (muted || !('speechSynthesis' in window)) { if (opts.onend) { try { opts.onend(); } catch (e) {} } return; }
     pickVoice();                                  // honor current language/persona
     const p = PERSONA[voicePersona] || PERSONA.mom;
     const u = new SpeechSynthesisUtterance(text);
@@ -273,6 +275,7 @@ window.YAKO.audio = (function () {
     u.rate = (opts.rate || 1) * p.rate;
     u.pitch = p.pitch;
     u.volume = volume;
+    if (opts.onend) u.onend = () => { try { opts.onend(); } catch (e) {} };
     speechSynthesis.speak(u);
   }
   function speakName(line, opts) { speak(I().withName(line), opts); }
@@ -311,12 +314,14 @@ window.YAKO.audio = (function () {
   // Higgsfield persona clips (cheers / try-again / level-up / greeting / find-the-key),
   // per current language + character; synth fallback if a clip is missing.
   function playPersona(keys, fallback, opts) {
-    if (muted) return;
+    opts = opts || {};
+    // opts.onend fires when the line finishes (recorded clip end, synth end, or — if muted — a read-time delay)
+    if (muted) { if (opts.onend) setTimeout(opts.onend, readMs(fallback)); return; }
     const key = Array.isArray(keys) ? keys[(Math.random() * keys.length) | 0] : keys;
     stopVoice();
     const my = ++VOICE.token, a = VOICE.a;
     a.src = VOICE.dir + I().langPrefix() + '/' + voicePersona + '/' + key + '.mp3';
-    a.onended = null;
+    a.onended = () => { if (my === VOICE.token && opts.onend) { try { opts.onend(); } catch (e) {} } };
     a.onerror = () => { if (my === VOICE.token && fallback) speakName(fallback, opts); };
     const p = a.play();
     if (p && p.catch) p.catch(() => { if (my === VOICE.token && fallback) speakName(fallback, opts); });

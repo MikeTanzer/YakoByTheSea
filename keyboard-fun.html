@@ -1620,6 +1620,16 @@
   .stChoice:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--gold-d); }
   .stChoice.wrong { animation: stShake .4s; }
   .stChoice.right { border-color: #2f7d3a; box-shadow: 0 5px 0 #2f7d3a; background: #dff5df; }
+  /* story fork: pick a path */
+  .stFork { cursor: pointer; display: inline-flex; align-items: center; gap: .5em; border: 3px solid var(--blue);
+    border-radius: 18px; background: #eef6fc; color: var(--blue-d); font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: clamp(16px, 1.8vw, 24px); padding: 1.1vh 1.4em; box-shadow: 0 5px 0 var(--blue-d);
+    transition: transform .1s ease, box-shadow .1s ease; }
+  .stFork:hover { transform: translateY(-2px); }
+  .stFork:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--blue-d); }
+  .stFork.right { border-color: #2f7d3a; box-shadow: 0 5px 0 #2f7d3a; background: #dff5df; }
+  .stFork .stForkEmoji { font-size: 1.5em; line-height: 1; }
+  @media (max-width: 760px) { .stFork { font-size: 4.4vw; } }
   /* tap-to-build tiles */
   .stSlots { display: flex; flex-wrap: wrap; gap: .5em; justify-content: center; width: 100%; margin-bottom: 1vh; }
   .stSlot { min-width: 3.4em; min-height: 1.8em; border-bottom: 4px dashed var(--gold-d); color: var(--blue-d);
@@ -3326,7 +3336,7 @@
 
   // Narrate a beat with the chosen narrator's recorded clip (voice/clips/<lang>/<persona>/
   // sty_<story>_<beat>.mp3); synth reads the same line if the clip is missing/blocked.
-  function sayStory(key, text) { try { stopAllSounds(); } catch (e) {} if (text || key) playPersona(key, text, { rate: 1.0 }); }
+  function sayStory(key, text, onend) { try { stopAllSounds(); } catch (e) {} if (text || key) playPersona(key, text, { rate: 1.0, onend: onend }); }
   function beatKey() { return 'sty_' + curStoryIdx + '_' + curBeat; }
   function storyTry() {
     try { if (A.playTryAgainTone) playTryAgainTone(); } catch (e) {}
@@ -3374,6 +3384,7 @@
     if (storyTextEl) storyTextEl.textContent = B.say || '';
     storyTaskEl.innerHTML = '';
     storyNavEl.innerHTML = '';
+    if (B.fork) { renderFork(B); const kf = beatKey(); setTimeout(() => sayStory(kf, B.say), 260); return; }
     const task = B.task;
     if (!task) {
       storyArt(popEmoji(curStory.emoji));
@@ -3383,8 +3394,13 @@
       b.textContent = last ? '🎉 Finish' : 'Next ▶';
       b.addEventListener('click', () => { if (last) finishStory(); else beatNext(); });
       storyNavEl.appendChild(b);
-      const k = beatKey();
-      setTimeout(() => sayStory(k, B.say), 260);
+      const k = beatKey(), myBeat = curBeat;
+      // auto-advance once the narrator finishes reading (tap Next to skip early)
+      const auto = () => {
+        if (!storyEl.classList.contains('show') || storyWinEl.classList.contains('show') || curBeat !== myBeat) return;
+        if (last) finishStory(); else beatNext();
+      };
+      setTimeout(() => sayStory(k, B.say, auto), 260);
       return;
     }
     if (task.kind === 'find')   renderFind(task, B);
@@ -3399,6 +3415,25 @@
     storyLocked = true;
     storyAward();
     advanceSoon(1250);
+  }
+
+  // A story fork: tap a path; its branch beats splice in after this one, then play on.
+  function renderFork(B) {
+    storyArt(popEmoji(curStory.emoji));
+    (B.fork.options || []).forEach((opt) => {
+      const b = document.createElement('button');
+      b.className = 'stFork'; b.type = 'button';
+      b.innerHTML = '<span class="stForkEmoji">' + (opt.emoji || '▶') + '</span><span class="stForkLabel">' + opt.label + '</span>';
+      b.addEventListener('click', () => {
+        if (storyLocked) return;
+        storyLocked = true;
+        b.classList.add('right');
+        curStory.beats.splice(curBeat + 1, 0, ...(opt.beats || []));
+        try { playChime(); } catch (e) {}
+        advanceSoon(650);
+      });
+      storyTaskEl.appendChild(b);
+    });
   }
 
   function renderFind(task, B) {
@@ -3525,7 +3560,9 @@
   function openStory(idx, campaign) {
     if (!STORIES.length) return;
     curStoryIdx = Math.max(0, Math.min(idx, STORIES.length - 1));
-    curStory = STORIES[curStoryIdx];
+    const src = STORIES[curStoryIdx];
+    // shallow-clone so a fork can splice its branch beats in without mutating the source data
+    curStory = { id: src.id, title: src.title, emoji: src.emoji, scene: src.scene, beats: src.beats.slice() };
     storyCampaign = !!campaign;
     curBeat = 0; storyLocked = false;
     totalStars = getNum('yako_points') || 0;
