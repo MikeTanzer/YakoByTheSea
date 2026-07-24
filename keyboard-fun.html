@@ -191,7 +191,7 @@
   .homeCard.storiesOpen #chooseStoryBtn .chev { transform: rotate(180deg); }
   .storiesHead { display: none; width: 100%; align-items: center; gap: 1vw; }
   .homeCard.storiesOpen .storiesHead { display: flex; }
-  .storyList { display: flex; flex-direction: column; gap: 1.1vh; width: 100%; }
+  .storyList { display: flex; flex-direction: column; gap: 1.1vh; width: 100%; padding-bottom: 13vh; }   /* clear the fixed foot ribbon so the last story is reachable */
   .storyPick { cursor: pointer; display: flex; align-items: center; gap: .8em; text-align: left;
     border: 3px solid var(--blue); border-radius: 18px; background: #eef6fc; color: #234; padding: 1.2vh 1.1em;
     font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(15px, 1.5vw, 22px);
@@ -224,7 +224,7 @@
   #lessonsFun:active { transform: scale(.94); }
   /* ===== Collapsible lesson groups (scales as levels grow) ===== */
   /* closed groups sit in a 2×2 grid of square tiles; an open group spans the full width */
-  .lessonGroups { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2vh 1.2vw; width: 100%; align-items: start; }
+  .lessonGroups { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2vh 1.2vw; width: 100%; align-items: start; padding-bottom: 13vh; }
   .lgroup.open { grid-column: 1 / -1; }
   .lgroup .btnGrid { grid-template-columns: repeat(2, 1fr); }   /* roomier buttons in the narrow card */
   .lgroup { border: 3px solid var(--gold); border-radius: 18px; background: rgba(255,255,255,.42); overflow: hidden; }
@@ -3350,7 +3350,9 @@
   // Narrate a beat with the chosen narrator's recorded clip (voice/clips/<lang>/<persona>/
   // sty_<story>_<beat>.mp3); synth reads the same line if the clip is missing/blocked.
   function sayStory(key, text, onend) { try { stopAllSounds(); } catch (e) {} if (text || key) playPersona(key, text, { rate: 1.0, onend: onend }); }
-  function beatKey() { return 'sty_' + curStoryIdx + '_' + curBeat; }
+  // Narration clip key uses the story's stable `vox` id (its original recording index),
+  // so the picker/campaign order can change without remapping the recorded clips.
+  function beatKey() { const v = (curStory && curStory.vox != null) ? curStory.vox : curStoryIdx; return 'sty_' + v + '_' + curBeat; }
   function storyTry() {
     try { if (A.playTryAgainTone) playTryAgainTone(); } catch (e) {}
     const tries = (L().tries && L().tries.length) ? L().tries : [L().again || 'Oops! Try again!'];
@@ -3575,7 +3577,7 @@
     curStoryIdx = Math.max(0, Math.min(idx, STORIES.length - 1));
     const src = STORIES[curStoryIdx];
     // shallow-clone so a fork can splice its branch beats in without mutating the source data
-    curStory = { id: src.id, title: src.title, emoji: src.emoji, scene: src.scene, beats: src.beats.slice() };
+    curStory = { id: src.id, title: src.title, emoji: src.emoji, scene: src.scene, vox: src.vox, beats: src.beats.slice() };
     storyCampaign = !!campaign;
     curBeat = 0; storyLocked = false;
     totalStars = getNum('yako_points') || 0;
