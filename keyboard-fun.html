@@ -1657,6 +1657,19 @@
   #storyWin { position: absolute; inset: 0; z-index: 5; display: none; align-items: center; justify-content: center;
     background: rgba(20,50,70,.45); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
   #storyWin.show { display: flex; }
+
+  /* ===== Short / landscape viewports (e.g. a phone held sideways): scroll the WHOLE
+     page as one, instead of a cramped internal scroll box inside the menu card ===== */
+  @media (max-height: 560px) {
+    #start { align-items: flex-start; justify-content: center; padding-top: 2.5vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .homeUI { max-height: none; padding-bottom: 88px; }        /* clear the fixed foot ribbon */
+    /* the card grows to its full height; #start provides the single page scroll */
+    .homeCard, .homeCard.lessonsOpen, .homeCard.storiesOpen { max-height: none; overflow: visible; }
+    .lgroup.open .btnGrid { max-height: none; overflow: visible; }
+    .homeTitle { font-size: 6vh; }
+    .homeRibbon { font-size: 2.4vh; }
+    .homeChar, .homeDog, .homeHi { display: none; }            /* no room for the side character sideways */
+  }
 </style>
 </head>
 <body>
