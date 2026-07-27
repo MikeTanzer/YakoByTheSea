@@ -1670,6 +1670,51 @@
     .homeRibbon { font-size: 2.4vh; }
     .homeChar, .homeDog, .homeHi { display: none; }            /* no room for the side character sideways */
   }
+
+  /* ===== Accessibility ===== */
+  /* Keyboard focus ring — visible for keyboard/switch users, invisible for mouse/touch
+     (only shows on :focus-visible, so it never appears on a tap). */
+  :focus-visible { outline: 3px solid #2b7fff; outline-offset: 2px; border-radius: 6px; }
+
+  /* "Hear it again" replay button — sits centered on the bottom control row, between the
+     Menu (left) and Sound (right) hotspots, so it never overlaps the keyboard or card. */
+  #replay { position: fixed; z-index: 41; display: none; align-items: center; gap: .4em;
+    bottom: calc(2.9vh + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%);
+    background: rgba(255,255,255,.94); color: var(--blue-d); border: 3px solid #ffd24a;
+    border-radius: 999px; padding: .5em 1.05em; font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: min(2.3vh, 4.3vw); line-height: 1; cursor: pointer; white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(60,45,15,.30); transition: transform .12s; }
+  #replay .rIco { font-size: 1.15em; }
+  #replay:active { transform: translateX(-50%) scale(.93); }
+  #game.adv #replay { display: inline-flex; }
+  #game.free-mode #replay, #game.adv.free-mode #replay { display: none; }
+
+  /* "Easy-read" font: readable sans stack + generous letter/word/line spacing.
+     Helps early and dyslexic readers; applied document-wide via a body class. */
+  body.a11y-dys, body.a11y-dys button, body.a11y-dys input {
+    font-family: "Verdana", "Trebuchet MS", "Segoe UI", Tahoma, sans-serif !important;
+    letter-spacing: .035em; word-spacing: .08em; }
+  body.a11y-dys #prompt, body.a11y-dys .choice, body.a11y-dys #hint,
+  body.a11y-dys .stSay, body.a11y-dys .sentence { line-height: 1.5; }
+
+  /* "Bigger text": scale the em/rem UI chrome document-wide, plus nudge up the
+     reading-critical gameplay text (which uses vw units the root scale can't reach). */
+  body.a11y-big { font-size: 116%; }
+  body.a11y-big #prompt { font-size: 2.9vw; }
+  body.a11y-big .gameStage #prompt { font-size: 3.2vh; }
+  body.a11y-big #game #panel #prompt { font-size: 6.2vw; }        /* mobile prompt */
+  body.a11y-big #choices .choice .num { font-size: min(6.4vh, 9.3vw); }
+  body.a11y-big #hint { font-size: 1.15em; }
+
+  /* Reading-help toggles inside the profile menu */
+  .pmA11y { border-top: 1.5px solid #ece0bf; margin-top: .4em; padding-top: .5em; display: flex; flex-direction: column; gap: .35em; }
+  .pmA11yHead { font-family: 'Baloo 2', sans-serif; font-weight: 800; color: #8a6a35; font-size: .82em; padding-left: .15em; }
+  .pmToggle { display: flex; align-items: center; justify-content: space-between; gap: .6em; cursor: pointer;
+    border: 1.5px solid #dfd3ad; background: #fff; border-radius: 10px; padding: .55em .7em;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800; color: #6e4f24; font-size: .95em; }
+  .pmToggle .pmToggleState { font-size: .82em; color: #b08a3e; background: #f3ead0; border-radius: 999px; padding: .12em .7em; }
+  .pmToggle[aria-pressed="true"] { border-color: #4a90d9; background: #eaf3fc; color: var(--blue-d); }
+  .pmToggle[aria-pressed="true"] .pmToggleState { color: #fff; background: #4a90d9; }
 </style>
 </head>
 <body>
@@ -1837,7 +1882,7 @@
       <div id="starbar"></div>
       <div id="score">⭐ 0</div>
       <div id="gameRibbon">🐚 Have fun counting &amp; spelling! ⭐</div>
-      <div id="panel"><div id="prompt"></div><div id="target"></div></div>
+      <div id="panel"><div id="prompt" role="status" aria-live="polite"></div><div id="target"></div></div>
       <div id="choices"></div>
       <div id="keyboard"></div>
       <div id="mfb"></div>
@@ -1846,6 +1891,7 @@
       <button id="logo" class="hotspot" title="Back to menu" aria-label="Back to menu"></button>
       <button id="exit" class="hotspot" title="Menu" aria-label="Menu"></button>
       <button id="sound" class="hotspot" title="Sound on/off" aria-label="Sound"></button>
+      <button id="replay" type="button" title="Hear it again" aria-label="Hear it again"><span class="rIco" aria-hidden="true">🔊</span><span class="rTxt">Again</span></button>
     </div>
     <div id="yako">👦🐕</div>
     <div id="buddy"></div>
@@ -1898,6 +1944,11 @@
       <div class="pmAccount" id="pmAccount" hidden>
         <div class="pmSynced">☁️ <span id="pmSyncedName">Signed in</span> — synced across devices</div>
         <button class="pmBtn ghost" id="pmSignOut" type="button">Sign out</button>
+      </div>
+      <div class="pmA11y">
+        <div class="pmA11yHead">👀 Reading help</div>
+        <button class="pmToggle" id="pmBigText" type="button" aria-pressed="false"><span>🔠 Bigger text</span><span class="pmToggleState">Off</span></button>
+        <button class="pmToggle" id="pmEasyFont" type="button" aria-pressed="false"><span>📖 Easy-read font</span><span class="pmToggleState">Off</span></button>
       </div>
       <button class="pmBtn ghost" id="pmSwitch" type="button">🔄 Switch player</button>
     </div>
@@ -2975,6 +3026,15 @@
     const k = e.target.closest('.key.active');
     if (!k || mode === 'free') return;
     tryAnswer(k.dataset.key);
+  });
+
+  // "Hear it again" — re-speak the current challenge's prompt (works for every mode,
+  // since announce() already handles each mode's own prompt/clip).
+  const replayBtn = document.getElementById('replay');
+  if (replayBtn) replayBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    ensureAudio();
+    if (challenge && mode !== 'free') announce();
   });
 
   // ---------- Celebration visuals ----------
@@ -4526,6 +4586,34 @@
   if (profileBtn) profileBtn.addEventListener('click', (e) => { e.stopPropagation(); ensureAudio(); menuOpen(); });
   document.addEventListener('click', (e) => { if (profileMenu && !profileMenu.hidden && !e.target.closest('#profileWrap')) menuOpen(false); });
   const pmProgressEl = document.getElementById('pmProgress'); if (pmProgressEl) pmProgressEl.addEventListener('click', openSuccess);
+
+  // ---------- Reading-help (accessibility) toggles ----------
+  // Persisted document-wide preferences: "Bigger text" and "Easy-read font".
+  function applyA11y(cls, on) {
+    document.body.classList.toggle(cls, on);
+    const btn = cls === 'a11y-big' ? document.getElementById('pmBigText') : document.getElementById('pmEasyFont');
+    if (btn) { btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      const st = btn.querySelector('.pmToggleState'); if (st) st.textContent = on ? 'On' : 'Off'; }
+  }
+  function initA11y() {
+    let big = false, dys = false;
+    try { big = localStorage.getItem('yako_a11y_big') === '1'; dys = localStorage.getItem('yako_a11y_dys') === '1'; } catch (e) {}
+    applyA11y('a11y-big', big); applyA11y('a11y-dys', dys);
+  }
+  const pmBigEl = document.getElementById('pmBigText');
+  if (pmBigEl) pmBigEl.addEventListener('click', () => {
+    const on = !document.body.classList.contains('a11y-big');
+    applyA11y('a11y-big', on);
+    try { localStorage.setItem('yako_a11y_big', on ? '1' : '0'); } catch (e) {}
+  });
+  const pmEasyEl = document.getElementById('pmEasyFont');
+  if (pmEasyEl) pmEasyEl.addEventListener('click', () => {
+    const on = !document.body.classList.contains('a11y-dys');
+    applyA11y('a11y-dys', on);
+    try { localStorage.setItem('yako_a11y_dys', on ? '1' : '0'); } catch (e) {}
+  });
+  initA11y();
+
   const pmSwitchEl = document.getElementById('pmSwitch');
   if (pmSwitchEl) pmSwitchEl.addEventListener('click', () => {
     menuOpen(false);
