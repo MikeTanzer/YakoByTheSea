@@ -465,7 +465,33 @@
   .spTab { flex: 1; cursor: pointer; border: 2px solid #eadfbe; background: #fff; border-radius: 12px;
     padding: .6em; font-family: 'Baloo 2'; font-weight: 800; font-size: .92em; color: #8a6a35; transition: all .12s ease; }
   .spTab.active { background: linear-gradient(#6fc3ff, var(--blue)); color: #fff; border-color: var(--blue-d); box-shadow: 0 3px 0 #2f7fc0; }
-  #spLeaderTab[hidden], #spProgressTab[hidden] { display: none; }
+  #spLeaderTab[hidden], #spProgressTab[hidden], #spStickersTab[hidden] { display: none; }
+
+  /* ===== Sticker book ===== */
+  .stkStreak { text-align: center; font-family: 'Baloo 2'; font-weight: 800; color: #a9541b; font-size: 1.05em;
+    background: linear-gradient(#fff1d6, #ffd9a3); border: 2px solid #f0a95a; border-radius: 14px;
+    padding: .7em; margin-bottom: .9em; line-height: 1.25; }
+  .stkStreak .stkFlame { font-size: 1.5em; display: block; }
+  .stkGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .7em; }
+  .stkCell { position: relative; display: flex; flex-direction: column; align-items: center; gap: .25em;
+    background: #fff; border: 2px solid #eadfbe; border-radius: 16px; padding: .8em .3em .6em; text-align: center; }
+  .stkCell .stkEmoji { font-size: 2.1em; line-height: 1; filter: none; }
+  .stkCell .stkName { font-family: 'Baloo 2'; font-weight: 800; color: var(--blue-d); font-size: .68em; line-height: 1.05; }
+  .stkCell.locked { background: #f4efe0; border-color: #e4d9bc; }
+  .stkCell.locked .stkEmoji { filter: grayscale(1); opacity: .32; }
+  .stkCell.locked .stkName { color: #b3a375; }
+  .stkCell .stkLock { position: absolute; top: .3em; right: .4em; font-size: .8em; opacity: .7; }
+  .stkCell .stkNeed { font-size: .62em; color: #b08a3e; font-weight: 700; }
+  .stkCell.unlocked { box-shadow: 0 3px 0 #e7cf8f; }
+  .stkCell.fresh { animation: stkPop .5s ease; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,210,70,.6); }
+  @keyframes stkPop { 0%{transform:scale(.4);opacity:0;} 60%{transform:scale(1.15);} 100%{transform:scale(1);opacity:1;} }
+  @media (max-width: 760px) { .stkGrid { grid-template-columns: repeat(3, 1fr); } }
+
+  /* New-sticker reward line inside the level-complete card */
+  .winSticker { margin: .4vh 0; font-family: 'Baloo 2'; font-weight: 800; color: #a9541b;
+    background: linear-gradient(#fff1d6, #ffe0b0); border: 2px solid #f0a95a; border-radius: 12px;
+    padding: .5vh 1vw; display: inline-block; }
+  .winSticker .wsEmoji { font-size: 1.3em; vertical-align: middle; }
   .lbYou { text-align: center; font-family: 'Baloo 2'; font-weight: 800; color: #7a5a12; font-size: 1.05em;
     background: linear-gradient(#fff6cf, #ffe89a); border: 2px solid var(--gold); border-radius: 14px; padding: .7em; margin-bottom: .8em; }
   .lbList { display: flex; flex-direction: column; gap: .45em; }
@@ -1967,8 +1993,13 @@
         </div>
       </div>
       <div class="spTabs">
-        <button class="spTab active" id="tabProgress" type="button" data-tab="progress">📈 My Progress</button>
-        <button class="spTab" id="tabLeader" type="button" data-tab="leader">🏆 Leaderboard</button>
+        <button class="spTab active" id="tabProgress" type="button" data-tab="progress">📈 Progress</button>
+        <button class="spTab" id="tabStickers" type="button" data-tab="stickers">🏅 Stickers</button>
+        <button class="spTab" id="tabLeader" type="button" data-tab="leader">🏆 Leaders</button>
+      </div>
+      <div id="spStickersTab" hidden>
+        <div class="stkStreak" id="stkStreak"></div>
+        <div class="stkGrid" id="stkGrid"></div>
       </div>
       <div id="spProgressTab">
         <div class="spHeadline" id="spHeadline"></div>
@@ -2140,6 +2171,62 @@
   function getNum(k) { try { const v = localStorage.getItem(k); return v == null ? null : parseFloat(v); } catch (e) { return null; } }
   function setNum(k, v) { try { localStorage.setItem(k, String(v)); } catch (e) {} }
   function fmt(sec) { return (Math.round(sec * 10) / 10).toFixed(1); }
+
+  // ---------- Rewards: sticker collection + daily streak ----------
+  // A sea-and-adventure sticker book. Star stickers unlock as the child's total
+  // stars grow; streak stickers unlock as they play on consecutive days. Purely
+  // localStorage — no accounts needed.
+  const STICKERS = [
+    { id: 'shell',   emoji: '🐚', name: 'Sea Shell',   type: 'stars', need: 5 },
+    { id: 'crab',    emoji: '🦀', name: 'Crab',        type: 'stars', need: 10 },
+    { id: 'star',    emoji: '⭐', name: 'Sea Star',    type: 'stars', need: 15 },
+    { id: 'fish',    emoji: '🐠', name: 'Little Fish', type: 'stars', need: 25 },
+    { id: 'dolphin', emoji: '🐬', name: 'Dolphin',     type: 'stars', need: 40 },
+    { id: 'turtle',  emoji: '🐢', name: 'Sea Turtle',  type: 'stars', need: 55 },
+    { id: 'seal',    emoji: '🦭', name: 'Seal',        type: 'stars', need: 75 },
+    { id: 'octopus', emoji: '🐙', name: 'Octopus',     type: 'stars', need: 95 },
+    { id: 'penguin', emoji: '🐧', name: 'Penguin',     type: 'stars', need: 120 },
+    { id: 'whale',   emoji: '🐳', name: 'Whale',       type: 'stars', need: 150 },
+    { id: 'shark',   emoji: '🦈', name: 'Shark',       type: 'stars', need: 185 },
+    { id: 'wave',    emoji: '🌊', name: 'Big Wave',    type: 'stars', need: 225 },
+    { id: 'surf',    emoji: '🏄', name: 'Surfer',      type: 'stars', need: 270 },
+    { id: 'rainbow', emoji: '🌈', name: 'Rainbow',     type: 'stars', need: 320 },
+    { id: 'trophy',  emoji: '🏆', name: 'Gold Trophy', type: 'stars', need: 400 },
+    { id: 'flame3',  emoji: '🔥', name: '3-Day Streak',  type: 'streak', need: 3 },
+    { id: 'bolt5',   emoji: '⚡', name: '5-Day Streak',  type: 'streak', need: 5 },
+    { id: 'glow7',   emoji: '🌟', name: '7-Day Streak',  type: 'streak', need: 7 },
+    { id: 'gem14',   emoji: '💎', name: '2-Week Streak', type: 'streak', need: 14 },
+    { id: 'crown30', emoji: '👑', name: '30-Day Streak', type: 'streak', need: 30 }
+  ];
+  function ymd(d) { return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+  function getStreak() { return getNum('yako_streak') || 0; }
+  // Count today's visit toward the daily streak (idempotent per calendar day).
+  function touchStreak() {
+    let today, yest;
+    try { const now = new Date(); today = ymd(now); const y = new Date(now); y.setDate(y.getDate() - 1); yest = ymd(y); }
+    catch (e) { return getStreak(); }
+    let last = null; try { last = localStorage.getItem('yako_streak_day'); } catch (e) {}
+    if (last === today) return getStreak();               // already counted today
+    const streak = (last === yest) ? (getStreak() + 1) : 1;
+    setNum('yako_streak', streak);
+    try { localStorage.setItem('yako_streak_day', today); } catch (e) {}
+    return streak;
+  }
+  function loadStickers() {
+    try { return new Set(JSON.parse(localStorage.getItem('yako_stickers') || '[]')); } catch (e) { return new Set(); }
+  }
+  function saveStickers(set) {
+    try { localStorage.setItem('yako_stickers', JSON.stringify([...set])); } catch (e) {}
+  }
+  function stickerUnlocked(s, stars, streak) { return (s.type === 'streak' ? streak : stars) >= s.need; }
+  // Unlock any newly-earned stickers; return the freshly-earned ones (for the reveal).
+  function checkStickers() {
+    const stars = getNum('yako_points') || 0, streak = getStreak();
+    const have = loadStickers(), newly = [];
+    STICKERS.forEach(s => { if (stickerUnlocked(s, stars, streak) && !have.has(s.id)) { have.add(s.id); newly.push(s); } });
+    if (newly.length) saveStickers(have);
+    return newly;
+  }
 
   // ---------- Modules (js/i18n.js + js/audio.js) ----------
   // Local aliases so the game code below keeps its familiar names.
@@ -3254,6 +3341,7 @@
   let defaultWinAct = 'level';   // what a tap / the timeout does on the win card
   function completeLevel() {
     stopAllSounds();
+    const newStickers = checkStickers();     // finishing a level may push total stars past a sticker threshold
     const bestKey = 'yako_best_' + mode, lastKey = 'yako_last_' + mode, cntKey = 'yako_count_' + mode;
     const firstKey = 'yako_first_' + mode, firstDayKey = 'yako_firstday_' + mode, lastDayKey = 'yako_lastday_' + mode;
     const prevBest = getNum(bestKey), prevLast = getNum(lastKey);
@@ -3318,6 +3406,7 @@
         '<div class="winBest">Best: ' + fmt(bestShown) + 's</div>' +
         '<div class="winMist">' + (levelMistakes === 0 ? 'No mistakes! 🌟' : 'Mistakes: ' + levelMistakes) + '</div>' +
         (improve ? '<div class="winImprove">' + improve + '</div>' : '') +
+        (newStickers.length ? '<div class="winSticker">🎉 New sticker: <span class="wsEmoji">' + newStickers[0].emoji + '</span> ' + newStickers[0].name + '!</div>' : '') +
         '<div class="winVerdict">' + V[vKey] + '</div>' +
         '<div class="winBtns">' + buttons + '</div>' +
       '</div>';
@@ -3782,6 +3871,8 @@
   // ---------- Start / menu ----------
   function startGame(m) {
     mode = m;
+    touchStreak();                 // count today's play toward the daily streak
+    checkStickers();               // unlock any streak stickers earned by playing today
     // Music lessons play the A–G notes with a reedy bagpipe timbre (to match the
     // piper); every other lesson uses the soft default tone.
     if (A.setNoteTimbre) A.setNoteTimbre(MUSIC_MODES.indexOf(mode) >= 0 ? 'bagpipe' : 'default');
@@ -4527,12 +4618,35 @@
     }).join('');
   }
   function showSuccessTab(which) {
-    const prog = which !== 'leader';
-    document.getElementById('spProgressTab').hidden = !prog;
-    document.getElementById('spLeaderTab').hidden = prog;
-    document.getElementById('tabProgress').classList.toggle('active', prog);
-    document.getElementById('tabLeader').classList.toggle('active', !prog);
-    if (!prog) renderLeaderboard();
+    document.getElementById('spProgressTab').hidden = which !== 'progress';
+    document.getElementById('spStickersTab').hidden = which !== 'stickers';
+    document.getElementById('spLeaderTab').hidden = which !== 'leader';
+    document.getElementById('tabProgress').classList.toggle('active', which === 'progress');
+    document.getElementById('tabStickers').classList.toggle('active', which === 'stickers');
+    document.getElementById('tabLeader').classList.toggle('active', which === 'leader');
+    if (which === 'leader') renderLeaderboard();
+    if (which === 'stickers') renderStickers();
+  }
+  // Paint the sticker book: streak banner + a grid of every sticker (locked ones greyed).
+  function renderStickers(fresh) {
+    checkStickers();     // reconcile: a returning player's stars/streak may already have earned some
+    const stars = getNum('yako_points') || 0, streak = getStreak();
+    const have = loadStickers(), freshSet = new Set(fresh || []);
+    const earned = STICKERS.filter(s => have.has(s.id)).length;
+    const sEl = document.getElementById('stkStreak');
+    if (sEl) sEl.innerHTML = '<span class="stkFlame">🔥</span>' +
+      (streak > 0 ? streak + '-day streak!' : 'Play today to start a streak!') +
+      ' &nbsp;·&nbsp; ' + earned + ' / ' + STICKERS.length + ' stickers';
+    const g = document.getElementById('stkGrid');
+    if (!g) return;
+    g.innerHTML = STICKERS.map(s => {
+      const on = have.has(s.id);
+      const cls = 'stkCell ' + (on ? 'unlocked' : 'locked') + (freshSet.has(s.id) ? ' fresh' : '');
+      const need = on ? '' : '<div class="stkNeed">' + (s.type === 'streak' ? s.need + '-day streak' : s.need + ' stars') + '</div>';
+      return '<div class="' + cls + '">' + (on ? '' : '<span class="stkLock">🔒</span>') +
+        '<span class="stkEmoji">' + s.emoji + '</span>' +
+        '<span class="stkName">' + (on ? s.name : '???') + '</span>' + need + '</div>';
+    }).join('');
   }
 
   function openSuccess() {
@@ -4624,6 +4738,7 @@
   });
   const spCloseEl = document.getElementById('spClose'); if (spCloseEl) spCloseEl.addEventListener('click', () => { successPage.hidden = true; });
   const tabProgEl = document.getElementById('tabProgress'); if (tabProgEl) tabProgEl.addEventListener('click', () => showSuccessTab('progress'));
+  const tabStkEl = document.getElementById('tabStickers'); if (tabStkEl) tabStkEl.addEventListener('click', () => showSuccessTab('stickers'));
   const tabLeadEl = document.getElementById('tabLeader'); if (tabLeadEl) tabLeadEl.addEventListener('click', () => showSuccessTab('leader'));
   if (successPage) successPage.addEventListener('click', (e) => { if (e.target === successPage) successPage.hidden = true; });
   // Tap/enter a progress card → its detailed analytics
