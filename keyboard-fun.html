@@ -3097,12 +3097,12 @@
     if (mode === 'melody') {
       if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>' + w + '! 🎶</b><span>You played the melody!</span>'; }
       playMelody(challenge.seq);                                        // play the whole tune back-to-back as the reward
-      playPersona(['cheer_1', 'cheer_2', 'cheer_3', 'cheer_4', 'cheer_5', 'cheer_6', 'cheer_7', 'cheer_8'], nextCheer(), { rate: 1.0 });
+      playPersona(cheerKeys(), nextCheer(), { rate: 1.0 });
     } else if (mode === 'chords') {
       if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>' + w + '! 🎶</b><span>You made a chord!</span>'; }
       playTone(noteFreqs(challenge.seq), { dur: 1.5 });                 // ring the full chord in triumph
       // spell the chord back in the recorded voice: "C. E. G." + a cheer
-      playPersonaChain(challenge.seq.map(n => 'name_' + n).concat('cheer_' + (1 + Math.floor(Math.random() * 8))), "That's " + w + '!', { rate: 1.0 });
+      playPersonaChain(challenge.seq.map(n => 'name_' + n).concat(pick(cheerKeys())), "That's " + w + '!', { rate: 1.0 });
     } else if (mode === 'objects') {
       if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>You spelled ' + w + '!</b><span>Great job!</span>'; }
       playPersonaChain(w.split('').map(ch => 'name_' + ch).concat('done_spell'), L().doneSpell(w), { rate: 1.0 });
@@ -3127,6 +3127,11 @@
     }, dur * 1000 + 300);
   }
 
+  // Recorded-clip pools sized to the current language's phrase list, so the child hears
+  // lots of DIFFERENT "great job!" / "try again!" lines (a real-person feel). Missing
+  // clips fall back to the spoken synth line automatically.
+  function cheerKeys() { const n = ((L().cheers || []).length) || 8; return Array.from({ length: n }, (_, i) => 'cheer_' + (i + 1)); }
+  function tryKeys()   { const n = ((L().tries  || []).length) || 0; return n ? Array.from({ length: n }, (_, i) => 'try_' + (i + 1)) : ['try']; }
   function correct(pressed) {
     stopAllSounds();
     clearHintTimer();
@@ -3154,7 +3159,7 @@
     playChime();
     const dur = 2.0 + Math.random() * 1.5;        // 2–3.5 s between rounds
     playApplause(dur);
-    playPersona(['cheer_1', 'cheer_2', 'cheer_3', 'cheer_4', 'cheer_5', 'cheer_6', 'cheer_7', 'cheer_8'], nextCheer(), { rate: 1.0 });   // recorded persona cheer
+    playPersona(cheerKeys(), nextCheer(), { rate: 1.0 });   // recorded persona cheer (random from the full pool)
 
     roundTimer = setTimeout(() => {
       if (finished) completeLevel();
@@ -3179,7 +3184,7 @@
     playTryAgainTone();
     targetEl.style.transform = 'scale(0.94)';
     setTimeout(() => { targetEl.style.transform = 'scale(1)'; }, 150);
-    playPersona('try', wrongPhrase(keyPressed));   // real-voice "try again" (synth fallback)
+    playPersona(tryKeys(), wrongPhrase(keyPressed));   // real-voice "try again" — random from the pool (synth fallback)
     // Listen & Match: after 2 wrong guesses, finally reveal the hidden letter/number
     if (mode === 'earmatch' || mode === 'pitchlisten') { targetWrong++; if (targetWrong >= 2 && challenge.revealAnswer) challenge.revealAnswer(); }
     scheduleHint();   // restart the idle countdown toward the next hint
@@ -3356,13 +3361,12 @@
   function storyTry() {
     try { if (A.playTryAgainTone) playTryAgainTone(); } catch (e) {}
     const tries = (L().tries && L().tries.length) ? L().tries : [L().again || 'Oops! Try again!'];
-    speak(pick(tries), { rate: 1.0 });
+    playPersona(tryKeys(), pick(tries), { rate: 1.0 });   // recorded "try again" from the pool (synth fallback)
   }
   function storyCheer() {
     try { playChime(); } catch (e) {}
     try { confetti(); } catch (e) {}
-    const key = (typeof nextCheer === 'function') ? nextCheer() : 'cheer';
-    playPersona(key, pick(L().cheers), { rate: 1.05 });
+    playPersona(cheerKeys(), pick(L().cheers), { rate: 1.05 });   // random recorded cheer (synth fallback)
   }
   function storyAward() {
     totalStars = (getNum('yako_points') || 0) + 1;

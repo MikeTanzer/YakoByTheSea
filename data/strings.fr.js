@@ -35,8 +35,8 @@ window.YAKO_STRINGS.fr = {
   wrongMath: "Oups ! Compte encore et réessaie !",
   again: "Oups ! Réessaie !",
   level: "Cinq étoiles ! Tu as fini le niveau {level} ! Bravo !",
-  cheers: ["Bravo !","Tu te débrouilles très bien !","Ouah, tu es si intelligent !","Tu es brillant !","C'est exactement ça, bien joué !","Je suis si fier de toi !","Magnifique travail !","Tu es un champion !","Bon travail !","Ouah, tu es doué pour ça !","Fantastique !","Tu as réussi !","Génial, continue !","Tu es incroyable !"],
-  tries: ["Ce n'est pas ça, pas grave — réessaie !","Oups ! Ce n'est pas grave, réessaie !","Presque ! Tu peux le faire — encore une fois !","Pas tout à fait — tu vas y arriver, réessaie !"],
+  cheers: ["Bravo !","Tu te débrouilles très bien !","Ouah, tu es si intelligent !","Tu es brillant !","C'est exactement ça, bien joué !","Je suis si fier de toi !","Magnifique travail !","Tu es un champion !","Oui ! Tu as réussi !","Bravo, joli travail !","Tu es un petit génie !","Parfait — continue !","Youpi ! Bien joué !","Tape m'en cinq ! C'est ça !","Tu es incroyable !","Fantastique, mon ami !"],
+  tries: ["Oups ! Ce n'est pas grave, réessaie !","Ce n'est pas ça — tu peux le faire !","Presque ! Encore une fois !","Tout près ! Essaie encore.","Bien tenté ! Réessaie.","Ne t'inquiète pas — tu vas y arriver !","Hmm, pas celui-là. Réessaie !","Bien essayé ! On réessaie."],
   wrongNamed: "Ce n'est pas {key}. Pas grave — réessaie !",
   greet: "Bonjour ! On joue !",
   prompt: {
