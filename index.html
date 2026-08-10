@@ -1,14 +1,127 @@
 <!doctype html>
-<!-- GitHub Pages entry point: send visitors straight into the game -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="refresh" content="0; url=./keyboard-fun.html">
-  <title>Yako by the Sea</title>
-  <link rel="icon" href="ui/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yako by the Sea — Free Learning Games for Kids (Letters, Numbers, Words, Counting &amp; Languages)</title>
+  <meta name="description" content="Yako by the Sea is a free, ad-free learning game for kids ages 3–7. Play friendly games to learn the alphabet and letters, numbers and counting, spelling words, phonics, and first words in 5 languages — English, Spanish, French, Hebrew and Tagalog. Works in any browser, on phone, tablet or computer, and even offline.">
+  <meta name="keywords" content="learning games for kids, free kids educational game, learn letters, alphabet game, learn numbers, counting game, spelling for kids, phonics, learn words, preschool games, kindergarten games, toddler learning, languages for kids, Spanish French Hebrew Tagalog for kids, no ads, offline">
+  <meta name="author" content="Yako by the Sea">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <link rel="canonical" href="https://miketanzer.github.io/YakoByTheSea/">
+  <link rel="icon" type="image/png" href="ui/favicon.png">
+  <link rel="apple-touch-icon" href="ui/icon-192.png">
+  <meta name="theme-color" content="#2f6fb0">
+
+  <!-- Open Graph / social + Google preview image (the app icon / favicon artwork) -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Yako by the Sea">
+  <meta property="og:title" content="Yako by the Sea — Free Learning Games for Kids">
+  <meta property="og:description" content="A free, ad-free game where kids ages 3–7 learn letters, numbers, counting, spelling and first words in 5 languages. Plays in any browser.">
+  <meta property="og:url" content="https://miketanzer.github.io/YakoByTheSea/">
+  <meta property="og:image" content="https://miketanzer.github.io/YakoByTheSea/ui/icon-512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="Yako by the Sea app icon">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Yako by the Sea — Free Learning Games for Kids">
+  <meta name="twitter:description" content="Free, ad-free learning game for ages 3–7: letters, numbers, counting, spelling and 5 languages.">
+  <meta name="twitter:image" content="https://miketanzer.github.io/YakoByTheSea/ui/icon-512.png">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://miketanzer.github.io/YakoByTheSea/#website",
+        "url": "https://miketanzer.github.io/YakoByTheSea/",
+        "name": "Yako by the Sea",
+        "description": "Free learning games for kids: letters, numbers, words, counting and 5 languages.",
+        "inLanguage": ["en", "es", "fr", "he", "tl"]
+      },
+      {
+        "@type": ["WebApplication", "LearningResource"],
+        "name": "Yako by the Sea",
+        "url": "https://miketanzer.github.io/YakoByTheSea/",
+        "image": "https://miketanzer.github.io/YakoByTheSea/ui/icon-512.png",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Any (web browser)",
+        "browserRequirements": "Requires a modern web browser. Works offline once loaded.",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "inLanguage": ["en", "es", "fr", "he", "tl"],
+        "educationalUse": ["instruction", "practice", "play"],
+        "learningResourceType": "game",
+        "interactivityType": "active",
+        "typicalAgeRange": "3-7",
+        "audience": [
+          { "@type": "EducationalAudience", "educationalRole": "student" },
+          { "@type": "PeopleAudience", "suggestedMinAge": 3, "suggestedMaxAge": 7 }
+        ],
+        "teaches": [
+          "Alphabet and letter recognition",
+          "Phonics and letter sounds",
+          "Numbers and counting",
+          "Spelling simple words",
+          "First words in English, Spanish, French, Hebrew and Tagalog"
+        ],
+        "featureList": [
+          "Letters and alphabet games",
+          "Numbers and counting games",
+          "Spelling and phonics",
+          "Objects, shapes, colors and animals",
+          "5 languages: English, Spanish, French, Hebrew, Tagalog",
+          "Friendly recorded narration in 4 voices",
+          "Story adventures",
+          "Sticker rewards and daily streaks",
+          "Ad-free, free to play, works offline"
+        ],
+        "description": "Yako by the Sea is a free, ad-free learning game for children ages 3 to 7. Kids play gentle, colorful games to learn the alphabet and letters, numbers and counting, spelling words, phonics, shapes, colors and animals, and first words in five languages (English, Spanish, French, Hebrew and Tagalog), guided by a friendly narrator. It runs in any web browser on phone, tablet or computer and works offline."
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    :root { color-scheme: light; }
+    body { margin:0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; color:#3f2f18;
+      background: linear-gradient(180deg,#9ed8f0 0%,#bfe7f4 30%,#ead9ab 72%,#ddc593 100%);
+      min-height:100vh; display:flex; align-items:center; justify-content:center; padding:6vw 5vw; }
+    main { max-width:680px; text-align:center; background:rgba(255,250,235,.86); border:4px solid #cba24a;
+      border-radius:26px; padding:clamp(20px,5vw,40px); box-shadow:0 12px 30px rgba(80,60,20,.25); }
+    img.logo { width:120px; height:120px; border-radius:26px; box-shadow:0 6px 16px rgba(60,45,15,.3); }
+    h1 { font-size:clamp(24px,5vw,34px); line-height:1.1; margin:.5em 0 .2em; color:#27598f; }
+    p.sub { font-size:clamp(15px,3.5vw,18px); line-height:1.5; margin:.4em 0 1.1em; }
+    ul.learn { text-align:left; display:inline-block; margin:0 auto 1.3em; line-height:1.7; font-size:clamp(14px,3.4vw,16px); }
+    a.play { display:inline-block; background:linear-gradient(#f4d06a 0,#e9b949 100%); color:#4a3410;
+      font-weight:800; font-size:clamp(18px,4.5vw,22px); text-decoration:none; padding:.7em 1.6em; border-radius:16px;
+      border:3px solid #a9762a; box-shadow:0 6px 0 #a9762a; }
+    a.play:active { transform:translateY(3px); box-shadow:0 3px 0 #a9762a; }
+    footer { margin-top:1.4em; font-size:13px; color:#6e5a34; }
+  </style>
 </head>
 <body>
-  <p style="font-family:sans-serif">Loading Yako by the Sea… <a href="./keyboard-fun.html">tap here if it doesn't start</a>.</p>
-  <script>location.replace('./keyboard-fun.html');</script>
+  <main>
+    <img class="logo" src="ui/icon-512.png" alt="Yako by the Sea app icon" width="120" height="120"
+         onerror="this.src='ui/icon-192.png'">
+    <h1>Yako by the Sea</h1>
+    <p class="sub">A <strong>free, ad-free learning game for kids ages 3–7</strong>. Play with Yako and his puppy by the Monterey coast to learn:</p>
+    <ul class="learn">
+      <li>🔤 <strong>Letters &amp; the alphabet</strong> — letter recognition and phonics sounds</li>
+      <li>🔢 <strong>Numbers &amp; counting</strong> — count sea animals and build numbers</li>
+      <li>✏️ <strong>Words &amp; spelling</strong> — spell simple words and fill-in sentences</li>
+      <li>🐚 <strong>Objects, shapes, colors &amp; animals</strong></li>
+      <li>🌍 <strong>5 languages</strong> — English, Spanish, French, Hebrew &amp; Tagalog</li>
+      <li>📖 Story adventures, sticker rewards, and friendly recorded voices</li>
+    </ul>
+    <p><a class="play" href="./keyboard-fun.html">▶ Play now — it's free</a></p>
+    <footer>Works in any browser on phone, tablet or computer — no download, no ads, and it even plays offline.</footer>
+  </main>
+  <noscript><p style="text-align:center"><a href="./keyboard-fun.html">Open Yako by the Sea</a></p></noscript>
+  <script>
+    /* Let crawlers read the content above; send real visitors into the game shortly after. */
+    setTimeout(function(){ location.href = './keyboard-fun.html'; }, 1400);
+  </script>
 </body>
 </html>
