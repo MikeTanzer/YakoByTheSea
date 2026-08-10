@@ -1,5 +1,5 @@
 /* Yako by the Sea — service worker (offline + installable PWA) */
-const CORE = 'yako-core-v58';    // versioned: bumped whenever the code/art below changes
+const CORE = 'yako-core-v59';    // versioned: bumped whenever the code/art below changes
 const MEDIA = 'yako-media';      // persistent: clips + scene stills cached as played (survives version bumps)
 const FONTS = 'yako-fonts';      // persistent: Google Fonts CSS + woff2 (so text looks right offline)
 const CORE_ASSETS = [
@@ -61,6 +61,10 @@ self.addEventListener('activate', (e) => {
     caches.keys()
       // drop stale CORE versions; keep the persistent MEDIA + FONTS caches
       .then((keys) => Promise.all(keys.filter((k) => k !== CORE && k !== MEDIA && k !== FONTS).map((k) => caches.delete(k))))
+      // the scene loop videos were re-rendered (same filenames) — purge the old
+      // copies from the persistent MEDIA cache so returning users refetch them once
+      .then(() => caches.open(MEDIA).then((c) => c.keys().then((reqs) =>
+        Promise.all(reqs.filter((r) => /\/scenes\/.*\.mp4$/i.test(new URL(r.url).pathname)).map((r) => c.delete(r))))))
       .then(() => self.clients.claim())
   );
 });
