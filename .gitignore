@@ -10,6 +10,8 @@
 !/robots.txt
 !/sitemap.xml
 !/llms.txt
+!/favicon.ico
+!/favicon.png
 !/.github/
 !/manifest.webmanifest
 !/sw.js
