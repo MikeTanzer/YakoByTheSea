@@ -1281,6 +1281,21 @@
     100% { transform: scale(1) rotate(0deg); }
   }
   @media (prefers-reduced-motion: reduce) { #target.celebrate { animation: none; } }
+  /* The answer graphic flies INTO the card on each new question, and flies OUT
+     of the card once it's answered correctly (then the next one flies in). */
+  #target.enter { animation: targetEnter .5s cubic-bezier(.2,1.35,.4,1) both; transform-origin: center; }
+  #target.leave { animation: targetLeave .45s cubic-bezier(.5,0,.75,.35) forwards; transform-origin: center; }
+  @keyframes targetEnter {
+    0%   { transform: translateY(16%) scale(.5) rotate(-6deg); opacity: 0; }
+    60%  { transform: translateY(-4%) scale(1.08) rotate(2deg); opacity: 1; }
+    100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+  }
+  @keyframes targetLeave {
+    0%   { transform: translateY(0) scale(1); opacity: 1; }
+    28%  { transform: translateY(6%) scale(1.1); opacity: 1; }
+    100% { transform: translateY(-135%) scale(.3) rotate(8deg); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { #target.enter, #target.leave { animation: none; } }
 
   /* celebration burst */
   .confetti { position: absolute; width: 16px; height: 16px; border-radius: 3px; pointer-events: none; z-index: 7;
@@ -2194,6 +2209,7 @@
   let playMode = 'practice';    // 'campaign' (START button, auto-advance) | 'practice' (picked one lesson)
   let locked = false;
   let roundTimer = null;
+  let leaveTimer = null;
   let lastTarget = null;
   let playerName = '';
   let answerStyle = 'letter';
@@ -3051,8 +3067,8 @@
     clearEar(); targetWrong = 0;     // reset the Listen & Match repeat/reveal state
     next.render();
     if (next.prompt) promptEl.textContent = next.prompt;   // per-challenge prompt override (Objects)
-    targetEl.classList.remove('celebrate');                // clear last answer's bounce
-    targetEl.style.transform = 'scale(1)';
+    clearTimeout(leaveTimer);
+    playEnter();                                           // the new answer graphic flies into the card
     hintStage = 0;
     clearKeyHighlights();
     scheduleHint();
@@ -3239,6 +3255,21 @@
     void targetEl.offsetWidth;                // reflow so the animation restarts every time
     targetEl.classList.add('celebrate');
   }
+  // The answer graphic flies IN when a new question appears...
+  function playEnter() {
+    if (!targetEl) return;
+    targetEl.classList.remove('leave', 'celebrate');
+    targetEl.style.transform = '';
+    void targetEl.offsetWidth;
+    targetEl.classList.add('enter');
+  }
+  // ...and flies OUT of the card once the question is answered correctly.
+  function playLeave() {
+    if (!targetEl) return;
+    targetEl.classList.remove('enter', 'celebrate');
+    void targetEl.offsetWidth;
+    targetEl.classList.add('leave');
+  }
 
   // ---------- Star bar / score ----------
   function updateStarbar() {
@@ -3335,6 +3366,7 @@
       if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>' + "That's " + w + '!</b><span>Great job!</span>'; }
       playPersona('done_num', L().doneNum(w), { rate: 1.0 });
     }
+    if (!finished) leaveTimer = setTimeout(playLeave, Math.max(0, dur * 1000 + 300 - 430));  // fly the answer out just before the next flies in
     roundTimer = setTimeout(() => {
       if (finished) completeLevel();
       else { locked = false; newTarget(); }
@@ -3375,6 +3407,7 @@
     playApplause(dur);
     playPersona(cheerKeys(), nextCheer(), { rate: 1.0 });   // recorded persona cheer (random from the full pool)
 
+    if (!finished) leaveTimer = setTimeout(playLeave, Math.max(0, dur * 1000 + 300 - 430));  // fly the answer out just before the next flies in
     roundTimer = setTimeout(() => {
       if (finished) completeLevel();
       else { locked = false; newTarget(); }
@@ -3960,7 +3993,7 @@
     startScreen.style.display = 'none';
     game.style.display = 'flex';
     lastTarget = null;
-    locked = false; clearTimeout(roundTimer);   // never carry a lock/celebration timer into a new game
+    locked = false; clearTimeout(roundTimer); clearTimeout(leaveTimer);   // never carry a lock/celebration timer into a new game
     choicesEl.innerHTML = '';
     game.classList.remove('choices-mode');
     game.classList.remove('adv');                // cleared here; re-added below only for Monterey Adventures
@@ -4029,7 +4062,7 @@
     hidePlacePop(); hidePlaceCard();
     { const vp = document.getElementById('volPop'); if (vp) vp.classList.remove('show'); }
     clearTimeout(winTimer);
-    clearTimeout(roundTimer); locked = false;
+    clearTimeout(roundTimer); clearTimeout(leaveTimer); locked = false;
     winEl.classList.remove('show');
     clearFeedback();
     game.style.display = 'none';
