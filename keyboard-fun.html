@@ -1269,6 +1269,18 @@
     18%  { transform: translate(-50%,-50%) scale(1.1); opacity: 1; }
     100% { transform: translate(-50%,-50%) scale(1.5); opacity: 0; }
   }
+  /* Joyful "tada" the answer plays once it's correct — the number/letter/word/
+     picture/shape/colour in the question card bounces and wiggles. */
+  #target.celebrate { animation: answerTada .8s cubic-bezier(.28,1.5,.5,1) both; transform-origin: center; }
+  @keyframes answerTada {
+    0%   { transform: scale(1) rotate(0deg); }
+    18%  { transform: scale(1.28) rotate(-7deg); }
+    38%  { transform: scale(1.16) rotate(6deg); }
+    58%  { transform: scale(1.24) rotate(-4deg); }
+    78%  { transform: scale(1.12) rotate(3deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  @media (prefers-reduced-motion: reduce) { #target.celebrate { animation: none; } }
 
   /* celebration burst */
   .confetti { position: absolute; width: 16px; height: 16px; border-radius: 3px; pointer-events: none; z-index: 7;
@@ -3039,6 +3051,7 @@
     clearEar(); targetWrong = 0;     // reset the Listen & Match repeat/reveal state
     next.render();
     if (next.prompt) promptEl.textContent = next.prompt;   // per-challenge prompt override (Objects)
+    targetEl.classList.remove('celebrate');                // clear last answer's bounce
     targetEl.style.transform = 'scale(1)';
     hintStage = 0;
     clearKeyHighlights();
@@ -3217,6 +3230,16 @@
     setTimeout(() => el.remove(), 1500);
   }
 
+  // Bounce/wiggle the answer shown in the question card (number, letter, spelled
+  // word, picture, shape or colour) once it's answered correctly.
+  function celebrateTarget() {
+    if (!targetEl) return;
+    targetEl.style.transform = '';            // let the keyframes own the transform
+    targetEl.classList.remove('celebrate');
+    void targetEl.offsetWidth;                // reflow so the animation restarts every time
+    targetEl.classList.add('celebrate');
+  }
+
   // ---------- Star bar / score ----------
   function updateStarbar() {
     starbarEl.innerHTML = '';
@@ -3280,6 +3303,7 @@
     if (finished) levelElapsed = (performance.now() - levelStartTime) / 1000;
     challenge.revealAll();
     clearKeyHighlights();
+    celebrateTarget();                          // the finished word / number bounces
     const w = challenge.word;
     confetti(); showBuddy(); showFeedback(true); playReaction(true); playChime();
     const dur = 2.0 + Math.random() * 1.5;
@@ -3337,7 +3361,7 @@
     clearKeyHighlights();
     popChar(pressed, '#2bb673');
     if (challenge.choices) highlightChoice(challenge.answer, true);
-    targetEl.style.transform = 'scale(1.15)';
+    celebrateTarget();                          // the answer bounces/wiggles
     const bl = targetEl.querySelector('.bigletter');
     if (bl) bl.style.color = '#2bb673';
     if (challenge.style === 'plain') targetEl.style.color = '#2bb673';
