@@ -11,7 +11,7 @@
 !/sitemap.xml
 !/llms.txt
 !/favicon.ico
-!/favicon.png
+!/favicon*.png
 !/.github/
 !/manifest.webmanifest
 !/sw.js

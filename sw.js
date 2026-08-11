@@ -1,5 +1,5 @@
 /* Yako by the Sea — service worker (offline + installable PWA) */
-const CORE = 'yako-core-v61';    // versioned: bumped whenever the code/art below changes
+const CORE = 'yako-core-v62';    // versioned: bumped whenever the code/art below changes
 const MEDIA = 'yako-media';      // persistent: clips + scene stills cached as played (survives version bumps)
 const FONTS = 'yako-fonts';      // persistent: Google Fonts CSS + woff2 (so text looks right offline)
 const CORE_ASSETS = [
@@ -8,7 +8,10 @@ const CORE_ASSETS = [
   './keyboard-fun.html',
   './manifest.webmanifest',
   './favicon.ico',
-  './favicon.png',
+  './favicon-16.png',
+  './favicon-32.png',
+  './favicon-48.png',
+  './favicon-180.png',
   './js/i18n.js',
   './js/audio.js',
   './js/cloud.js',
