@@ -1719,18 +1719,22 @@
      (only shows on :focus-visible, so it never appears on a tap). */
   :focus-visible { outline: 3px solid #2b7fff; outline-offset: 2px; border-radius: 6px; }
 
-  /* "Hear it again" replay button — sits centered on the bottom control row, between the
-     Menu (left) and Sound (right) hotspots, so it never overlaps the keyboard or card. */
-  #replay { position: fixed; z-index: 41; display: none; align-items: center; gap: .4em;
-    bottom: calc(2.9vh + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%);
-    background: rgba(255,255,255,.94); color: var(--blue-d); border: 3px solid #ffd24a;
-    border-radius: 999px; padding: .5em 1.05em; font-family: 'Baloo 2', sans-serif; font-weight: 800;
-    font-size: min(2.3vh, 4.3vw); line-height: 1; cursor: pointer; white-space: nowrap;
-    box-shadow: 0 4px 14px rgba(60,45,15,.30); transition: transform .12s; }
-  #replay .rIco { font-size: 1.15em; }
-  #replay:active { transform: translateX(-50%) scale(.93); }
-  #game.adv #replay { display: inline-flex; }
-  #game.free-mode #replay, #game.adv.free-mode #replay { display: none; }
+  /* "Hear it again" speaker — a round icon button that lives INSIDE the question
+     card and is styled like the parchment card itself (bottom-centre, clear of the
+     painted corners). Icon only, no label. */
+  #panel #replay { position: absolute; z-index: 2; display: none; padding: 0;
+    bottom: 3.5%; left: 50%; transform: translateX(-50%);
+    width: min(7vh, 12vw); height: min(7vh, 12vw); min-width: 42px; min-height: 42px;
+    align-items: center; justify-content: center; line-height: 1; cursor: pointer;
+    color: var(--blue-d); border: 3px solid var(--gold); border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%, #fffbe9, var(--parch) 78%);
+    box-shadow: 0 4px 10px rgba(60,45,15,.26), inset 0 0 0 2px rgba(255,255,255,.55);
+    transition: transform .12s; }
+  #panel #replay .rIco { font-size: min(3.4vh, 5.8vw); }
+  #panel #replay:hover { filter: brightness(1.04); }
+  #panel #replay:active { transform: translateX(-50%) scale(.92); }
+  #game.adv #panel #replay { display: inline-flex; }
+  #game.free-mode #panel #replay, #game.adv.free-mode #panel #replay { display: none; }
 
   /* "Easy-read" font: readable sans stack + generous letter/word/line spacing.
      Helps early and dyslexic readers; applied document-wide via a body class. */
@@ -1937,7 +1941,7 @@
       <div id="starbar"></div>
       <div id="score">⭐ 0</div>
       <div id="gameRibbon">🐚 Have fun counting &amp; spelling! ⭐</div>
-      <div id="panel"><img class="pcorner tl" alt="" aria-hidden="true"><img class="pcorner tr" alt="" aria-hidden="true"><img class="pcorner bl" alt="" aria-hidden="true"><img class="pcorner br" alt="" aria-hidden="true"><div id="prompt" role="status" aria-live="polite"></div><div id="target"></div></div>
+      <div id="panel"><img class="pcorner tl" alt="" aria-hidden="true"><img class="pcorner tr" alt="" aria-hidden="true"><img class="pcorner bl" alt="" aria-hidden="true"><img class="pcorner br" alt="" aria-hidden="true"><div id="prompt" role="status" aria-live="polite"></div><div id="target"></div><button id="replay" type="button" title="Hear it again" aria-label="Hear it again"><span class="rIco" aria-hidden="true">🔊</span></button></div>
       <div id="choices"></div>
       <div id="keyboard"></div>
       <div id="mfb"></div>
@@ -1946,7 +1950,6 @@
       <button id="logo" class="hotspot" title="Back to menu" aria-label="Back to menu"></button>
       <button id="exit" class="hotspot" title="Menu" aria-label="Menu"></button>
       <button id="sound" class="hotspot" title="Sound on/off" aria-label="Sound"></button>
-      <button id="replay" type="button" title="Hear it again" aria-label="Hear it again"><span class="rIco" aria-hidden="true">🔊</span><span class="rTxt">Again</span></button>
     </div>
     <div id="yako">👦🐕</div>
     <div id="buddy"></div>
