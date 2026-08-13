@@ -4489,11 +4489,22 @@
     document.querySelectorAll('.pickPop.open').forEach(p => p.classList.remove('open'));
     document.querySelectorAll('.pickBtn.open').forEach(b => { b.classList.remove('open'); b.setAttribute('aria-expanded', 'false'); });
   }
-  function placePop(btn, pop) {   // fixed popover, centered just below the picker button
+  function placePop(btn, pop) {   // fixed popover under the picker button, clamped on-screen (mobile-safe)
     const r = btn.getBoundingClientRect();
-    pop.style.left = (r.left + r.width / 2) + 'px';
+    const vw = document.documentElement.clientWidth;
+    const vh = document.documentElement.clientHeight;
+    const margin = 8;
+    // measure the popover (offsetWidth ignores the scale transform, so it's the real layout size)
+    const pw = pop.offsetWidth || 220, ph = pop.offsetHeight || 64, half = pw / 2;
+    // horizontal: aim to centre under the button, but keep both edges inside the viewport
+    let cx = r.left + r.width / 2;
+    if (half * 2 + margin * 2 >= vw) cx = vw / 2;                       // wider than screen → dead-centre
+    else cx = Math.max(margin + half, Math.min(vw - margin - half, cx));
+    pop.style.left = cx + 'px';
     pop.style.bottom = 'auto';
-    pop.style.top = (r.bottom + 8) + 'px';
+    // vertical: below the button, but flip above if it would fall off the bottom
+    const below = r.bottom + 8;
+    pop.style.top = (below + ph + margin > vh ? Math.max(margin, r.top - 8 - ph) : below) + 'px';
   }
   function wirePicker(btnId, popId) {
     const btn = document.getElementById(btnId), pop = document.getElementById(popId);
