@@ -1793,6 +1793,23 @@
   .pmToggle[aria-pressed="true"] { border-color: #4a90d9; background: #eaf3fc; color: var(--blue-d); }
   .pmToggle[aria-pressed="true"] .pmToggleState { color: #fff; background: #4a90d9; }
 
+  /* ===== About popup ===== */
+  #aboutPop { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+    background: rgba(30,22,8,.55); padding: 6vw; animation: aboutFade .18s ease; }
+  #aboutPop[hidden] { display: none; }
+  @keyframes aboutFade { from { opacity: 0; } to { opacity: 1; } }
+  .aboutCard { position: relative; max-width: 420px; width: 92%; text-align: center;
+    background: linear-gradient(#fffaf0, #f4e8c8); border: 5px solid var(--gold); border-radius: 24px;
+    padding: 1.6em 1.4em 1.5em; box-shadow: 0 18px 40px rgba(40,30,10,.5), inset 0 0 0 3px rgba(255,255,255,.5);
+    animation: aboutPop .32s cubic-bezier(.2,1.5,.4,1); }
+  @keyframes aboutPop { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .aboutX { position: absolute; top: .5em; right: .55em; width: 1.9em; height: 1.9em; border-radius: 50%;
+    border: 2px solid #e0d3ac; background: #f3ead0; color: #6e4f24; font-weight: 800; font-size: 1em; line-height: 1; cursor: pointer; }
+  .aboutX:active { transform: scale(.92); }
+  .aboutAv { font-size: 3.2em; line-height: 1; }
+  .aboutTitle { font-family: 'Baloo 2', sans-serif; font-weight: 800; color: var(--blue-d); font-size: 1.5em; margin: .15em 0 .45em; }
+  .aboutText { font-family: 'Baloo 2', sans-serif; color: #5b4327; font-size: 1.05em; line-height: 1.55; margin: 0; }
+
   /* ===== Painted Monterey corner frame on the question card (4 rotating variations) ===== */
   /* retire the old single-emoji corner decorations in favor of the painted frame */
   #panel::before, #panel::after, #game #panel::before, #game #panel::after { content: none !important; }
@@ -2038,7 +2055,18 @@
         <button class="pmToggle" id="pmBigText" type="button" aria-pressed="false"><span>🔠 Bigger text</span><span class="pmToggleState">Off</span></button>
         <button class="pmToggle" id="pmEasyFont" type="button" aria-pressed="false"><span>📖 Easy-read font</span><span class="pmToggleState">Off</span></button>
       </div>
+      <button class="pmBtn ghost" id="pmAbout" type="button">ℹ️ About Yako</button>
       <button class="pmBtn ghost" id="pmSwitch" type="button">🔄 Switch player</button>
+    </div>
+  </div>
+
+  <!-- About popup -->
+  <div id="aboutPop" hidden>
+    <div class="aboutCard" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+      <button class="aboutX" id="aboutClose" type="button" aria-label="Close">✕</button>
+      <div class="aboutAv" aria-hidden="true">👦🐕</div>
+      <div class="aboutTitle" id="aboutTitle">About Yako</div>
+      <p class="aboutText">This game was made by Jacob “Yako” Tanzer in Carmel by the Sea. When Yako's not busy learning, he enjoys playing on the beach, walking his dog Zoe around town, jamming on his guitar and having pizza parties! 🏖️🎸🍕</p>
     </div>
   </div>
 
@@ -4829,6 +4857,14 @@
   if (profileBtn) profileBtn.addEventListener('click', (e) => { e.stopPropagation(); ensureAudio(); menuOpen(); });
   document.addEventListener('click', (e) => { if (profileMenu && !profileMenu.hidden && !e.target.closest('#profileWrap')) menuOpen(false); });
   const pmProgressEl = document.getElementById('pmProgress'); if (pmProgressEl) pmProgressEl.addEventListener('click', openSuccess);
+  // About popup
+  const aboutPopEl = document.getElementById('aboutPop');
+  const closeAbout = () => { if (aboutPopEl) aboutPopEl.hidden = true; };
+  const pmAboutEl = document.getElementById('pmAbout');
+  if (pmAboutEl) pmAboutEl.addEventListener('click', () => { menuOpen(false); if (aboutPopEl) aboutPopEl.hidden = false; });
+  const aboutCloseEl = document.getElementById('aboutClose'); if (aboutCloseEl) aboutCloseEl.addEventListener('click', closeAbout);
+  if (aboutPopEl) aboutPopEl.addEventListener('click', (e) => { if (e.target === aboutPopEl) closeAbout(); });   // tap backdrop to close
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && aboutPopEl && !aboutPopEl.hidden) closeAbout(); });
 
   // ---------- Reading-help (accessibility) toggles ----------
   // Persisted document-wide preferences: "Bigger text" and "Easy-read font".
