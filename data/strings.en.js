@@ -29,6 +29,8 @@ window.YAKO_STRINGS.en = {
   again: "Oops! Try again!",
   level: "Five stars! You finished level {level}! I'm so proud of you!",
   cheers: ["Great job!","You're doing so well!","Wow, you're so smart!","You're brilliant!","That's exactly right, well done!","I'm so proud of you!","Wonderful work!","You're a superstar!","Yes! You got it!","Woohoo, nice work!","You're a little genius!","Perfect — keep it up!","Yay! Way to go!","High five! That's right!","You're amazing!","Fantastic, my friend!"],
+  // Escalating praise: climbs a tier with each correct answer, eases back after a miss.
+  ramp: ["You're right!","Good job!","Great job!","You're brilliant!","Wow, you're so smart!","Wow, I'm so proud of you!"],
   tries: ["Oops! It's okay, try again!","That's not it — you can do it!","Almost! Give it another go!","So close! Try one more time.","Good try! Have another go.","Don't worry — you've got this!","Hmm, not that one. Try again!","Nice try! Let's try again."],
   wrongNamed: "That's not {key}. It's okay — try again!",
   greet: "Hello! Let's play!",

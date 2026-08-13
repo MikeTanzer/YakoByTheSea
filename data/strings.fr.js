@@ -36,6 +36,7 @@ window.YAKO_STRINGS.fr = {
   again: "Oups ! Réessaie !",
   level: "Cinq étoiles ! Tu as fini le niveau {level} ! Bravo !",
   cheers: ["Bravo !","Tu te débrouilles très bien !","Ouah, tu es si intelligent !","Tu es brillant !","C'est exactement ça, bien joué !","Je suis si fier de toi !","Magnifique travail !","Tu es un champion !","Oui ! Tu as réussi !","Bravo, joli travail !","Tu es un petit génie !","Parfait — continue !","Youpi ! Bien joué !","Tape m'en cinq ! C'est ça !","Tu es incroyable !","Fantastique, mon ami !"],
+  ramp: ["C'est juste !","Bien joué !","Super travail !","Tu es brillant !","Ouah, tu es si intelligent !","Ouah, je suis si fier de toi !"],
   tries: ["Oups ! Ce n'est pas grave, réessaie !","Ce n'est pas ça — tu peux le faire !","Presque ! Encore une fois !","Tout près ! Essaie encore.","Bien tenté ! Réessaie.","Ne t'inquiète pas — tu vas y arriver !","Hmm, pas celui-là. Réessaie !","Bien essayé ! On réessaie."],
   wrongNamed: "Ce n'est pas {key}. Pas grave — réessaie !",
   greet: "Bonjour ! On joue !",

@@ -36,6 +36,7 @@ window.YAKO_STRINGS.es = {
   again: "¡Uy! ¡Intenta otra vez!",
   level: "¡Cinco estrellas! ¡Terminaste el nivel {level}! ¡Muy bien!",
   cheers: ["¡Muy bien!","¡Lo estás haciendo genial!","¡Vaya, qué inteligente eres!","¡Eres brillante!","¡Exacto, bien hecho!","¡Estoy muy orgullosa de ti!","¡Excelente trabajo!","¡Eres una estrella!","¡Sí! ¡Lo lograste!","¡Bien hecho, qué bonito!","¡Eres un pequeño genio!","¡Perfecto, sigue así!","¡Yupi! ¡Muy bien!","¡Choca esos cinco! ¡Correcto!","¡Eres increíble!","¡Fantástico, amiguito!"],
+  ramp: ["¡Correcto!","¡Buen trabajo!","¡Excelente!","¡Eres brillante!","¡Vaya, eres muy inteligente!","¡Vaya, estoy muy orgullosa de ti!"],
   tries: ["¡Uy! No pasa nada, ¡inténtalo otra vez!","No es eso — ¡tú puedes!","¡Casi! ¡Una vez más!","¡Muy cerca! Inténtalo de nuevo.","¡Buen intento! Prueba otra vez.","No te preocupes — ¡lo lograrás!","Mmm, ese no. ¡Inténtalo!","¡Buen intento! Vamos de nuevo."],
   wrongNamed: "No es {key}. No pasa nada — ¡inténtalo otra vez!",
   greet: "¡Hola! ¡A jugar!",

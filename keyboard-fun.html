@@ -127,8 +127,8 @@
   #start .btnGrid .modeBtn:active { transform: translateY(5px);
     box-shadow: 0 3px 0 color-mix(in srgb, var(--bg), #000 38%), 0 6px 10px rgba(34,21,4,.18); }
   #start .btnGrid .modeBtn .title { position: relative; z-index: 1; display: block; font-weight: 900; line-height: 1.05;
-    font-size: clamp(18px, 1.9vw, 30px); margin-bottom: .7vh; color: #fff7e5;
-    max-width: 100%; overflow-wrap: break-word;   /* wrap between words; only break a word as a last resort */
+    font-size: clamp(14px, 1.9vw, 30px); margin-bottom: .7vh; color: #fff7e5;
+    max-width: 100%; overflow-wrap: normal; word-break: keep-all; hyphens: none;   /* never split a word (e.g. "Sentences"); multi-word titles still wrap between words */
     text-shadow: 2px 2px 0 rgba(35,22,8,.85), -1px -1px 0 rgba(35,22,8,.35); }
   #start .btnGrid .modeBtn .sub { position: relative; z-index: 1; display: block; color: #fff7e5;
     font-family: 'Trebuchet MS', Georgia, serif; font-weight: 900; font-size: clamp(15px, 1.4vw, 24px);
@@ -271,6 +271,9 @@
   .homeCard.subOpen .lgroup:not(.open) { display: none; }
   .homeCard.subOpen .lgroup.open .groupHead { display: none; }   /* page title already names the group */
   .homeCard.subOpen .lgroup.open { border: none; background: none; }
+  /* Drill-down: no cramped inner scrollbox — let the whole card scroll so every
+     lesson tile is reachable and the bottom rows are never cut off. */
+  .homeCard.subOpen .lgroup.open .btnGrid { max-height: none; overflow: visible; }
   .lgroupFun .groupHead { background: linear-gradient(#ffdf8a, #f0b53a); }   /* the playful parity tile */
   /* — file-cabinet folder: the flap swings open to reveal the lessons inside — */
   .lgroup.open { background: rgba(255,252,240,.6); }
@@ -3334,6 +3337,7 @@
     if (finished) levelElapsed = (performance.now() - levelStartTime) / 1000;
     challenge.revealAll();
     clearKeyHighlights();
+    bumpPraise();                               // a completed word/number climbs the praise ladder too
     celebrateTarget();                          // the finished word / number bounces
     const w = challenge.word;
     confetti(); showBuddy(); showFeedback(true); playReaction(true); playChime();
@@ -3378,6 +3382,18 @@
   // clips fall back to the spoken synth line automatically.
   function cheerKeys() { const n = ((L().cheers || []).length) || 8; return Array.from({ length: n }, (_, i) => 'cheer_' + (i + 1)); }
   function tryKeys()   { const n = ((L().tries  || []).length) || 0; return n ? Array.from({ length: n }, (_, i) => 'try_' + (i + 1)) : ['try']; }
+  // Escalating praise: praiseLevel climbs one tier per correct answer and eases
+  // back after a miss, so encouragement grows from "You're right!" up to
+  // "Wow, I'm so proud of you!" the better the child is doing.
+  let praiseLevel = 0;
+  function rampList() { const r = L().ramp; return (r && r.length) ? r : (L().cheers || ['Great job!']); }
+  function bumpPraise() { praiseLevel = Math.min(praiseLevel + 1, rampList().length); }   // step up one tier
+  function easePraise() { praiseLevel = Math.max(0, praiseLevel - 2); }                    // gentle step down after a miss
+  function playRampCheer(rate) {
+    const list = rampList();
+    const tier = Math.max(1, Math.min(praiseLevel, list.length));
+    playPersona('ramp_' + tier, list[tier - 1] || nextCheer(), { rate: rate || 1.0 });     // recorded clip, synth fallback
+  }
   function correct(pressed) {
     stopAllSounds();
     clearHintTimer();
@@ -3405,7 +3421,7 @@
     playChime();
     const dur = 2.0 + Math.random() * 1.5;        // 2–3.5 s between rounds
     playApplause(dur);
-    playPersona(cheerKeys(), nextCheer(), { rate: 1.0 });   // recorded persona cheer (random from the full pool)
+    bumpPraise(); playRampCheer(1.0);                        // escalating praise (climbs each correct answer)
 
     if (!finished) leaveTimer = setTimeout(playLeave, Math.max(0, dur * 1000 + 300 - 430));  // fly the answer out just before the next flies in
     roundTimer = setTimeout(() => {
@@ -3424,6 +3440,7 @@
   function wrong(keyPressed) {
     stopAllSounds();
     levelMistakes++;
+    easePraise();                               // a miss eases the praise ladder back down
     popChar(keyPressed, '#e0466b');
     if (challenge.choices) highlightChoice(keyPressed, false);
     showFeedback(false);
@@ -4054,6 +4071,7 @@
   }
   function backToMenu() {
     stopAllSounds();
+    praiseLevel = 0;   // returning home resets the encouragement ladder to "simple"; it climbs across lessons within a run
     if (typeof fadeMusicDuck === 'function') fadeMusicDuck(1, 1000);   // bring the music back up on the menu
     const fb = document.getElementById('freeBg'); if (fb) fb.pause();
     hideBuddy();

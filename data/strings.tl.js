@@ -29,6 +29,7 @@ window.YAKO_STRINGS.tl = {
   again: "Ay! Subukan mo ulit!",
   level: "Limang bituin! Natapos mo ang level {level}! Proud na proud ako sa'yo!",
   cheers: ["Magaling!","Ang galing-galing mo!","Wow, ang talino mo!","Napakahusay mo!","Tamang-tama, magaling!","Proud na proud ako sa'yo!","Napakagandang trabaho!","Isa kang bituin!","Oo! Nagawa mo!","Ayos, ang galing!","Munting henyo ka!","Perpekto — tuloy lang!","Yehey! Magaling!","High five! Tama 'yan!","Ang galing mo talaga!","Napakahusay, kaibigan!"],
+  ramp: ["Tama!","Magaling!","Napakahusay!","Henyo ka!","Wow, ang talino mo!","Wow, sobrang proud ako sa'yo!"],
   tries: ["Ay! Okay lang, subukan mo ulit!","Hindi 'yan — kaya mo 'yan!","Muntik na! Isa pa!","Sobrang lapit! Subukan ulit.","Magandang subok! Ulitin natin.","Huwag mag-alala — kaya mo 'yan!","Hmm, hindi 'yan. Subukan ulit!","Magaling subukan! Ulit tayo."],
   wrongNamed: "Hindi {key} 'yan. Okay lang — subukan mo ulit!",
   greet: "Kumusta! Tara, maglaro tayo!",
