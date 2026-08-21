@@ -3123,7 +3123,7 @@
     // shapes/colors/animals: name the thing — "Find the letter R, for Rabbit!"
     if (s === 'letter') { sayPrompt('find_for_' + challenge.itemKey, t.findFor(cname, ans), { rate: 0.95 }); return; }
     // Objects — first-letter round: name the object, then ask for its starting letter
-    if (s === 'objfirst') { playPersona('obj_' + challenge.word, challenge.objName + ' starts with ' + ans + '. Find ' + ans + '!', { rate: 0.95 }); return; }
+    if (s === 'objfirst') { playPersona('obj_' + challenge.word, t.starts(challenge.objName, ans), { rate: 0.95 }); return; }
     // Objects — spelling round: "Let's spell CHAIR. Find the letter C!"
     if (s === 'seq' && mode === 'objects') { sayPrompt('spell_' + challenge.word, t.spell(challenge.word, ans), { rate: 0.95 }); return; }
     // sentences: read the sentence with a "blank", then ask them to spell the missing word
