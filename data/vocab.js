@@ -4,82 +4,84 @@
 //   voice/clips/tl/mom/word_dog.mp3 == "Aso", voice/clips/fr/mom/word_dog.mp3 == "Chien".
 // Numbers are numword_1..numword_10; the greeting is  hello.
 window.YAKO_VOCAB = {
-  // the five languages the game speaks, in flag-row order
+  // the six languages the game speaks, in flag-row order
   LANGS: [
     { p: 'en', flag: '🇬🇧', label: 'English' },
     { p: 'fr', flag: '🇫🇷', label: 'Français' },
     { p: 'es', flag: '🇪🇸', label: 'Español' },
     { p: 'he', flag: '🇮🇱', label: 'עברית' },
-    { p: 'tl', flag: '🇵🇭', label: 'Tagalog' }
+    { p: 'tl', flag: '🇵🇭', label: 'Tagalog' },
+    { p: 'zh', flag: '🇨🇳', label: '中文' }
   ],
   // object word in every language — English key matches CATEGORY_NAMES / *_DATA names
   WORDS: {
     // animals
-    Cat:     { en: 'Cat',      fr: 'Chat',      es: 'Gato',      he: 'חתול',   tl: 'Pusa' },
-    Dog:     { en: 'Dog',      fr: 'Chien',     es: 'Perro',     he: 'כלב',    tl: 'Aso' },
-    Elephant:{ en: 'Elephant', fr: 'Éléphant',  es: 'Elefante',  he: 'פיל',    tl: 'Elepante' },
-    Frog:    { en: 'Frog',     fr: 'Grenouille',es: 'Rana',      he: 'צפרדע',  tl: 'Palaka' },
-    Giraffe: { en: 'Giraffe',  fr: 'Girafe',    es: 'Jirafa',    he: "ג'ירפה", tl: 'Dyirap' },
-    Horse:   { en: 'Horse',    fr: 'Cheval',    es: 'Caballo',   he: 'סוס',    tl: 'Kabayo' },
-    Lion:    { en: 'Lion',     fr: 'Lion',      es: 'León',      he: 'אריה',   tl: 'Leon' },
-    Monkey:  { en: 'Monkey',   fr: 'Singe',     es: 'Mono',      he: 'קוף',    tl: 'Unggoy' },
-    Owl:     { en: 'Owl',      fr: 'Hibou',     es: 'Búho',      he: 'ינשוף',  tl: 'Kuwago' },
-    Pig:     { en: 'Pig',      fr: 'Cochon',    es: 'Cerdo',     he: 'חזיר',   tl: 'Baboy' },
-    Rabbit:  { en: 'Rabbit',   fr: 'Lapin',     es: 'Conejo',    he: 'ארנב',   tl: 'Kuneho' },
-    Snake:   { en: 'Snake',    fr: 'Serpent',   es: 'Serpiente', he: 'נחש',    tl: 'Ahas' },
-    Tiger:   { en: 'Tiger',    fr: 'Tigre',     es: 'Tigre',     he: 'נמר',    tl: 'Tigre' },
-    Zebra:   { en: 'Zebra',    fr: 'Zèbre',     es: 'Cebra',     he: 'זברה',   tl: 'Sebra' },
+    Cat:     { en: 'Cat',      fr: 'Chat',      es: 'Gato',      he: 'חתול',   tl: 'Pusa',       zh: '猫' },
+    Dog:     { en: 'Dog',      fr: 'Chien',     es: 'Perro',     he: 'כלב',    tl: 'Aso',        zh: '狗' },
+    Elephant:{ en: 'Elephant', fr: 'Éléphant',  es: 'Elefante',  he: 'פיל',    tl: 'Elepante',   zh: '大象' },
+    Frog:    { en: 'Frog',     fr: 'Grenouille',es: 'Rana',      he: 'צפרדע',  tl: 'Palaka',     zh: '青蛙' },
+    Giraffe: { en: 'Giraffe',  fr: 'Girafe',    es: 'Jirafa',    he: "ג'ירפה", tl: 'Dyirap',     zh: '长颈鹿' },
+    Horse:   { en: 'Horse',    fr: 'Cheval',    es: 'Caballo',   he: 'סוס',    tl: 'Kabayo',     zh: '马' },
+    Lion:    { en: 'Lion',     fr: 'Lion',      es: 'León',      he: 'אריה',   tl: 'Leon',       zh: '狮子' },
+    Monkey:  { en: 'Monkey',   fr: 'Singe',     es: 'Mono',      he: 'קוף',    tl: 'Unggoy',     zh: '猴子' },
+    Owl:     { en: 'Owl',      fr: 'Hibou',     es: 'Búho',      he: 'ינשוף',  tl: 'Kuwago',     zh: '猫头鹰' },
+    Pig:     { en: 'Pig',      fr: 'Cochon',    es: 'Cerdo',     he: 'חזיר',   tl: 'Baboy',      zh: '猪' },
+    Rabbit:  { en: 'Rabbit',   fr: 'Lapin',     es: 'Conejo',    he: 'ארנב',   tl: 'Kuneho',     zh: '兔子' },
+    Snake:   { en: 'Snake',    fr: 'Serpent',   es: 'Serpiente', he: 'נחש',    tl: 'Ahas',       zh: '蛇' },
+    Tiger:   { en: 'Tiger',    fr: 'Tigre',     es: 'Tigre',     he: 'נמר',    tl: 'Tigre',      zh: '老虎' },
+    Zebra:   { en: 'Zebra',    fr: 'Zèbre',     es: 'Cebra',     he: 'זברה',   tl: 'Sebra',      zh: '斑马' },
     // local Monterey Peninsula animals
-    Seal:    { en: 'Seal',     fr: 'Phoque',    es: 'Foca',      he: 'כלב ים',  tl: 'Poka' },
-    Otter:   { en: 'Otter',    fr: 'Loutre',    es: 'Nutria',    he: 'לוטרה',   tl: 'Otter' },
-    Whale:   { en: 'Whale',    fr: 'Baleine',   es: 'Ballena',   he: 'לווייתן', tl: 'Balyena' },
-    Deer:    { en: 'Deer',     fr: 'Cerf',      es: 'Ciervo',    he: 'אייל',    tl: 'Usa' },
-    Quail:   { en: 'Quail',    fr: 'Caille',    es: 'Codorniz',  he: 'שליו',    tl: 'Pugo' },
-    Squirrel:{ en: 'Squirrel', fr: 'Écureuil',  es: 'Ardilla',   he: 'סנאי',    tl: 'Ardilya' },
-    Pelican: { en: 'Pelican',  fr: 'Pélican',   es: 'Pelícano',  he: 'שקנאי',   tl: 'Pelikano' },
-    Sheep:   { en: 'Sheep',    fr: 'Mouton',    es: 'Oveja',     he: 'כבשה',    tl: 'Tupa' },
-    Cow:     { en: 'Cow',      fr: 'Vache',     es: 'Vaca',      he: 'פרה',     tl: 'Baka' },
-    Bird:    { en: 'Bird',     fr: 'Oiseau',    es: 'Pájaro',    he: 'ציפור',   tl: 'Ibon' },
-    Fish:    { en: 'Fish',     fr: 'Poisson',   es: 'Pez',       he: 'דג',      tl: 'Isda' },
+    Seal:    { en: 'Seal',     fr: 'Phoque',    es: 'Foca',      he: 'כלב ים',  tl: 'Poka',      zh: '海豹' },
+    Otter:   { en: 'Otter',    fr: 'Loutre',    es: 'Nutria',    he: 'לוטרה',   tl: 'Otter',     zh: '海獭' },
+    Whale:   { en: 'Whale',    fr: 'Baleine',   es: 'Ballena',   he: 'לווייתן', tl: 'Balyena',   zh: '鲸鱼' },
+    Deer:    { en: 'Deer',     fr: 'Cerf',      es: 'Ciervo',    he: 'אייל',    tl: 'Usa',       zh: '鹿' },
+    Quail:   { en: 'Quail',    fr: 'Caille',    es: 'Codorniz',  he: 'שליו',    tl: 'Pugo',      zh: '鹌鹑' },
+    Squirrel:{ en: 'Squirrel', fr: 'Écureuil',  es: 'Ardilla',   he: 'סנאי',    tl: 'Ardilya',   zh: '松鼠' },
+    Pelican: { en: 'Pelican',  fr: 'Pélican',   es: 'Pelícano',  he: 'שקנאי',   tl: 'Pelikano',  zh: '鹈鹕' },
+    Sheep:   { en: 'Sheep',    fr: 'Mouton',    es: 'Oveja',     he: 'כבשה',    tl: 'Tupa',      zh: '绵羊' },
+    Cow:     { en: 'Cow',      fr: 'Vache',     es: 'Vaca',      he: 'פרה',     tl: 'Baka',      zh: '奶牛' },
+    Bird:    { en: 'Bird',     fr: 'Oiseau',    es: 'Pájaro',    he: 'ציפור',   tl: 'Ibon',      zh: '小鸟' },
+    Fish:    { en: 'Fish',     fr: 'Poisson',   es: 'Pez',       he: 'דג',      tl: 'Isda',      zh: '鱼' },
     // colors
-    Red:     { en: 'Red',      fr: 'Rouge',     es: 'Rojo',      he: 'אדום',   tl: 'Pula' },
-    Orange:  { en: 'Orange',   fr: 'Orange',    es: 'Naranja',   he: 'כתום',   tl: 'Kahel' },
-    Yellow:  { en: 'Yellow',   fr: 'Jaune',     es: 'Amarillo',  he: 'צהוב',   tl: 'Dilaw' },
-    Green:   { en: 'Green',    fr: 'Vert',      es: 'Verde',     he: 'ירוק',   tl: 'Berde' },
-    Blue:    { en: 'Blue',     fr: 'Bleu',      es: 'Azul',      he: 'כחול',   tl: 'Asul' },
-    Purple:  { en: 'Purple',   fr: 'Violet',    es: 'Morado',    he: 'סגול',   tl: 'Lila' },
-    Pink:    { en: 'Pink',     fr: 'Rose',      es: 'Rosa',      he: 'ורוד',   tl: 'Rosas' },
-    Brown:   { en: 'Brown',    fr: 'Marron',    es: 'Marrón',    he: 'חום',    tl: 'Kayumanggi' },
+    Red:     { en: 'Red',      fr: 'Rouge',     es: 'Rojo',      he: 'אדום',   tl: 'Pula',       zh: '红色' },
+    Orange:  { en: 'Orange',   fr: 'Orange',    es: 'Naranja',   he: 'כתום',   tl: 'Kahel',      zh: '橙色' },
+    Yellow:  { en: 'Yellow',   fr: 'Jaune',     es: 'Amarillo',  he: 'צהוב',   tl: 'Dilaw',      zh: '黄色' },
+    Green:   { en: 'Green',    fr: 'Vert',      es: 'Verde',     he: 'ירוק',   tl: 'Berde',      zh: '绿色' },
+    Blue:    { en: 'Blue',     fr: 'Bleu',      es: 'Azul',      he: 'כחול',   tl: 'Asul',       zh: '蓝色' },
+    Purple:  { en: 'Purple',   fr: 'Violet',    es: 'Morado',    he: 'סגול',   tl: 'Lila',       zh: '紫色' },
+    Pink:    { en: 'Pink',     fr: 'Rose',      es: 'Rosa',      he: 'ורוד',   tl: 'Rosas',      zh: '粉色' },
+    Brown:   { en: 'Brown',    fr: 'Marron',    es: 'Marrón',    he: 'חום',    tl: 'Kayumanggi', zh: '棕色' },
     // shapes
-    Circle:  { en: 'Circle',   fr: 'Cercle',    es: 'Círculo',   he: 'עיגול',  tl: 'Bilog' },
-    Square:  { en: 'Square',   fr: 'Carré',     es: 'Cuadrado',  he: 'ריבוע',  tl: 'Parisukat' },
-    Triangle:{ en: 'Triangle', fr: 'Triangle',  es: 'Triángulo', he: 'משולש',  tl: 'Tatsulok' },
-    Heart:   { en: 'Heart',    fr: 'Cœur',      es: 'Corazón',   he: 'לב',     tl: 'Puso' },
-    Star:    { en: 'Star',     fr: 'Étoile',    es: 'Estrella',  he: 'כוכב',   tl: 'Bituin' },
-    Diamond: { en: 'Diamond',  fr: 'Losange',   es: 'Rombo',     he: 'מעוין',  tl: 'Diyamante' }
+    Circle:  { en: 'Circle',   fr: 'Cercle',    es: 'Círculo',   he: 'עיגול',  tl: 'Bilog',      zh: '圆形' },
+    Square:  { en: 'Square',   fr: 'Carré',     es: 'Cuadrado',  he: 'ריבוע',  tl: 'Parisukat',  zh: '正方形' },
+    Triangle:{ en: 'Triangle', fr: 'Triangle',  es: 'Triángulo', he: 'משולש',  tl: 'Tatsulok',   zh: '三角形' },
+    Heart:   { en: 'Heart',    fr: 'Cœur',      es: 'Corazón',   he: 'לב',     tl: 'Puso',       zh: '爱心' },
+    Star:    { en: 'Star',     fr: 'Étoile',    es: 'Estrella',  he: 'כוכב',   tl: 'Bituin',     zh: '星星' },
+    Diamond: { en: 'Diamond',  fr: 'Losange',   es: 'Rombo',     he: 'מעוין',  tl: 'Diyamante',  zh: '菱形' }
   },
   // number words 1-10 (Hebrew uses feminine cardinals, as when counting objects)
   NUMS: {
-    1:  { en: 'One',   fr: 'Un',     es: 'Uno',    he: 'אחת',    tl: 'Isa' },
-    2:  { en: 'Two',   fr: 'Deux',   es: 'Dos',    he: 'שתיים',  tl: 'Dalawa' },
-    3:  { en: 'Three', fr: 'Trois',  es: 'Tres',   he: 'שלוש',   tl: 'Tatlo' },
-    4:  { en: 'Four',  fr: 'Quatre', es: 'Cuatro', he: 'ארבע',   tl: 'Apat' },
-    5:  { en: 'Five',  fr: 'Cinq',   es: 'Cinco',  he: 'חמש',    tl: 'Lima' },
-    6:  { en: 'Six',   fr: 'Six',    es: 'Seis',   he: 'שש',     tl: 'Anim' },
-    7:  { en: 'Seven', fr: 'Sept',   es: 'Siete',  he: 'שבע',    tl: 'Pito' },
-    8:  { en: 'Eight', fr: 'Huit',   es: 'Ocho',   he: 'שמונה',  tl: 'Walo' },
-    9:  { en: 'Nine',  fr: 'Neuf',   es: 'Nueve',  he: 'תשע',    tl: 'Siyam' },
-    10: { en: 'Ten',   fr: 'Dix',    es: 'Diez',   he: 'עשר',    tl: 'Sampu' }
+    1:  { en: 'One',   fr: 'Un',     es: 'Uno',    he: 'אחת',    tl: 'Isa',    zh: '一' },
+    2:  { en: 'Two',   fr: 'Deux',   es: 'Dos',    he: 'שתיים',  tl: 'Dalawa', zh: '二' },
+    3:  { en: 'Three', fr: 'Trois',  es: 'Tres',   he: 'שלוש',   tl: 'Tatlo',  zh: '三' },
+    4:  { en: 'Four',  fr: 'Quatre', es: 'Cuatro', he: 'ארבע',   tl: 'Apat',   zh: '四' },
+    5:  { en: 'Five',  fr: 'Cinq',   es: 'Cinco',  he: 'חמש',    tl: 'Lima',   zh: '五' },
+    6:  { en: 'Six',   fr: 'Six',    es: 'Seis',   he: 'שש',     tl: 'Anim',   zh: '六' },
+    7:  { en: 'Seven', fr: 'Sept',   es: 'Siete',  he: 'שבע',    tl: 'Pito',   zh: '七' },
+    8:  { en: 'Eight', fr: 'Huit',   es: 'Ocho',   he: 'שמונה',  tl: 'Walo',   zh: '八' },
+    9:  { en: 'Nine',  fr: 'Neuf',   es: 'Nueve',  he: 'תשע',    tl: 'Siyam',  zh: '九' },
+    10: { en: 'Ten',   fr: 'Dix',    es: 'Diez',   he: 'עשר',    tl: 'Sampu',  zh: '十' }
   },
   // greeting per language
-  HELLO: { en: 'Hello!', fr: 'Bonjour !', es: '¡Hola!', he: 'שלום!', tl: 'Kumusta!' },
+  HELLO: { en: 'Hello!', fr: 'Bonjour !', es: '¡Hola!', he: 'שלום!', tl: 'Kumusta!', zh: '你好！' },
   // "How many <animal>?" naming the animal in every language ({w} = the animal word)
   HOWMANY: {
     en: 'How many {w}? Count them, then press the number!',
     fr: 'Combien de {w} ? Compte-les, puis appuie sur le chiffre !',
     es: '¿Cuántos {w} hay? ¡Cuéntalos y aprieta el número!',
     he: 'כמה {w}? ספרו אותם ולחצו על המספר!',
-    tl: 'Ilan ang {w}? Bilangin mo, tapos pindutin ang numero!'
+    tl: 'Ilan ang {w}? Bilangin mo, tapos pindutin ang numero!',
+    zh: '有多少{w}？数一数，然后按数字！'
   },
   // "Welcome to {place}!" for the Monterey Adventures place intros ({p} = English place name)
   WELCOME: {
@@ -87,7 +89,8 @@ window.YAKO_VOCAB = {
     fr: 'Bienvenue à {p} ! On compte !',
     es: '¡Bienvenido a {p}! ¡A contar!',
     he: 'ברוכים הבאים ל-{p}! בואו נספור!',
-    tl: 'Maligayang pagdating sa {p}! Bilangin natin!'
+    tl: 'Maligayang pagdating sa {p}! Bilangin natin!',
+    zh: '欢迎来到{p}！我们来数数吧！'
   }
 };
 

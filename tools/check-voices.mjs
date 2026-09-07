@@ -6,7 +6,10 @@
 // game speaks), so the strings files stay the single source of truth.
 // For every language × persona it checks voice/clips/<lang>/<persona>/<key>.mp3
 // and prints what each missing clip should say (paste that text into
-// Higgsfield text2speech_v2/elevenlabs with the matching voice to regenerate).
+// Higgsfield seed_audio with the matching voice to regenerate).
+//
+// Story-Time narration (sty_*) and Sentences narration (sen_*/senf_*) are
+// English-only content — they're checked under voice/clips/en/ for all personas.
 //
 //   node tools/check-voices.mjs          # report
 //   node tools/check-voices.mjs --texts  # also dump the full expected script
@@ -19,22 +22,28 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 // data/strings.*.js are classic browser scripts writing to window.*
 globalThis.window = globalThis;
-for (const lang of ['en', 'fr', 'es', 'he', 'tl']) {
+for (const lang of ['en', 'fr', 'es', 'he', 'tl', 'zh']) {
   await import(pathToFileURL(join(ROOT, 'data', `strings.${lang}.js`)));
 }
 await import(pathToFileURL(join(ROOT, 'data', 'lessons.js')));
 await import(pathToFileURL(join(ROOT, 'data', 'vocab.js')));
+await import(pathToFileURL(join(ROOT, 'data', 'stories.js')));
+await import(pathToFileURL(join(ROOT, 'data', 'sentences.js')));
 const S = globalThis.YAKO_STRINGS;
 const LSN = globalThis.YAKO_LESSONS;
 const VOC = globalThis.YAKO_VOCAB;
 const MON = globalThis.YAKO_MONTEREY;
+const STO = globalThis.YAKO_STORIES;
+const SEN = globalThis.YAKO_SENTENCES;
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const title = w => w.charAt(0) + w.slice(1).toLowerCase();
 
-const LANGS    = ['en', 'fr', 'es', 'he', 'tl'];
+const LANGS    = ['en', 'fr', 'es', 'he', 'tl', 'zh'];
 const PERSONAS = ['mom', 'dad', 'grandpa', 'grandma'];   // Isabella / Mark / Brooks / Mabel
 const LETTERS  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 const DIGITS   = '0123456789'.split('');
-const RECORDED_CHEERS = 8;                               // cheer_1..cheer_8 exist as recordings
+// everyday objects — mirrors OBJECTS_DATA in keyboard-fun.html
+const OBJECT_WORDS = ['MILK','TREE','BALL','PLANE','CUP','GIRL','BOY','GLASS','CAR','TRUCK','SHIRT','SHOE','SPOON','FORK','CHAIR'];
 
 const fmt = (t, v) => String(t).replace(/\{(\w+)\}/g, (m, k) => (v && k in v) ? v[k] : m);
 
@@ -44,7 +53,9 @@ function expectedClips(lang) {
   const clips = {};
   for (const l of LETTERS) clips[`find_let_${l}`] = fmt(c.find, { key: fmt(c.letterKey, { k: l }) });
   for (const d of DIGITS)  clips[`find_num_${d}`] = fmt(c.find, { key: fmt(c.numberKey, { k: d }) });
-  for (let i = 1; i <= RECORDED_CHEERS; i++) clips[`cheer_${i}`] = c.cheers[i - 1];
+  for (let i = 1; i <= (c.cheers || []).length; i++) clips[`cheer_${i}`] = c.cheers[i - 1];
+  for (let i = 1; i <= (c.tries  || []).length; i++) clips[`try_${i}`]   = c.tries[i - 1];
+  for (let i = 1; i <= (c.ramp   || []).length; i++) clips[`ramp_${i}`]  = c.ramp[i - 1];
   clips.greet = c.greet;
   clips.try   = c.again;                                       // "Oops! Try again!" family
   clips.level = fmt(c.level, { level: '' }).replace(/\s+/g, ' ');  // recorded clip is the generic (numberless) version
@@ -72,9 +83,13 @@ function expectedClips(lang) {
     const ln = lang === 'en' ? n : (c.names[n] || n);
     clips[`find_for_${n.toLowerCase()}`] = fmt(c.findFor, { letter: deacc(ln).charAt(0).toUpperCase(), name: ln });
   }
-  // "Let's spell CAT. Find the letter C!" — one per unique word
-  for (const w of new Set([].concat(...Object.values(LSN.WORDS)))) {
+  // "Let's spell CAT. Find the letter C!" — one per unique word (spelling lesson + objects)
+  for (const w of new Set([].concat(...Object.values(LSN.WORDS), OBJECT_WORDS))) {
     clips[`spell_${w}`] = fmt(c.spell, { word: w, letter: w[0] });
+  }
+  // Objects lesson — "Milk starts with M. Find M!"
+  for (const w of OBJECT_WORDS) {
+    clips[`obj_${w}`] = fmt(c.starts, { name: title(w), letter: w[0] });
   }
   // Add & Subtract: every possible problem (sum ≤ 9, result ≥ 1); audio is creature-generic
   for (let a = 1; a <= 8; a++) for (let b = 1; b <= 9 - a; b++)
@@ -101,6 +116,25 @@ function expectedClips(lang) {
   return clips;
 }
 
+// English-only narration: Story-Time beats + Sentences lines (the content itself is English)
+function expectedEnglishOnly() {
+  const clips = {};
+  for (const s of STO) {
+    const walk = beats => beats.forEach((b, i) => {
+      if (b.say) clips[`sty_${s.vox}_${b.vk != null ? b.vk : i}`] = b.say;
+      if (b.fork) b.fork.options.forEach(o => walk(o.beats));
+    });
+    walk(s.beats);
+  }
+  let li = 0;
+  for (const st of SEN) for (const ln of st.lines) {
+    clips[`sen_${li}`]  = (ln.before + ' blank ' + (ln.after || '')).replace(/\s+/g, ' ').trim() + " Let's spell " + ln.answer + '.';
+    clips[`senf_${li}`] = ((ln.before ? ln.before + ' ' : '') + ln.answer + (ln.after ? ' ' + ln.after : '')).replace(/\s+([.!?,])/g, '$1');
+    li++;
+  }
+  return clips;
+}
+
 let present = 0, missing = [];
 for (const lang of LANGS) {
   const clips = expectedClips(lang);
@@ -112,12 +146,23 @@ for (const lang of LANGS) {
     }
   }
 }
+const enOnly = expectedEnglishOnly();
+let enPresent = 0, enMissing = [];
+for (const persona of PERSONAS) {
+  for (const [key, text] of Object.entries(enOnly)) {
+    const rel = join('voice', 'clips', 'en', persona, `${key}.mp3`);
+    if (existsSync(join(ROOT, rel))) enPresent++;
+    else enMissing.push({ rel, text });
+  }
+}
 
 const total = present + missing.length;
 console.log(`voice clips: ${present}/${total} present  (${LANGS.length} languages × ${PERSONAS.length} personas × ${total / LANGS.length / PERSONAS.length} keys)`);
-if (missing.length) {
+console.log(`story/sentence clips (English-only): ${enPresent}/${enPresent + enMissing.length} present`);
+const allMissing = missing.concat(enMissing);
+if (allMissing.length) {
   console.log('\nMISSING — regenerate these (text shown is what the clip must say):');
-  for (const m of missing) console.log(`  ${m.rel}\n      "${m.text}"`);
+  for (const m of allMissing) console.log(`  ${m.rel}\n      "${m.text}"`);
   process.exitCode = 1;
 } else {
   console.log('all clips present ✔');
@@ -129,4 +174,6 @@ if (process.argv.includes('--texts')) {
     console.log(`\n--- ${lang} ---`);
     for (const [key, text] of Object.entries(expectedClips(lang))) console.log(`${key}: ${text}`);
   }
+  console.log('\n--- en-only (stories + sentences) ---');
+  for (const [key, text] of Object.entries(expectedEnglishOnly())) console.log(`${key}: ${text}`);
 }

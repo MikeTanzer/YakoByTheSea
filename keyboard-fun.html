@@ -16,19 +16,19 @@
 <meta name="apple-mobile-web-app-title" content="Yako">
 <link rel="apple-touch-icon" href="ui/icon-192.png">
 <!-- SEO + discoverability -->
-<meta name="description" content="Free, ad-free learning game for kids ages 3–7. Learn letters and the alphabet, numbers and counting, spelling words, phonics, and first words in 5 languages — English, Spanish, French, Hebrew and Tagalog. Plays in any browser, even offline.">
+<meta name="description" content="Free, ad-free learning game for kids ages 3–7. Learn letters and the alphabet, numbers and counting, spelling words, phonics, and first words in 6 languages — English, Spanish, French, Hebrew, Tagalog and Mandarin Chinese. Plays in any browser, even offline.">
 <meta name="keywords" content="learning games for kids, learn letters, alphabet, numbers, counting, spelling, phonics, words, preschool, kindergarten, toddler, languages for kids, free educational game, no ads, offline">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <link rel="canonical" href="https://yakobythesea.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Yako by the Sea">
 <meta property="og:title" content="Yako by the Sea — Learn &amp; Play!">
-<meta property="og:description" content="Free learning game for kids: letters, numbers, counting, spelling and 5 languages.">
+<meta property="og:description" content="Free learning game for kids: letters, numbers, counting, spelling and 6 languages.">
 <meta property="og:url" content="https://yakobythesea.com/">
 <meta property="og:image" content="https://yakobythesea.com/ui/icon-512.png">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://yakobythesea.com/ui/icon-512.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":["WebApplication","LearningResource"],"name":"Yako by the Sea","url":"https://yakobythesea.com/","image":"https://yakobythesea.com/ui/icon-512.png","applicationCategory":"EducationalApplication","operatingSystem":"Any (web browser)","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":["en","es","fr","he","tl"],"typicalAgeRange":"3-7","learningResourceType":"game","teaches":["Alphabet and letters","Phonics","Numbers and counting","Spelling words","First words in 5 languages"],"description":"A free, ad-free learning game for children ages 3–7: letters, numbers, counting, spelling, phonics, and first words in English, Spanish, French, Hebrew and Tagalog."}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":["WebApplication","LearningResource"],"name":"Yako by the Sea","url":"https://yakobythesea.com/","image":"https://yakobythesea.com/ui/icon-512.png","applicationCategory":"EducationalApplication","operatingSystem":"Any (web browser)","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":["en","es","fr","he","tl","zh"],"typicalAgeRange":"3-7","learningResourceType":"game","teaches":["Alphabet and letters","Phonics","Numbers and counting","Spelling words","First words in 6 languages"],"description":"A free, ad-free learning game for children ages 3–7: letters, numbers, counting, spelling, phonics, and first words in English, Spanish, French, Hebrew, Tagalog and Mandarin Chinese."}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
@@ -1870,6 +1870,7 @@
                 <button class="flagBtn" data-lang="es-ES" title="Español" aria-label="Spanish">🇪🇸</button>
                 <button class="flagBtn" data-lang="he-IL" title="עברית" aria-label="Hebrew">🇮🇱</button>
                 <button class="flagBtn" data-lang="tl-PH" title="Tagalog" aria-label="Tagalog">🇵🇭</button>
+                <button class="flagBtn" data-lang="zh-CN" title="中文" aria-label="Mandarin Chinese">🇨🇳</button>
               </div>
             </div>
             <div class="picker">
@@ -2128,6 +2129,7 @@
 <script src="data/strings.es.js"></script>
 <script src="data/strings.he.js"></script>
 <script src="data/strings.tl.js"></script>
+<script src="data/strings.zh.js"></script>
 <script src="data/lessons.js"></script>
 <script src="data/vocab.js"></script>
 <script src="data/music.js"></script>
@@ -2521,7 +2523,7 @@
     const seq = item.answer.split('');
     return {
       style: 'seq', word: item.answer, seq: seq, idx: 0, answer: seq[0], kind: 'letter',
-      name: 'sent_' + i, sentence: item,
+      name: 'sent_' + i, sentence: item, lineIdx: i,
       render() { renderSentenceCard(item, this.seq, this.idx); },
       revealAll() { renderSentenceCard(item, this.seq, this.seq.length); }
     };
@@ -3127,7 +3129,8 @@
     // Objects — spelling round: "Let's spell CHAIR. Find the letter C!"
     if (s === 'seq' && mode === 'objects') { sayPrompt('spell_' + challenge.word, t.spell(challenge.word, ans), { rate: 0.95 }); return; }
     // sentences: read the sentence with a "blank", then ask them to spell the missing word
-    if (s === 'seq' && mode === 'sentences') { speak(sentenceSpoken(challenge.sentence) + " Let's spell " + challenge.word + '.', { rate: 0.98 }); return; }
+    // sentences are English content in every UI language — play the recorded English clip (synth fallback)
+    if (s === 'seq' && mode === 'sentences') { playPersonaLang('en', 'sen_' + challenge.lineIdx, sentenceSpoken(challenge.sentence) + " Let's spell " + challenge.word + '.', { rate: 0.98 }); return; }
     // spelling: say the word first — "Let's spell CAR. Find the letter C!"
     if (s === 'seq' && mode === 'spelling') { sayPrompt('spell_' + challenge.word, t.spell(challenge.word, ans), { rate: 0.95 }); return; }
     // counting: speak the FULL multi-digit number, then the first digit
@@ -3392,9 +3395,9 @@
       const it = challenge.sentence;
       const full = ((it.before ? it.before + ' ' : '') + w + (it.after ? ' ' + it.after : '')).replace(/\s+([.!?,])/g, '$1');
       if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>' + w + '!</b><span>You finished the sentence!</span>'; }
-      // read the letters back, then the whole completed sentence as the reward
+      // read the letters back, then the whole completed sentence as the reward (recorded English clip)
       playPersonaChain(w.split('').map(ch => 'name_' + ch), full, { rate: 1.0 });
-      setTimeout(() => speak(full, { rate: 0.98 }), 900);
+      setTimeout(() => playPersonaLang('en', 'senf_' + challenge.lineIdx, full, { rate: 0.98 }), 700 + w.length * 750);
     } else if (mode === 'spelling') {
       if (mfb) { mfb.className = 'show good'; mfb.innerHTML = '<b>You spelled ' + w + '!</b><span>Great job!</span>'; }
       // read the letters back in the recorded voice, then the completion clip: "C. U. P. You spelled it!"
@@ -3656,7 +3659,13 @@
   function sayStory(key, text, onend) { try { stopAllSounds(); } catch (e) {} if (text || key) playPersona(key, text, { rate: 1.0, onend: onend }); }
   // Narration clip key uses the story's stable `vox` id (its original recording index),
   // so the picker/campaign order can change without remapping the recorded clips.
-  function beatKey() { const v = (curStory && curStory.vox != null) ? curStory.vox : curStoryIdx; return 'sty_' + v + '_' + curBeat; }
+  function beatKey() {
+    const v = (curStory && curStory.vox != null) ? curStory.vox : curStoryIdx;
+    // Fork-story beats carry a stable `vk` (indices shift when a fork splices beats in);
+    // plain stories keep the original index-based keys their clips were recorded under.
+    const b = curStory && curStory.beats && curStory.beats[curBeat];
+    return 'sty_' + v + '_' + ((b && b.vk != null) ? b.vk : curBeat);
+  }
   function storyTry() {
     try { if (A.playTryAgainTone) playTryAgainTone(); } catch (e) {}
     const tries = (L().tries && L().tries.length) ? L().tries : [L().again || 'Oops! Try again!'];

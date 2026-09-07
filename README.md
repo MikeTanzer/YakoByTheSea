@@ -51,8 +51,8 @@ js/i18n.js             language engine — interpolates data/strings.*
 js/audio.js            SFX + narrator (recorded clips w/ speech-synth fallback)
 data/strings.{en,fr,es}.js   every phrase — single source of truth
 data/lessons.js        spelling words, word pictures, category items
-voice/clips/<lang>/<persona>/*.mp3   4,644 recorded narration clips
-                       (387 phrases × EN/FR/ES × Mom/Dad/Grandpa/Grandma)
+voice/clips/<lang>/<persona>/*.mp3   ~12,500 recorded narration clips
+                       (502 phrases × EN/FR/ES/HE/TL/ZH × Mom/Dad/Grandpa/Grandma, + English story/sentence lines)
 tools/check-voices.mjs verify the clip library matches the strings data
 tools/serve.js         tiny static server (HTTP Range support for video)
 ui/, *.png, *.mp4      painted art, animated backgrounds, sprite sheets
