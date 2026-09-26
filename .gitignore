@@ -5,6 +5,8 @@
 # --- the game ---
 !/.gitignore
 !/README.md
+!/CLAUDE.md
+!/docs/
 !/index.html
 !/keyboard-fun.html
 !/privacy.html
@@ -23,6 +25,9 @@
 !/data/
 !/tools/
 
+# self-hosted webfonts (replaced the Google Fonts <link>; the game 404s without them)
+!/fonts/
+
 # art & video the game loads
 !/background.jpg
 !/gameui.png
@@ -40,6 +45,7 @@
 !/yako_cheer.png
 !/theme.mp3
 !/scenes/
+!/video/
 !/music/
 !/objects/
 !/decor/

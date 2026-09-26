@@ -1,7 +1,9 @@
 /* Yako by the Sea — service worker (offline + installable PWA) */
-const CORE = 'yako-core-v72';    // versioned: bumped whenever the code/art below changes
+const CORE = 'yako-core-v73';    // versioned: bumped whenever the code/art below changes
 const MEDIA = 'yako-media';      // persistent: clips + scene stills cached as played (survives version bumps)
-const FONTS = 'yako-fonts';      // persistent: Google Fonts CSS + woff2 (so text looks right offline)
+// Retired: fonts are self-hosted and precached in CORE. The name is kept ONLY so the
+// activate handler below keeps deleting the old cache on clients that still carry it.
+const FONTS = 'yako-fonts';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -39,7 +41,25 @@ const CORE_ASSETS = [
   './ui/favicon.png',
   './ui/icon-192.png',
   './ui/icon-512.png',
-  './ui/icon-maskable-512.png'
+  './ui/icon-maskable-512.png',
+  // Self-hosted webfonts — first-party since the Google Fonts <link> was removed.
+  './fonts/Baloo2-500-latin-ext.woff2',
+  './fonts/Baloo2-500-latin.woff2',
+  './fonts/Baloo2-600-latin-ext.woff2',
+  './fonts/Baloo2-600-latin.woff2',
+  './fonts/Baloo2-700-latin-ext.woff2',
+  './fonts/Baloo2-700-latin.woff2',
+  './fonts/Baloo2-800-latin-ext.woff2',
+  './fonts/Baloo2-800-latin.woff2',
+  './fonts/Fredoka-500-hebrew.woff2',
+  './fonts/Fredoka-500-latin-ext.woff2',
+  './fonts/Fredoka-500-latin.woff2',
+  './fonts/Fredoka-600-hebrew.woff2',
+  './fonts/Fredoka-600-latin-ext.woff2',
+  './fonts/Fredoka-600-latin.woff2',
+  './fonts/Fredoka-700-hebrew.woff2',
+  './fonts/Fredoka-700-latin-ext.woff2',
+  './fonts/Fredoka-700-latin.woff2'
 ];
 // Painted scene stills + the piper are small; precache them so backgrounds show
 // OFFLINE even before the (large, runtime-cached) looping videos are downloaded.
@@ -69,7 +89,7 @@ self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
       // drop stale CORE versions; keep the persistent MEDIA + FONTS caches
-      .then((keys) => Promise.all(keys.filter((k) => k !== CORE && k !== MEDIA && k !== FONTS).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== CORE && k !== MEDIA).map((k) => caches.delete(k))))
       // the scene loop videos were re-rendered (same filenames) — purge the old
       // copies from the persistent MEDIA cache so returning users refetch them once
       .then(() => caches.open(MEDIA).then((c) => c.keys().then((reqs) =>
@@ -98,13 +118,6 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-
-  // Google Fonts (stylesheet + woff2 files): cache-first so text renders in the
-  // right font OFFLINE after the first online visit.
-  if (url.host === 'fonts.googleapis.com' || url.host === 'fonts.gstatic.com') {
-    e.respondWith(cacheFirst(FONTS, req));
-    return;
-  }
 
   // Recorded voice clips + painted scene stills: cache-first so replays work OFFLINE.
   // Stored full (played start-to-finish, never range-seeked).
