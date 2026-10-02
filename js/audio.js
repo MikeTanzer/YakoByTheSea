@@ -248,7 +248,11 @@ window.YAKO.audio = (function () {
   function getPersona() { return voicePersona; }
 
   // ----- speech synthesis (the always-available fallback voice) -----
-  const VOICE_FEM = /(female|Samantha|Victoria|Karen|Moira|Tessa|Fiona|Amelie|Amélie|Audrey|Aurelie|Marie|Chantal|Monica|Mónica|Paulina|Marisol|Zira|Aria|Jenny|Helena|Sabina|Esperanza|Google US English|Google.*[Ff]ran|Google.*[Ee]spa)/;
+  // NOTE: do NOT add 'Google ...' voices here. On Chrome/Android those are SERVER-SIDE:
+  // choosing one sends every spoken line to Google to be synthesised. Thousands of
+  // narration lines still fall back to the synth (see tools/check-voices.mjs), so that is
+  // a routine path, not an edge case. Keep this list to on-device voices only.
+  const VOICE_FEM = /(female|Samantha|Victoria|Karen|Moira|Tessa|Fiona|Amelie|Amélie|Audrey|Aurelie|Marie|Chantal|Monica|Mónica|Paulina|Marisol|Zira|Aria|Jenny|Helena|Sabina|Esperanza)/;
   const VOICE_MAS = /(\bmale|Daniel|Alex|Fred|Aaron|Tom|Oliver|Thomas|Nicolas|Mathieu|Jorge|Diego|Carlos|Juan|Pablo|David|Mark|Guy)/;
   let voice = null;
   function pickVoice() {
@@ -257,6 +261,13 @@ window.YAKO.audio = (function () {
     const pre = I().langPrefix();
     let pool = voices.filter(v => v.lang && v.lang.toLowerCase().slice(0, 2) === pre);
     if (!pool.length) pool = voices;
+    // Speak on the device, never in the cloud. A voice with localService === false is
+    // synthesised on the vendor's servers, which would ship the child's lesson text off
+    // the device -- and no CSP can stop it, because Web Speech traffic is issued by the
+    // browser outside the page's fetch context. Fall back to the full pool only if a
+    // platform reports nothing local, so the narrator never goes silent.
+    const localPool = pool.filter(v => v.localService !== false);
+    if (localPool.length) pool = localPool;
     const re = (PERSONA[voicePersona] || PERSONA.mom).gender === 'female' ? VOICE_FEM : VOICE_MAS;
     voice = pool.find(v => re.test(v.name)) || pool.find(v => v.default) || pool[0] || null;
   }

@@ -24,10 +24,19 @@
 !/manifest.webmanifest
 !/sw.js
 
-# code + data + tools
+# code + data. Note these un-ignore whole trees: anything dropped into js/ or data/ is
+# committed and published on the next bulk add. Keep scratch files out of them.
 !/js/
 !/data/
-!/tools/
+/js/*.bak
+/data/*.txt
+
+# tools: named files only. Un-ignoring the whole folder is how tools/serve-artarchive.js
+# -- a server for an unrelated private project, containing a local filesystem path --
+# ended up committed to this PUBLIC repo before being removed.
+!/tools/serve.js
+!/tools/check-voices.mjs
+!/tools/dump-missing-voices.mjs
 
 # self-hosted webfonts (replaced the Google Fonts <link>; the game 404s without them)
 !/fonts/
@@ -63,11 +72,8 @@ ui/_orig_btns/
 # recorded narration. The clip-review TOOLS are deliberately not published: they are
 # internal dev pages, nothing links to them, and every tracked file is served live on a
 # site aimed at children. They stay on disk for local use, just out of the deploy.
-!/voice/
-/voice/src_*.mp3
-/voice/clip-marker.html
-/voice/review-persona.html
-/voice/review.html
+!/voice/clips/
+!/voice/place/
 # scratch voice auditions -- never loaded by the game, no reason to publish them
 /voice/_yako_candidates/
 
