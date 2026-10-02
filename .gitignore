@@ -1,9 +1,11 @@
 # This folder is a multi-project workspace — the YakoByTheSea repo tracks ONLY
 # the game. Everything is ignored unless explicitly whitelisted below.
 #
-# NOTE: this repo is PUBLIC. CLAUDE.md and docs/ are deliberately NOT whitelisted:
-# .github/workflows/static.yml strips them from the published SITE, but anything
-# committed here is readable by anyone browsing the repository regardless.
+# NOTE: this repo is PUBLIC, and the Pages deploy serves the whole checkout. There is no
+# longer a "strip internal files" step in the workflow and it is not needed: anything that
+# must not be public is simply not whitelisted here. CLAUDE.md, docs/ and the voice review
+# tools are excluded for that reason. Stripping at deploy time would not have helped anyway
+# -- it cleans the published site, not the repository, which anyone can read.
 /*
 
 # --- the game ---
@@ -58,9 +60,14 @@ ui/_orig_art/
 ui/_framed_orig/
 ui/_orig_btns/
 
-# recorded narration + the clip-review tools (raw source recordings excluded)
+# recorded narration. The clip-review TOOLS are deliberately not published: they are
+# internal dev pages, nothing links to them, and every tracked file is served live on a
+# site aimed at children. They stay on disk for local use, just out of the deploy.
 !/voice/
 /voice/src_*.mp3
+/voice/clip-marker.html
+/voice/review-persona.html
+/voice/review.html
 # scratch voice auditions -- never loaded by the game, no reason to publish them
 /voice/_yako_candidates/
 

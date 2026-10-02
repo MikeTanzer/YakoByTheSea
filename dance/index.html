@@ -2,13 +2,52 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<!-- Content Security Policy. GitHub Pages cannot set HTTP response headers, so this is
+     delivered as a meta tag. Two directives (frame-ancestors, report-to) are header-only
+     and are therefore NOT available to us here; clickjacking is instead limited by the
+     fact that the page holds no credentials and no destructive controls.
+     'unsafe-inline' is required because the game is one large inline <script> and its
+     styles are inline; it still blocks loading script from any external origin.
+     NOTE: connect-src/script-src are locked to 'self'. If the optional Firebase sign-in
+     is ever switched on, this policy must be widened or the SDK fetch will be blocked. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; form-action 'self'; worker-src 'self'; manifest-src 'self'">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Yako's Sunset Vortex</title>
 <meta name="description" content="Yako and his dog watch the sunset, painted in five million particles that swirl through vortices and gyroid flows to Baby Yak.">
 <link rel="icon" href="../favicon-32.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=IBM+Plex+Mono:wght@500&display=swap">
+<!-- Self-hosted Baloo 2 (the same woff2 files the game uses). These pages used to pull
+     the font from Google's font CDN, which sent every visitor's IP address to Google on
+     a site aimed at children -- the exact thing self-hosting was adopted to stop.
+     The mono face was dropped rather than self-hosted: the one rule that used it already
+     falls back to ui-monospace. -->
+<style>
+@font-face { font-family: 'Baloo 2'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url('../fonts/Baloo2-600-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face { font-family: 'Baloo 2'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url('../fonts/Baloo2-600-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face { font-family: 'Baloo 2'; font-style: normal; font-weight: 700; font-display: swap;
+  src: url('../fonts/Baloo2-700-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face { font-family: 'Baloo 2'; font-style: normal; font-weight: 700; font-display: swap;
+  src: url('../fonts/Baloo2-700-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face { font-family: 'Baloo 2'; font-style: normal; font-weight: 800; font-display: swap;
+  src: url('../fonts/Baloo2-800-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face { font-family: 'Baloo 2'; font-style: normal; font-weight: 800; font-display: swap;
+  src: url('../fonts/Baloo2-800-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+</style>
 <style>
   :root { --gold:#f4c35a; --cream:#fdf3d6; --sea:#7fd3f2; --sun:#ff9a4a; }
   * { box-sizing: border-box; }
@@ -40,7 +79,7 @@
     text-align: center; pointer-events: none; z-index: 3; white-space: nowrap; }
   #cap b { display: block; font-weight: 800; font-size: clamp(18px, 2.6vw, 30px); color: #fff;
     text-shadow: 0 2px 0 rgba(0,0,0,.5), 0 0 18px rgba(255,154,74,.55); }
-  #cap code { display: block; margin-top: 2px; font: 500 clamp(11px, 1.3vw, 15px) 'IBM Plex Mono', ui-monospace, monospace;
+  #cap code { display: block; margin-top: 2px; font: 500 clamp(11px, 1.3vw, 15px) ui-monospace, SFMono-Regular, Menlo, monospace;
     color: #ffe7c2; text-shadow: 0 1px 0 rgba(0,0,0,.6); opacity: .92; min-height: 1.3em; }
   .hud { position: fixed; z-index: 4; display: flex; gap: 8px; align-items: center; font-size: 13px;
     padding: max(10px, env(safe-area-inset-top)) 12px 0; color: #d8cbe8; }

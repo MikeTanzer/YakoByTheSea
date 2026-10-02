@@ -2,6 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+<!-- Content Security Policy. GitHub Pages cannot set HTTP response headers, so this is
+     delivered as a meta tag. Two directives (frame-ancestors, report-to) are header-only
+     and are therefore NOT available to us here; clickjacking is instead limited by the
+     fact that the page holds no credentials and no destructive controls.
+     'unsafe-inline' is required because the game is one large inline <script> and its
+     styles are inline; it still blocks loading script from any external origin.
+     NOTE: connect-src/script-src are locked to 'self'. If the optional Firebase sign-in
+     is ever switched on, this policy must be widened or the SDK fetch will be blocked. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; form-action 'self'; worker-src 'self'; manifest-src 'self'">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Terms of Use — Yako by the Sea</title>
   <meta name="description" content="Terms of Use for Yako by the Sea, a free educational game for children: acceptable use, disclaimers, limitation of liability, and parental responsibility.">
@@ -34,7 +45,7 @@
     <a class="back" href="./keyboard-fun.html">← Back to the game</a>
     <div class="card">
       <h1>Terms of Use</h1>
-      <p class="updated">Last updated: August 11, 2026</p>
+      <p class="updated">Last updated: October 2, 2026</p>
 
       <p>Welcome to Yako by the Sea (the “Service”), a free, ad‑free educational game for children created by Jacob “Yako” Tanzer in Carmel‑by‑the‑Sea, California, available at <a href="https://yakobythesea.com/">yakobythesea.com</a>. By accessing or using the Service, you agree to these Terms of Use (“Terms”). If you do not agree, please do not use the Service. These Terms work together with our <a href="./privacy.html">Privacy Policy</a>.</p>
 
