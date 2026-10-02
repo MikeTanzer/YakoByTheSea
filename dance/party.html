@@ -1,0 +1,845 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Yako's Particle Dance Party</title>
+<meta name="description" content="Five million particles dance, laugh, point and puzzle along with Yako to Baby Yak.">
+<link rel="icon" href="../favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap">
+<style>
+  :root { --gold:#f4c35a; --gold-d:#cba24a; --ink:#0a1636; --cream:#fdf3d6; --sea:#7fd3f2; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #050d24; color: var(--cream); overflow: hidden;
+    font-family: 'Baloo 2', 'Arial Rounded MT Bold', 'Trebuchet MS', system-ui, sans-serif; }
+  canvas#gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+  #gate { position: fixed; inset: 0; display: grid; place-items: center; z-index: 5;
+    background: radial-gradient(120% 90% at 50% 40%, rgba(8,20,56,.35), rgba(3,8,22,.82));
+    transition: opacity .6s ease; }
+  #gate.gone { opacity: 0; pointer-events: none; }
+  .card { text-align: center; padding: 28px 30px 24px; max-width: min(92vw, 520px); }
+  .card h1 { margin: 0; font-weight: 800; font-size: clamp(38px, 7.4vw, 78px); line-height: .95;
+    color: var(--gold); text-shadow: 0 4px 0 #8a5a12, 0 10px 34px rgba(244,195,90,.35); letter-spacing: .5px; }
+  .card h1 span { display: block; color: var(--sea); font-size: .5em; text-shadow: 0 3px 0 #1d5a78; margin-top: .18em; }
+  .card p { margin: 16px auto 0; font-size: 18px; line-height: 1.35; color: #dfe9ff; max-width: 34ch; }
+  .card .count { font-variant-numeric: tabular-nums; color: var(--gold); }
+  #go { margin-top: 22px; font: 800 22px/1 'Baloo 2', sans-serif; padding: 16px 30px 13px; border-radius: 999px;
+    border: 3px solid #fff3c4; background: linear-gradient(#ffd977, #e7a531); color: #4a2a00; cursor: pointer;
+    box-shadow: 0 6px 0 #9a6115, 0 14px 30px rgba(0,0,0,.35); }
+  #go:disabled { filter: grayscale(.6) brightness(.8); cursor: progress; }
+  #go:focus-visible, .hud button:focus-visible, .hud select:focus-visible { outline: 3px solid var(--sea); outline-offset: 3px; }
+  .bar { height: 6px; width: 260px; max-width: 70vw; margin: 18px auto 0; border-radius: 6px; background: rgba(255,255,255,.12); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--sea), var(--gold)); transition: width .2s; }
+  .status { margin-top: 8px; font-size: 14px; color: #9fb3dc; min-height: 1.2em; }
+
+  #cap { position: fixed; left: 50%; bottom: max(26px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+    font-weight: 800; font-size: clamp(18px, 2.6vw, 30px); color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.45), 0 0 18px rgba(127,211,242,.45);
+    white-space: nowrap; pointer-events: none; z-index: 3; transition: opacity .25s; }
+  .hud { position: fixed; z-index: 4; display: flex; gap: 8px; align-items: center; font-size: 13px;
+    padding: max(10px, env(safe-area-inset-top)) 12px 0; color: #b8c8ec; }
+  .hud.l { left: 0; top: 0; font-variant-numeric: tabular-nums; }
+  .hud.r { right: 0; top: 0; }
+  .hud b { color: var(--gold); font-weight: 800; }
+  .hud a.swap { color: var(--cream); text-decoration: none; font: 700 14px 'Baloo 2', sans-serif; background: rgba(10,22,54,.62);
+    border: 1px solid rgba(255,255,255,.18); border-radius: 999px; padding: 6px 12px 4px; }
+  .hud button, .hud select { font: 700 14px 'Baloo 2', sans-serif; color: var(--cream); background: rgba(10,22,54,.62);
+    border: 1px solid rgba(255,255,255,.18); border-radius: 999px; padding: 6px 12px 4px; cursor: pointer; }
+  .hud select { padding: 6px 10px 4px; }
+  #err { position: fixed; inset: 0; display: none; place-items: center; text-align: center; padding: 24px; z-index: 9; background: #050d24; }
+  #err.show { display: grid; }
+  @media (max-width: 560px) { .hud.l span.fps { display: none; } }
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<div id="gate" role="dialog" aria-labelledby="gt">
+  <div class="card">
+    <h1 id="gt">Yako by the Sea<span>Particle Dance Party</span></h1>
+    <p>Yako dances, laughs, points and puzzles to <em>Baby Yak</em> — drawn with <b class="count" id="pc">5,308,416</b> particles.</p>
+    <button id="go" type="button" disabled>Loading…</button>
+    <div class="bar" aria-hidden="true"><i id="prog"></i></div>
+    <div class="status" id="st" role="status">Painting Yako into particles…</div>
+  </div>
+</div>
+
+<div id="cap" aria-live="polite"></div>
+
+<div class="hud l"><span><b id="hc">5,308,416</b> particles</span><span class="fps">· <span id="fps">–</span> fps</span></div>
+<div class="hud r">
+  <a class="swap" href="./">Sunset ↗</a>
+  <select id="q" aria-label="Particle count">
+    <option value="2304" selected>5.3M</option>
+    <option value="1536">2.4M</option>
+    <option value="1024">1.0M</option>
+  </select>
+  <button id="mute" type="button" aria-label="Mute music">🔊</button>
+  <button id="pause" type="button" aria-label="Pause">⏸</button>
+</div>
+<div id="err"><div><h2>This device can't run the particle party</h2><p id="errmsg"></p></div></div>
+
+<audio id="song" src="../music/baby-yak.mp3" loop preload="auto" crossorigin="anonymous"></audio>
+
+<script>
+(() => {
+'use strict';
+// ───────────────────────────── the song's beat grid ─────────────────────────────
+// Measured offline from music/baby-yak.mp3 with a comb-filter tempo/phase search over the whole
+// track: 92.44 BPM, on-beat onsets 1.49× stronger than off-beat, halves agree within 0.054 s.
+// Kicks land on beats 1 and 3 of each bar; the first downbeat is at 0.889 s.
+const BPM = 92.44, BEAT = 60 / BPM, PHASE = 0.240, T0 = PHASE + BEAT;   // T0 = first downbeat
+
+// ───────────────────────────── constants ─────────────────────────────
+const CW = 384, CH = 512, ANCHOR = CW * 0.40, BASE = CH - 8;   // atlas cell, shirt-centre anchor, feet line
+const L = 32768, LW = 256, LH = 128;                           // samples per frame, as a 256×128 layer
+const PW = 640, PH = 512;                                      // props canvas
+const ROLE_Y = 0.68, ROLE_P = 0.86;                            // fractions of particles: Yako | props | sea+stars
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let SNAP = false, FORCE_YL = -1;  // diagnostics: snap particles onto targets / force a Yako frame
+
+const $ = (id) => document.getElementById(id);
+const canvas = $('gl'), song = $('song');
+const fail = (m) => { $('errmsg').textContent = m; $('err').classList.add('show'); throw new Error(m); };
+
+const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, depth: false, stencil: false,
+  premultipliedAlpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: false });
+if (!gl) fail('It needs WebGL 2, which this browser does not offer.');
+if (!gl.getExtension('EXT_color_buffer_float') && !gl.getExtension('EXT_color_buffer_half_float'))
+  fail('It needs floating-point render targets (EXT_color_buffer_float).');
+
+// ───────────────────────────── shaders ─────────────────────────────
+// Each particle stores only an OFFSET from its target, plus a velocity. Both passes recompute the
+// target from the same hash, so within an animation Yako is always crisp (offsets carry over while the
+// targets update), and on a change of pose the old position is folded into the offset — the particle
+// keeps its place on screen and visibly flies to its new spot.
+const HEAD = `#version 300 es
+precision highp float; precision highp int; precision highp sampler2D; precision highp usampler2DArray;
+uint pcg(uint v){ uint s = v * 747796405u + 2891336453u; uint w = ((s >> ((s >> 28u) + 4u)) ^ s) * 277803737u; return (w >> 22u) ^ w; }
+float u01(uint h){ return float(h) * (1.0 / 4294967296.0); }
+const float ANCHOR = ${ANCHOR.toFixed(1)}, BASE = ${BASE.toFixed(1)}, RY = ${ROLE_Y}, RP = ${ROLE_P};
+uniform usampler2DArray uYako, uProps;
+uniform int uYL, uYL2, uPL; uniform float uYF;
+uniform vec2 uYO, uPO, uHalo; uniform float uYS, uPS, uT, uA, uSea, uBass;
+struct R { float r0, r1, r2, r3, r4, r5, r6; };
+R rnd(uint id){ R r; uint h = pcg(id); r.r0 = u01(h); h = pcg(h); r.r1 = u01(h); h = pcg(h); r.r2 = u01(h); h = pcg(h); r.r3 = u01(h);
+  h = pcg(h); r.r4 = u01(h); h = pcg(h); r.r5 = u01(h); h = pcg(h); r.r6 = u01(h); return r; }
+int roleOf(float f){ return f < RY ? 0 : (f < RP ? 1 : 2); }
+vec2 yakoAt(int layer, vec2 origin, float r0, out uvec4 tx){
+  int j = int(r0 * 32768.0); tx = texelFetch(uYako, ivec3(j & 255, j >> 8, layer), 0);
+  return origin + vec2(float(tx.x) - ANCHOR, BASE - float(tx.y)) * uYS; }
+vec2 propsAt(int layer, vec2 origin, float scale, float r0, out uvec4 tx){
+  int j = int(r0 * 32768.0); tx = texelFetch(uProps, ivec3(j & 255, j >> 8, layer), 0);
+  return origin + vec2(float(tx.x), -float(tx.y)) * scale; }
+vec2 fireflyAt(float r1, float r2, float r3){            // ~1500 glowing clusters looping around Yako
+  uint fk = pcg(uint(r1 * 1500.0) + 77u); float q1 = u01(fk); fk = pcg(fk); float q2 = u01(fk); fk = pcg(fk); float q3 = u01(fk); fk = pcg(fk); float q4 = u01(fk);
+  float a = q1 * 6.2831853 + uT * (0.06 + 0.16 * q2) * (q3 < 0.5 ? 1.0 : -1.0);
+  return uHalo + vec2(cos(a) * (0.75 + 0.95 * q3), sin(a + q2 * 6.2831853) * (0.42 + 0.5 * q4)) + (vec2(r2, r3) - 0.5) * 0.012; }
+vec2 seaAt(float r2, float r3){
+  float x = (r2 * 2.0 - 1.0) * uA * 1.06, dep = pow(r3, 1.25);
+  float w = sin(x * 3.1 + uT * 1.3) * 0.5 + sin(x * 7.3 - uT * 2.1) * 0.25 + sin(x * 13.7 + uT * 3.3) * 0.12;
+  return vec2(x, uSea - dep * 0.24 + w * (0.016 + 0.055 * uBass) * (1.0 - dep)); }
+vec2 starAt(float r0, float r2){
+  uint sk = pcg(uint(r2 * 700.0) + 991u);
+  return vec2((u01(sk) * 2.0 - 1.0) * uA * 1.02, mix(0.05, 1.02, u01(pcg(sk)))) + (vec2(r0, fract(r0 * 91.7)) - 0.5) * 0.011; }
+vec2 targetOf(int role, R r, out uvec4 tx){
+  tx = uvec4(0u);
+  if (role == 0) return yakoAt(r.r4 < uYF ? uYL2 : uYL, uYO, r.r0, tx);   // dithered dissolve between two frames
+  if (role == 1) return uPL >= 0 ? propsAt(uPL, uPO, uPS, r.r0, tx) : fireflyAt(r.r1, r.r2, r.r3);
+  return r.r1 < 0.74 ? seaAt(r.r2, r.r3) : starAt(r.r0, r.r2);
+}
+vec3 rainbow(float h){ return 0.5 + 0.5 * cos(6.2831853 * (h + vec3(0.0, 0.33, 0.67))); }
+`;
+const VS_QUAD = `#version 300 es
+void main(){ vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2)); gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0); }`;
+
+const FS_UPDATE = HEAD + `
+uniform sampler2D uState;
+uniform int uW, uInit, uSnap, uYMorph, uPMorph, uYLp, uPLp; uniform float uN;
+uniform vec2 uYOp, uPOp, uBurstC; uniform float uPSp;
+uniform float uPT, uDt, uBeatT, uAmp, uFeet, uFigH, uBurstT, uSwirl;
+out vec4 o;
+void main(){
+  ivec2 c = ivec2(gl_FragCoord.xy); uint id = uint(c.y * uW + c.x);
+  int role = roleOf(float(id) / uN); R r = rnd(id);
+  uvec4 tx; vec2 T = targetOf(role, r, tx);
+  if (uInit == 1) {                                          // start as a slowly turning galaxy
+    float a = r.r0 * 6.2831853 + r.r1 * 9.0, rad = 0.15 + pow(r.r1, 0.6) * 1.35;
+    o = vec4(vec2(cos(a) * rad * uA * 0.62, sin(a) * rad * 0.62) - T, vec2(-sin(a), cos(a)) * 0.35 * rad); return;
+  }
+  vec4 s = texelFetch(uState, c, 0); vec2 off = s.xy, v = s.zw;
+  if (role == 0 && uYMorph == 1) { uvec4 tp; off += yakoAt(uYLp, uYOp, r.r0, tp) - T; v += (vec2(r.r5, r.r6) - 0.5) * 1.6; }
+  if (role == 1 && uPMorph == 1) { uvec4 tp; off += (uPLp >= 0 ? propsAt(uPLp, uPOp, uPSp, r.r0, tp) : fireflyAt(r.r1, r.r2, r.r3)) - T; v += (vec2(r.r5, r.r6) - 0.5) * 1.2; }
+  if (uSnap == 1) { o = vec4(0.0); return; }
+  float k = 3.0, damp = 2.5;
+  if (role == 0) { k = 58.0; damp = 11.4; }
+  else if (role == 1) { if (uPL >= 0) { k = 55.0; damp = 11.0; } else { k = 4.0; damp = 2.2; } }
+  else if (r.r1 < 0.74) { k = 38.0; damp = 9.0; }
+  float dt = uDt;
+  v += -off * k * dt; v *= exp(-damp * dt);
+  if (role < 2) {
+    vec2 P = T + off; float far = smoothstep(0.02, 0.45, length(off));
+    vec2 q = P * 2.2; float tt = uT * 0.35;
+    v += vec2(-sin(q.x + tt) * sin(q.y * 1.3 - tt) * 1.3, -cos(q.x + tt) * cos(q.y * 1.3 - tt)) * far * uSwirl * dt;
+    // the beat lands at the feet first and ripples up to the head
+    float hit = uBeatT + clamp((T.y - uFeet) / uFigH, 0.0, 1.0) * 0.10 + r.r1 * 0.015;
+    if (hit > uPT && hit <= uT) v.y -= uAmp * (0.75 + 0.5 * r.r2);
+    if (role == 1 && uBurstT > uPT && uBurstT <= uT)
+      v += normalize(P - uBurstC + (vec2(r.r2, r.r3) - 0.5) * 0.06) * (1.1 + 2.4 * r.r3) + vec2(0.0, 0.7);
+  } else if (r.r1 < 0.74) {
+    float hit = uBeatT + abs(T.x) * 0.06;
+    if (hit > uPT && hit <= uT) v.y += uAmp * 0.55 * (1.0 - pow(r.r3, 1.25));
+  }
+  off += v * dt;
+  o = vec4(off, v);
+}`;
+
+const VS_DRAW = HEAD + `
+uniform sampler2D uState; uniform int uW; uniform float uN;
+uniform float uPt, uYI, uPI, uSI, uKI, uYJ, uPJ, uHigh, uFlash, uPFlash, uRainbow, uGain;
+out vec3 vC;
+vec3 lin(uvec4 t){ vec3 c = vec3(float(t.z >> 8u), float(t.z & 255u), float(t.w >> 8u)) / 255.0; return c * c; }
+void main(){
+  uint id = uint(gl_VertexID); ivec2 c = ivec2(int(id % uint(uW)), int(id / uint(uW)));
+  vec4 s = texelFetch(uState, c, 0); int role = roleOf(float(id) / uN); R r = rnd(id);
+  uvec4 tx; vec2 T = targetOf(role, r, tx);
+  vec2 p = T + s.xy, jit = vec2(r.r5, r.r6) - 0.5; float spd = length(s.zw);
+  float fly = smoothstep(0.12, 0.9, spd);                  // in flight: glow the colour of its direction
+  vec3 flyC = rainbow(r.r1 * 0.85 + atan(s.w, s.z + 1e-7) * 0.05 + uT * 0.2) * 1.4, col;
+  if (role == 0) {
+    col = lin(tx); p += jit * uYJ;
+    float luma = max(max(col.r, col.g), col.b);
+    float band = 0.5 + 0.5 * sin((T.y * 2.6 + T.x * 1.4 - uT * 1.7) * 3.14159);   // rainbow bands sweeping through him
+    col = mix(col, rainbow(T.y * 0.55 + T.x * 0.3 + uT * 0.22) * (0.35 + 0.9 * luma), uRainbow * smoothstep(0.62, 1.0, band));
+    col = mix(col, flyC * (0.4 + luma), fly * 0.8);
+    float sparkle = step(0.972, r.r6) * uHigh * (0.5 + 0.5 * sin(uT * 13.0 + r.r1 * 40.0));
+    col *= uYI * (1.0 + uFlash + sparkle * 5.0);
+  } else if (role == 1) {
+    if (uPL >= 0) { col = lin(tx); p += jit * uPJ; col = mix(col, flyC, fly * 0.8) * uPI * (1.0 + uFlash * 0.6 + uPFlash); }
+    else {
+      float fk = float(uint(r.r1 * 1500.0)), tw = sin(uT * 2.6 + fk * 1.7);
+      col = rainbow(fk * 0.0618 + uT * 0.12) * uKI * (0.35 + 0.65 * tw * tw);
+      col = mix(col, flyC * uKI * 2.0, fly * 0.6);
+    }
+  } else if (r.r1 < 0.74) {
+    float dep = pow(r.r3, 1.25);
+    col = mix(rainbow(T.x * 0.18 + uT * 0.07 + dep * 0.6) * 0.9, vec3(0.015, 0.09, 0.32), sqrt(dep));
+    col *= uSI * (0.75 + uBass * 0.9) * (dep < 0.02 ? 1.5 : 1.0);
+    p += jit * 0.004;
+  } else {
+    float sk = float(uint(r.r2 * 700.0));
+    float tw = 0.3 + 0.7 * smoothstep(0.2, 1.0, sin(uT * (0.8 + fract(sk * 0.37) * 2.5) + sk));
+    col = mix(vec3(0.85, 0.9, 1.0), rainbow(sk * 0.13 + uT * 0.05), 0.6) * uKI * tw * (1.0 + uHigh * 1.8 * step(0.75, fract(sk * 0.73)));
+  }
+  gl_Position = vec4(p.x / uA, p.y, 0.0, 1.0); gl_PointSize = uPt; vC = col * uGain;
+}`;
+const FS_DRAW = `#version 300 es
+precision highp float; in vec3 vC; out vec4 o; void main(){ o = vec4(vC, 1.0); }`;
+
+// Video feedback: last frame, nudged bigger, turned a little and hue-rotated, then faded — so anything
+// that moves leaves rainbow trails tunnelling out of the picture.
+const FS_FEED = `#version 300 es
+precision highp float; uniform sampler2D uPrev, uFresh; uniform vec2 uRes, uC; uniform float uDecay, uZoom, uRot, uHue; out vec4 o;
+vec3 hueRot(vec3 c, float a){ const vec3 k = vec3(0.57735); float ca = cos(a), sa = sin(a); return c * ca + cross(k, c) * sa + k * dot(k, c) * (1.0 - ca); }
+void main(){
+  float asp = uRes.x / uRes.y; vec2 uv = gl_FragCoord.xy / uRes;
+  vec2 q = (uv - uC) * vec2(asp, 1.0); float ca = cos(uRot), sa = sin(uRot);
+  q = mat2(ca, sa, -sa, ca) * q / uZoom;
+  vec3 c = hueRot(texture(uPrev, q / vec2(asp, 1.0) + uC).rgb, uHue);
+  if (any(isnan(c)) || any(isinf(c))) c = vec3(0.0);
+  o = vec4(clamp(c, 0.0, 64.0) * uDecay + texture(uFresh, uv).rgb * (1.0 - uDecay), 1.0);
+}`;
+const FS_DOWN = `#version 300 es
+precision highp float; uniform sampler2D uSrc; uniform vec2 uTx; out vec4 o;
+void main(){ vec2 uv = gl_FragCoord.xy * uTx * 2.0; vec2 h = uTx;
+  vec3 c = texture(uSrc, uv).rgb * 4.0 + texture(uSrc, uv - h).rgb + texture(uSrc, uv + h).rgb
+         + texture(uSrc, uv + vec2(h.x, -h.y)).rgb + texture(uSrc, uv - vec2(h.x, -h.y)).rgb;
+  o = vec4(c / 8.0, 1.0); }`;
+const FS_UP = `#version 300 es
+precision highp float; uniform sampler2D uSrc; uniform vec2 uTx; out vec4 o;
+void main(){ vec2 uv = gl_FragCoord.xy * uTx; vec2 h = uTx;
+  vec3 c = texture(uSrc, uv + vec2(-h.x * 2.0, 0)).rgb + texture(uSrc, uv + vec2(-h.x, h.y)).rgb * 2.0
+         + texture(uSrc, uv + vec2(0, h.y * 2.0)).rgb + texture(uSrc, uv + vec2(h.x, h.y)).rgb * 2.0
+         + texture(uSrc, uv + vec2(h.x * 2.0, 0)).rgb + texture(uSrc, uv + vec2(h.x, -h.y)).rgb * 2.0
+         + texture(uSrc, uv + vec2(0, -h.y * 2.0)).rgb + texture(uSrc, uv + vec2(-h.x, -h.y)).rgb * 2.0;
+  o = vec4(c / 12.0, 1.0); }`;
+const FS_COMP = `#version 300 es
+precision highp float; uniform sampler2D uHdr, uFresh, uBloom; uniform vec2 uRes, uRing;
+uniform float uBloomK, uExp, uPulse, uT, uBass, uKal, uCA, uRingAge, uPlasma, uMix; out vec4 o;
+vec3 rainbow(float h){ return 0.5 + 0.5 * cos(6.2831853 * (h + vec3(0.0, 0.33, 0.67))); }
+vec3 soft(vec3 x){ const float k = 0.72; return mix(x, k + (1.0 - k) * (1.0 - exp(-(x - k) / (1.0 - k))), step(k, x)); }
+vec2 kal(vec2 uv, float asp){                               // six-fold rotating mirror
+  vec2 q = (uv - 0.5) * vec2(asp, 1.0); float r = length(q), a = atan(q.y, q.x + 1e-6) + uT * 0.12;
+  const float seg = 6.2831853 / 6.0; a = abs(mod(a, seg) - seg * 0.5);
+  return vec2(cos(a), sin(a)) * r / vec2(asp, 1.0) + 0.5; }
+vec3 hdrAt(vec2 uv, vec2 dir){                               // crisp particles over their trails, split on the hits
+  vec3 tr = vec3(texture(uHdr, uv + dir * uCA).r, texture(uHdr, uv).g, texture(uHdr, uv - dir * uCA).b);
+  return texture(uFresh, uv).rgb * (1.0 - uMix) + tr * uMix * 1.1; }
+void main(){
+  vec2 uv = gl_FragCoord.xy / uRes; float asp = uRes.x / uRes.y;
+  vec2 q = (uv - 0.5) * vec2(asp, 1.0); float r = length(q);
+  const float seg = 6.2831853 / 8.0; float am = abs(mod(atan(q.y, q.x + 1e-6) + uT * 0.05, seg) - seg * 0.5);
+  vec2 k = vec2(cos(am), sin(am)) * r;                       // a dim kaleidoscopic plasma breathing with the bass
+  float pl = sin(k.x * 9.0 + uT * 0.9) + sin(k.y * 13.0 - uT * 1.2) + sin((k.x + k.y) * 7.0 + uT * 0.6) + sin(r * 16.0 - uT * 2.2 - uBass * 3.0);
+  vec3 bg = rainbow(pl * 0.12 + uT * 0.04) * (0.035 + 0.07 * uBass) * uPlasma + mix(vec3(0.004, 0.008, 0.03), vec3(0.015, 0.02, 0.07), uv.y);
+  vec2 rq = (uv - uRing) * vec2(asp, 1.0); float rr = length(rq);   // rainbow shockwave from his feet each beat
+  float rw = (rr - uRingAge * 1.1) * 26.0;                  // squared by hand: pow() of a negative base is NaN on Metal
+  bg += rainbow(atan(rq.y, rq.x + 1e-6) * 0.159 + uT * 0.3) * exp(-rw * rw) * exp(-uRingAge * 2.6) * uPulse * 0.9;
+  vec2 dir = uv - 0.5;
+  vec3 c = hdrAt(uv, dir) + uKal * 0.75 * hdrAt(kal(uv, asp), dir) + texture(uBloom, uv).rgb * uBloomK;
+  c = bg + c * uExp;
+  float vig = smoothstep(1.25, 0.35, length((uv - 0.5) * vec2(1.25, 1.0)));
+  o = vec4(sqrt(soft(c * mix(0.72, 1.0, vig))), 1.0);
+}`;
+
+function compile(type, src) {
+  const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+    const log = gl.getShaderInfoLog(s); console.error(log, src.split('\n').map((l, i) => (i + 1) + ': ' + l).join('\n'));
+    fail('A shader failed to compile: ' + log);
+  }
+  return s;
+}
+function program(vs, fs) {
+  const p = gl.createProgram(); gl.attachShader(p, compile(gl.VERTEX_SHADER, vs)); gl.attachShader(p, compile(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) fail('A shader failed to link: ' + gl.getProgramInfoLog(p));
+  const u = {}; const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+  for (let i = 0; i < n; i++) { const a = gl.getActiveUniform(p, i); u[a.name] = gl.getUniformLocation(p, a.name); }
+  return { p, u };
+}
+const P_UPD = program(VS_QUAD, FS_UPDATE), P_DRAW = program(VS_DRAW, FS_DRAW), P_FEED = program(VS_QUAD, FS_FEED);
+const P_DOWN = program(VS_QUAD, FS_DOWN), P_UP = program(VS_QUAD, FS_UP), P_COMP = program(VS_QUAD, FS_COMP);
+const vao = gl.createVertexArray();              // attribute-less: every vertex is gl_VertexID
+
+// ───────────────────────────── GPU buffers ─────────────────────────────
+function tex2D(w, h, fmt, filter) {
+  const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.texStorage2D(gl.TEXTURE_2D, 1, fmt, w, h);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  return t;
+}
+function fbo(t) {
+  const f = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, f);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+  if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) fail('Float render targets are not supported here.');
+  return f;
+}
+function arrayTex(layers) {
+  const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D_ARRAY, t);
+  gl.texStorage3D(gl.TEXTURE_2D_ARRAY, 1, gl.RGBA16UI, LW, LH, layers);
+  gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  return t;
+}
+
+let SW = 2304, N = SW * SW, state = [], stateF = [], cur = 0, needInit = true;
+function buildState(side) {
+  const max = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+  SW = Math.min(side, max); N = SW * SW;
+  for (const t of state) gl.deleteTexture(t); for (const f of stateF) gl.deleteFramebuffer(f);
+  state = [tex2D(SW, SW, gl.RGBA16F, gl.NEAREST), tex2D(SW, SW, gl.RGBA16F, gl.NEAREST)];
+  stateF = state.map(fbo); cur = 0; needInit = true;
+  const label = N.toLocaleString('en-US');
+  $('hc').textContent = label; $('pc').textContent = label;
+}
+
+let hdr = [], hdrF = [], hc = 0, fresh = null, freshF = null, blooms = [], bloomF = [], VW = 1, VH = 1;
+function buildScreen() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  VW = Math.max(2, Math.round(innerWidth * dpr)); VH = Math.max(2, Math.round(innerHeight * dpr));
+  canvas.width = VW; canvas.height = VH;
+  hdr.forEach(t => gl.deleteTexture(t)); hdrF.forEach(f => gl.deleteFramebuffer(f));
+  blooms.forEach(b => gl.deleteTexture(b.t)); bloomF.forEach(f => gl.deleteFramebuffer(f));
+  if (fresh) { gl.deleteTexture(fresh); gl.deleteFramebuffer(freshF); }
+  fresh = tex2D(VW, VH, gl.RGBA16F, gl.LINEAR); freshF = fbo(fresh);
+  hdr = [tex2D(VW, VH, gl.RGBA16F, gl.LINEAR), tex2D(VW, VH, gl.RGBA16F, gl.LINEAR)]; hdrF = hdr.map(fbo);
+  for (const f of hdrF) { gl.bindFramebuffer(gl.FRAMEBUFFER, f); gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT); }
+  blooms = []; bloomF = [];
+  let w = VW, h = VH;
+  for (let i = 0; i < 4; i++) { w = Math.max(1, w >> 1); h = Math.max(1, h >> 1); const t = tex2D(w, h, gl.RGBA16F, gl.LINEAR); blooms.push({ t, w, h }); bloomF.push(fbo(t)); }
+  layout();
+}
+
+// ───────────────────────────── particle targets from pictures ─────────────────────────────
+// Each picture becomes L samples of its solid pixels, walked in Hilbert-curve order. Because the
+// Hilbert curve keeps neighbours together, sample j sits on about the same part of Yako in every
+// frame — so particle j follows his arm or his hair through the dance instead of scrambling.
+const hilbertCache = {};
+function hilbertOrder(w, h) {
+  const key = w + 'x' + h; if (hilbertCache[key]) return hilbertCache[key];
+  let n = 1; while (n < Math.max(w, h)) n <<= 1;
+  const out = new Uint32Array(w * h); let k = 0;
+  for (let d = 0; d < n * n; d++) {
+    let x = 0, y = 0, t = d;
+    for (let s = 1; s < n; s <<= 1) {
+      const rx = 1 & (t >> 1), ry = 1 & (t ^ rx);
+      if (ry === 0) { if (rx === 1) { x = s - 1 - x; y = s - 1 - y; } const tmp = x; x = y; y = tmp; }
+      x += s * rx; y += s * ry; t >>= 2;
+    }
+    if (x < w && y < h) out[k++] = y * w + x;
+  }
+  return (hilbertCache[key] = out);
+}
+const scratch = new Uint32Array(PW * PH);
+function samplesFrom(data, w, h, out) {
+  const order = hilbertOrder(w, h); let c = 0;
+  for (let i = 0; i < order.length; i++) { const p = order[i]; if (data[p * 4 + 3] > 127) scratch[c++] = p; }
+  for (let j = 0; j < L; j++) {
+    const p = c ? scratch[Math.floor(j * c / L)] : 0, o = j * 4, q = p * 4;
+    out[o] = p % w; out[o + 1] = (p / w) | 0;
+    out[o + 2] = (data[q] << 8) | data[q + 1]; out[o + 3] = (data[q + 2] << 8) | 255;
+  }
+  return c;
+}
+
+const CLIP = { dance: { from: 0, n: 61 }, cheer: { from: 61, n: 54 }, still: { from: 115, n: 5 } };
+const STILL = { neutral: 115, wave: 116, laugh: 117, point: 118, aha: 119 };
+const yakoTex = arrayTex(120), yakoCount = new Float32Array(120);
+async function loadYako(progress) {
+  const cell = document.createElement('canvas'); cell.width = CW; cell.height = CH;
+  const cx = cell.getContext('2d', { willReadFrequently: true });
+  const buf = new Uint16Array(L * 4); let done = 0;
+  gl.bindTexture(gl.TEXTURE_2D_ARRAY, yakoTex);
+  for (const [name, c] of Object.entries(CLIP)) {
+    const img = new Image(); img.src = 'atlas_' + name + '.webp'; await img.decode();
+    for (let i = 0; i < c.n; i++) {
+      cx.clearRect(0, 0, CW, CH);
+      cx.drawImage(img, (i % 8) * CW, Math.floor(i / 8) * CH, CW, CH, 0, 0, CW, CH);
+      yakoCount[c.from + i] = samplesFrom(cx.getImageData(0, 0, CW, CH).data, CW, CH, buf);
+      gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, 0, 0, c.from + i, LW, LH, 1, gl.RGBA_INTEGER, gl.UNSIGNED_SHORT, buf);
+      if (++done % 6 === 0) { progress(done / 120 * 0.8); await new Promise(r => setTimeout(r)); }
+    }
+  }
+}
+
+// ───────────────────────────── puzzles, drawn as props ─────────────────────────────
+const FONT = "'Baloo 2', 'Arial Rounded MT Bold', 'Trebuchet MS', sans-serif";
+function beachBall(g, x, y, r) {
+  const cols = ['#ff5a5a', '#ffffff', '#2f8cff', '#ffffff', '#ffd23f', '#ffffff'];
+  for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(x, y); g.arc(x, y, r, i * Math.PI / 3 - 1.2, (i + 1) * Math.PI / 3 - 1.2); g.closePath(); g.fillStyle = cols[i]; g.fill(); }
+  g.beginPath(); g.arc(x, y, r * 0.16, 0, 7); g.fillStyle = '#fff'; g.fill();
+}
+function seaStar(g, x, y, r) {
+  g.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.46 : r; g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
+  g.closePath(); g.fillStyle = '#ff8a3d'; g.fill(); g.lineWidth = 4; g.strokeStyle = '#ffd08a'; g.stroke();
+  g.fillStyle = '#ffe0b0'; for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i * Math.PI * 0.4; g.beginPath(); g.arc(x + Math.cos(a) * r * 0.5, y + Math.sin(a) * r * 0.5, 4, 0, 7); g.fill(); }
+}
+function fish(g, x, y, r, col) {
+  g.fillStyle = col; g.beginPath(); g.ellipse(x, y, r, r * 0.6, 0, 0, 7); g.fill();
+  g.beginPath(); g.moveTo(x - r * 0.85, y); g.lineTo(x - r * 1.5, y - r * 0.55); g.lineTo(x - r * 1.5, y + r * 0.55); g.closePath(); g.fill();
+  g.fillStyle = '#fff'; g.beginPath(); g.arc(x + r * 0.45, y - r * 0.12, r * 0.18, 0, 7); g.fill();
+  g.fillStyle = '#0a1636'; g.beginPath(); g.arc(x + r * 0.5, y - r * 0.12, r * 0.08, 0, 7); g.fill();
+}
+function catFace(g, x, y, r) {
+  g.fillStyle = '#ffb347'; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
+  for (const s of [-1, 1]) { g.beginPath(); g.moveTo(x + s * r * 0.9, y - r * 0.3); g.lineTo(x + s * r * 0.75, y - r * 1.25); g.lineTo(x + s * r * 0.2, y - r * 0.85); g.closePath(); g.fill(); }
+  g.fillStyle = '#2a1a08'; for (const s of [-1, 1]) { g.beginPath(); g.ellipse(x + s * r * 0.38, y - r * 0.1, r * 0.11, r * 0.17, 0, 0, 7); g.fill(); }
+  g.fillStyle = '#ff6f91'; g.beginPath(); g.arc(x, y + r * 0.18, r * 0.1, 0, 7); g.fill();
+  g.strokeStyle = '#fff3d6'; g.lineWidth = 3; for (const s of [-1, 1]) for (const k of [-1, 0, 1]) { g.beginPath(); g.moveTo(x + s * r * 0.2, y + r * 0.28); g.lineTo(x + s * r * 1.05, y + r * (0.2 + k * 0.16)); g.stroke(); }
+}
+function bubble(g, x, y, txt) {
+  g.fillStyle = '#ffffff';
+  g.beginPath(); g.ellipse(x, y, 58, 46, 0, 0, 7); g.fill();
+  g.beginPath(); g.arc(x + 44, y + 54, 12, 0, 7); g.fill(); g.beginPath(); g.arc(x + 62, y + 76, 7, 0, 7); g.fill();
+  g.fillStyle = '#2f6fd6'; g.font = `800 74px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(txt, x, y + 6);
+}
+function bulb(g, x, y) {
+  const grd = g.createRadialGradient(x, y, 6, x, y, 54); grd.addColorStop(0, '#fffbe0'); grd.addColorStop(1, '#ffd23f');
+  g.fillStyle = grd; g.beginPath(); g.arc(x, y, 44, 0, 7); g.fill();
+  g.fillStyle = '#c9c9c9'; g.fillRect(x - 18, y + 38, 36, 22); g.fillStyle = '#9a9a9a'; g.fillRect(x - 13, y + 60, 26, 8);
+  g.strokeStyle = '#fff6b0'; g.lineWidth = 6; for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; g.beginPath(); g.moveTo(x + Math.cos(a) * 56, y + Math.sin(a) * 56); g.lineTo(x + Math.cos(a) * 76, y + Math.sin(a) * 76); g.stroke(); }
+}
+function label(g, txt, x, y, px, fill, stroke) {
+  g.font = `800 ${px}px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  if (stroke) { g.lineWidth = px * 0.14; g.strokeStyle = stroke; g.lineJoin = 'round'; g.strokeText(txt, x, y); }
+  g.fillStyle = fill; g.fillText(txt, x, y);
+}
+
+// Each puzzle is a list of props pictures; the choreography steps through them on the beat.
+const PUZZLES = [
+  { id: 'balls', n: 3, title: 'How many beach balls?', draw: (g, x, y) => beachBall(g, x, y, 54), answer: '3!', say: 'Three beach balls!' },
+  { id: 'cat', spell: true, title: 'Spell the word!', answer: 'CAT!', say: 'C – A – T spells CAT!' },
+  { id: 'stars', n: 5, title: 'Count the sea stars!', draw: (g, x, y) => seaStar(g, x, y, 46), answer: '5!', say: 'Five sea stars!' },
+  { id: 'fish', add: true, title: '2 fish + 2 fish = ?', answer: '4!', say: 'Two plus two makes four!' }
+];
+const NUM_WORDS = ['One…', 'two…', 'three…', 'four…', 'five…'];
+const propsLayers = [];            // { name, count }
+function propsPictures() {
+  const pics = [];
+  const add = (name, fn) => pics.push({ name, fn });
+  for (const pz of PUZZLES) {
+    if (pz.n) {
+      const xs = Array.from({ length: pz.n }, (_, i) => PW / 2 + (i - (pz.n - 1) / 2) * (pz.n > 3 ? 116 : 150));
+      const base = (g, k) => { label(g, pz.title, PW * 0.42, 46, 38, '#ffe7a3', '#5a3a08'); xs.forEach(x => pz.draw(g, x, 300)); for (let i = 0; i < k; i++) label(g, String(i + 1), xs[i], 196, 74, '#ffffff', '#1e4f9c'); };
+      add(pz.id + ':show', g => base(g, 0));
+      add(pz.id + ':think', g => { base(g, 0); bubble(g, PW - 72, 118, '?'); });
+      for (let k = 1; k <= pz.n; k++) add(pz.id + ':c' + k, g => base(g, k));
+      add(pz.id + ':bulb', g => { base(g, pz.n); bulb(g, PW - 72, 124); });
+      add(pz.id + ':ans', g => { xs.forEach(x => pz.draw(g, x, 380)); label(g, pz.answer, PW / 2, 200, 190, '#ffd23f', '#7a4a00'); });
+    } else if (pz.spell) {
+      const word = (g, s, col) => { catFace(g, PW / 2, 360, 70); label(g, s, PW / 2, 190, 128, col, '#3a2a6a'); label(g, pz.title, PW * 0.42, 46, 38, '#ffe7a3', '#5a3a08'); };
+      add('cat:show', g => word(g, 'C _ T', '#ffffff'));
+      add('cat:think', g => { word(g, 'C _ T', '#ffffff'); bubble(g, PW - 72, 118, '?'); });
+      add('cat:g1', g => word(g, 'C O T ?', '#9fc6ff'));          // a wrong guess first — that's the fun of it
+      add('cat:g2', g => word(g, 'C E T ?', '#9fc6ff'));
+      add('cat:bulb', g => { word(g, 'C _ T', '#ffffff'); bulb(g, PW - 72, 124); });
+      add('cat:ans', g => { catFace(g, PW / 2, 370, 78); label(g, pz.answer, PW / 2, 190, 170, '#ffd23f', '#7a4a00'); });
+    } else if (pz.add) {
+      const base = (g, k) => {
+        label(g, pz.title, PW * 0.42, 46, 38, '#ffe7a3', '#5a3a08');
+        const xs = [96, 210, 430, 544]; xs.forEach((x, i) => fish(g, x, 300, 46, i < 2 ? '#4fc3f7' : '#ff7eb6'));
+        label(g, '+', PW / 2, 300, 96, '#ffffff', '#1e4f9c');
+        for (let i = 0; i < k; i++) label(g, String(i + 1), xs[i], 196, 74, '#ffffff', '#1e4f9c');
+      };
+      add('fish:show', g => base(g, 0));
+      add('fish:think', g => { base(g, 0); bubble(g, PW - 72, 118, '?'); });
+      for (let k = 1; k <= 4; k++) add('fish:c' + k, g => base(g, k));
+      add('fish:bulb', g => { base(g, 4); bulb(g, PW - 72, 124); });
+      add('fish:ans', g => { label(g, '2 + 2 = 4!', PW / 2, 220, 132, '#ffd23f', '#7a4a00'); [130, 250, 390, 510].forEach((x, i) => fish(g, x, 400, 40, i < 2 ? '#4fc3f7' : '#ff7eb6')); });
+    }
+  }
+  add('haha', g => { label(g, 'HA HA!', PW / 2, 200, 170, '#ffffff', '#ff6f91'); label(g, 'ha ha ha!', PW / 2, 360, 74, '#ffe7a3', '#a8451f'); });
+  return pics;
+}
+let propsTex, propsIndex = {}, propsCount;
+async function loadProps(progress) {
+  try { await document.fonts.load(`800 80px 'Baloo 2'`); } catch (e) {}
+  const pics = propsPictures();
+  propsTex = arrayTex(pics.length); propsCount = new Float32Array(pics.length);
+  const cv = document.createElement('canvas'); cv.width = PW; cv.height = PH;
+  const g = cv.getContext('2d', { willReadFrequently: true }); const buf = new Uint16Array(L * 4);
+  gl.bindTexture(gl.TEXTURE_2D_ARRAY, propsTex);
+  for (let i = 0; i < pics.length; i++) {
+    g.clearRect(0, 0, PW, PH); pics[i].fn(g);
+    propsCount[i] = samplesFrom(g.getImageData(0, 0, PW, PH).data, PW, PH, buf);
+    gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, 0, 0, i, LW, LH, 1, gl.RGBA_INTEGER, gl.UNSIGNED_SHORT, buf);
+    propsIndex[pics[i].name] = i;
+    if (i % 4 === 3) { progress(0.8 + 0.2 * (i + 1) / pics.length); await new Promise(r => setTimeout(r)); }
+  }
+}
+
+// ───────────────────────────── stage layout ─────────────────────────────
+const LAY = {};
+function layout() {
+  const A = VW / VH; LAY.A = A;
+  if (A >= 1.15) {
+    LAY.ys = 1.52 / 441; LAY.feet = -0.78; LAY.centerX = 0; LAY.sideX = A * 0.5;
+    const x0 = -A + 0.1, x1 = LAY.sideX - 0.64, y0 = -0.7, y1 = 0.86;
+    LAY.ps = Math.min((x1 - x0) / PW, (y1 - y0) / PH);
+    LAY.po = [(x0 + x1) / 2 - PW / 2 * LAY.ps, (y0 + y1) / 2 + PH / 2 * LAY.ps];
+    LAY.sea = -0.9;
+  } else {
+    LAY.ys = Math.min(1.12 / 441, (2 * A * 0.95) / 300); LAY.feet = -0.8;
+    LAY.centerX = (ANCHOR - 195) * LAY.ys; LAY.sideX = LAY.centerX;
+    const x0 = -A + 0.04, x1 = A - 0.04, y0 = LAY.feet + 441 * LAY.ys + 0.03, y1 = 0.97;
+    LAY.ps = Math.min((x1 - x0) / PW, (y1 - y0) / PH);
+    LAY.po = [(x0 + x1) / 2 - PW / 2 * LAY.ps, (y0 + y1) / 2 + PH / 2 * LAY.ps];
+    LAY.sea = -0.92;
+  }
+  LAY.figH = 441 * LAY.ys;
+}
+
+// ───────────────────────────── audio ─────────────────────────────
+let actx, analyser, gain, freq, playing = false, started = false, muted = false;
+const lv = { bass: 0, mid: 0, high: 0, pb: 0.25, pm: 0.2, ph: 0.15 };
+function setupAudio() {
+  if (actx) return;
+  actx = new (window.AudioContext || window.webkitAudioContext)();
+  const src = actx.createMediaElementSource(song);
+  analyser = actx.createAnalyser(); analyser.fftSize = 2048; analyser.smoothingTimeConstant = 0.55;
+  gain = actx.createGain(); src.connect(analyser); analyser.connect(gain); gain.connect(actx.destination);
+  freq = new Uint8Array(analyser.frequencyBinCount);
+}
+function readBands() {
+  if (!analyser || !playing) { lv.bass *= 0.92; lv.mid *= 0.92; lv.high *= 0.92; return; }
+  analyser.getByteFrequencyData(freq);
+  const hz = actx.sampleRate / analyser.fftSize;
+  const band = (a, b) => { let s = 0, n = 0; for (let i = Math.floor(a / hz); i <= Math.ceil(b / hz); i++) { s += freq[i]; n++; } return s / n / 255; };
+  const b = band(30, 150), m = band(300, 2000), h = band(4000, 11000);
+  lv.pb = Math.max(lv.pb * 0.997, b, 0.2); lv.pm = Math.max(lv.pm * 0.997, m, 0.15); lv.ph = Math.max(lv.ph * 0.997, h, 0.08);
+  const ease = (o, v) => o + (v - o) * 0.35;
+  lv.bass = ease(lv.bass, Math.pow(b / lv.pb, 1.6)); lv.mid = ease(lv.mid, m / lv.pm); lv.high = ease(lv.high, Math.pow(h / lv.ph, 1.4));
+}
+
+// A smooth song clock: audio.currentTime is coarse in some browsers, so advance with the frame
+// clock and re-anchor whenever the two disagree (or the song loops back to the start).
+let clock = 0, plays = 0, idle = 0, manualClock = false;
+function advanceClock(dt) {
+  if (manualClock) return;
+  if (!playing) { idle += dt; return; }
+  clock += dt;
+  const a = song.currentTime;
+  if (a < clock - 2) plays++;                      // the song wrapped around
+  if (Math.abs(a - clock) > 0.05) clock = a;
+}
+
+// ───────────────────────────── choreography ─────────────────────────────
+// A 16-bar routine, repeated through the song with the puzzle rotating each time:
+//  0–1 hello · 2–5 dance · 6 point · 7–8 think, count, aha · 9–10 laugh · 11–14 dance · 15 wave
+const CAPTIONS = { hello: 'Hi! I’m Yako!', dance: 'Dance break!', point: 'Ooh — what’s that?', think: 'Hmm… let me think!',
+  aha: 'Aha!', laugh: 'Ha ha ha!', bye: 'Wave with me!' };
+function puzzleSteps(pz) {
+  const s = [];                                     // 20 beats: bars 6–10 of the routine
+  const step = (props, pose, cap, extra) => s.push(Object.assign({ props, pose, cap }, extra || {}));
+  for (let i = 0; i < 4; i++) step(pz.id + ':show', 'point', CAPTIONS.point);
+  step(pz.id + ':think', 'neutral', pz.title.replace(/\?$/, '') + '?');
+  if (pz.n || pz.add) {
+    const n = pz.n || 4;
+    for (let k = 1; k <= n; k++) step(pz.id + ':c' + k, k % 2 ? 'point' : 'neutral', NUM_WORDS.slice(0, k).join(' '));
+  } else {
+    step('cat:g1', 'neutral', 'Is it C-O-T?'); step('cat:g2', 'point', 'C-E-T? Hmm, no…');
+  }
+  step(pz.id + ':bulb', 'aha', CAPTIONS.aha, { flash: 1 });
+  while (s.length < 12) step(pz.id + ':ans', 'aha', pz.say);
+  for (let i = s.length; i < 20; i++) { const k = i - 12; step(k < 2 ? 'haha' : null, 'laugh', CAPTIONS.laugh, { burst: k === 2 }); }
+  return s;
+}
+const STEPS = PUZZLES.map(puzzleSteps);
+// How hard the trip hits in each part: feedback trail, rainbow bands, kaleidoscope, background plasma.
+// The puzzles stay calm so the counting and spelling read clearly; the dance breaks go all the way.
+const PSY = {
+  idle:   { trail: 0.80, rainbow: 0.35, kal: 0.00, plasma: 0.70, mix: 0.38 },
+  hello:  { trail: 0.80, rainbow: 0.30, kal: 0.00, plasma: 0.80, mix: 0.38 },
+  dance:  { trail: 0.88, rainbow: 0.65, kal: 0.00, plasma: 1.00, mix: 0.42 },
+  trip:   { trail: 0.90, rainbow: 0.80, kal: 0.65, plasma: 1.00, mix: 0.60 },
+  puzzle: { trail: 0.55, rainbow: 0.12, kal: 0.00, plasma: 0.45, mix: 0.20 },
+  laugh:  { trail: 0.86, rainbow: 0.85, kal: 0.35, plasma: 1.00, mix: 0.48 },
+  bye:    { trail: 0.82, rainbow: 0.50, kal: 0.20, plasma: 0.90, mix: 0.42 }
+};
+let lastStepKey = '', flash = 0, burstT = -1, burstC = [0, 0], propsCenter = [0, 0];
+function clipAt(b, clip, startBeat, beats) {      // a looping clip locked to the beat, plus the fraction to the next frame
+  const n = CLIP[clip].n; let ph = ((b - startBeat) / beats) % 1; if (ph < 0) ph += 1;
+  const x = ph * n, i = Math.floor(x) % n;
+  return { yl: CLIP[clip].from + i, yl2: CLIP[clip].from + (i + 1) % n, yf: x - Math.floor(x) };
+}
+const still = (l) => ({ yl: l, yl2: l, yf: 0 });
+function direct(t) {
+  const gb = Math.floor((t - PHASE) / BEAT), beatT = PHASE + gb * BEAT;
+  const pos = ((gb - 1) % 4 + 4) % 4;               // 0 = downbeat
+  const b = (t - T0) / BEAT, bar = Math.floor(b / 4), cyc = Math.floor(bar / 16), cb = ((bar % 16) + 16) % 16;
+  const routineStart = (bar - cb) * 4, beatInRoutine = b - routineStart;
+  const out = Object.assign({ beatT, amp: (pos === 0 || pos === 2 ? 1 : 0.55), x: LAY.centerX, pl: -1, po: LAY.po, ps: LAY.ps,
+    cap: CAPTIONS.hello, psy: PSY.hello }, still(STILL.wave));
+  if (t < T0 || bar < 0) return out;
+  if (cb <= 1) Object.assign(out, still(Math.floor(b) % 2 ? STILL.laugh : STILL.wave));
+  else if (cb <= 5) Object.assign(out, clipAt(b, 'dance', routineStart + 8, 8), { cap: CAPTIONS.dance, psy: cb >= 4 ? PSY.trip : PSY.dance });
+  else if (cb <= 10) {
+    const pz = (plays * 2 + cyc) % PUZZLES.length, steps = STEPS[pz];
+    const si = Math.max(0, Math.min(19, Math.floor(beatInRoutine) - 24)), st = steps[si];
+    out.cap = st.cap;
+    if (st.pose === 'laugh') Object.assign(out, clipAt(b, 'cheer', routineStart + 36, 8), { x: LAY.centerX, psy: PSY.laugh });
+    else Object.assign(out, still(STILL[st.pose]), { x: LAY.sideX, psy: PSY.puzzle });
+    if (st.props === 'haha') {
+      out.pl = propsIndex.haha; out.ps = LAY.ps * 0.7;
+      const cx = LAY.A >= 1.15 ? LAY.centerX - 0.95 : 0, cy = LAY.A >= 1.15 ? 0.52 : LAY.po[1] - PH / 2 * LAY.ps;
+      out.po = [cx - PW / 2 * out.ps, cy + PH / 2 * out.ps];
+    } else if (st.props) out.pl = propsIndex[st.props];
+    if (out.pl >= 0) propsCenter = [out.po[0] + PW / 2 * out.ps, out.po[1] - PH / 2 * out.ps];
+    const key = pz + ':' + si + ':' + cyc;
+    if (key !== lastStepKey) {
+      lastStepKey = key;
+      if (st.flash) flash = 0.9;
+      if (st.burst) { burstT = t + 0.001; burstC = propsCenter.slice(); }
+    }
+  }
+  else if (cb <= 14) Object.assign(out, clipAt(b, 'dance', routineStart + 44, 8), { cap: CAPTIONS.dance, psy: cb >= 13 ? PSY.trip : PSY.dance });
+  else Object.assign(out, still(Math.floor(b) % 2 ? STILL.wave : STILL.laugh), { cap: CAPTIONS.bye, psy: PSY.bye });
+  return out;
+}
+// Before the music starts: Yako waves hello, bouncing gently to an imaginary beat.
+function directIdle(t) {
+  const ib = 60 / 84, gb = Math.floor(t / ib);
+  return Object.assign({ beatT: gb * ib, amp: 0.5, x: LAY.centerX, pl: -1, po: LAY.po, ps: LAY.ps, cap: '', psy: PSY.idle },
+    still(gb % 2 ? STILL.laugh : STILL.wave));
+}
+
+// ───────────────────────────── frame ─────────────────────────────
+// Pose families: switching inside a family snaps (crisp stop-motion on the beat); switching between
+// families makes every particle fly to the new shape.
+const familyOf = (l) => l <= 60 ? 1 : l <= 114 ? 2 : (l === STILL.wave || l === STILL.laugh) ? 3 : (l === STILL.neutral || l === STILL.point) ? 4 : 5;
+const propsFamily = (pl) => pl < 0 ? 0 : (pl === propsIndex.haha ? 2 : 1);
+let yakoX = 0, prevT = 0, lastNow = performance.now(), paused = false, ready = false, HOLD = false, fpsN = 0, fpsT = 0;
+let prevYL = -1, prevYX = 0, prevPL = -1, prevPO = [0, 0], prevPS = 1, pFlash = 0;
+const psy = Object.assign({}, PSY.idle);
+const capEl = $('cap'); let capText = '';
+function common(U, d, t) {                         // uniforms both particle passes share, so they agree on every target
+  gl.uniform1i(U.uYako, 1); gl.uniform1i(U.uProps, 2);
+  gl.uniform1i(U.uYL, d.yl); gl.uniform1i(U.uYL2, d.yl2); gl.uniform1f(U.uYF, d.yf); gl.uniform1i(U.uPL, d.pl);
+  gl.uniform2f(U.uYO, yakoX, LAY.feet); gl.uniform1f(U.uYS, LAY.ys);
+  gl.uniform2f(U.uPO, d.po[0], d.po[1]); gl.uniform1f(U.uPS, d.ps);
+  gl.uniform2f(U.uHalo, yakoX, LAY.feet + LAY.figH * 0.55);
+  gl.uniform1f(U.uT, t); gl.uniform1f(U.uA, LAY.A); gl.uniform1f(U.uSea, LAY.sea); gl.uniform1f(U.uBass, lv.bass);
+  gl.uniform1i(U.uW, SW); gl.uniform1f(U.uN, N);
+}
+function frame(now, dtOverride) {
+  const dt = dtOverride != null ? dtOverride : Math.min(0.05, Math.max(0.001, (now - lastNow) / 1000));
+  lastNow = now;
+  if (!paused) advanceClock(dt);
+  readBands();
+  const t = playing ? clock : idle;
+  const d = playing ? direct(t) : directIdle(t);
+  if (FORCE_YL >= 0) { d.yl = FORCE_YL; d.yl2 = FORCE_YL; d.yf = 0; }
+  yakoX += (d.x - yakoX) * Math.min(1, dt * 5);
+  flash *= Math.exp(-dt * 4); pFlash *= Math.exp(-dt * 7);
+  for (const key in psy) psy[key] += (d.psy[key] - psy[key]) * Math.min(1, dt * 2.5);
+  if (d.cap !== capText) { capText = d.cap; capEl.textContent = capText; }
+  const yMorph = !needInit && prevYL >= 0 && familyOf(prevYL) !== familyOf(d.yl);
+  const pMorph = !needInit && propsFamily(prevPL) !== propsFamily(d.pl);
+  if (d.pl >= 0 && d.pl !== prevPL) pFlash = 0.7;
+
+  // — simulate —
+  gl.bindVertexArray(vao); gl.disable(gl.BLEND);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, stateF[1 - cur]); gl.viewport(0, 0, SW, SW);
+  const U = P_UPD.u; gl.useProgram(P_UPD.p);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, state[cur]); gl.uniform1i(U.uState, 0);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D_ARRAY, yakoTex);
+  gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D_ARRAY, propsTex);
+  common(U, d, t);
+  gl.uniform1i(U.uInit, needInit ? 1 : 0); gl.uniform1i(U.uSnap, SNAP ? 1 : 0);
+  gl.uniform1i(U.uYMorph, yMorph ? 1 : 0); gl.uniform1i(U.uYLp, prevYL >= 0 ? prevYL : d.yl); gl.uniform2f(U.uYOp, prevYX, LAY.feet);
+  gl.uniform1i(U.uPMorph, pMorph ? 1 : 0); gl.uniform1i(U.uPLp, prevPL); gl.uniform2f(U.uPOp, prevPO[0], prevPO[1]); gl.uniform1f(U.uPSp, prevPS);
+  gl.uniform2f(U.uBurstC, burstC[0], burstC[1]); gl.uniform1f(U.uBurstT, burstT);
+  gl.uniform1f(U.uPT, paused ? t : Math.min(prevT, t)); gl.uniform1f(U.uDt, paused ? 0 : dt);
+  gl.uniform1f(U.uBeatT, d.beatT); gl.uniform1f(U.uAmp, (REDUCED ? 0.1 : 0.34) * d.amp * (playing ? 0.45 + 0.9 * lv.bass : 0.6));
+  gl.uniform1f(U.uFeet, LAY.feet); gl.uniform1f(U.uFigH, LAY.figH); gl.uniform1f(U.uSwirl, REDUCED ? 0.4 : 2.8);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  cur = 1 - cur; needInit = false; prevT = t;
+  prevYL = d.yl; prevYX = yakoX; prevPL = d.pl; prevPO = d.po.slice(); prevPS = d.ps;
+
+  // — particles into the fresh buffer —
+  const decay = REDUCED ? Math.min(psy.trail, 0.5) : psy.trail, f60 = dt * 60;
+  gl.bindFramebuffer(gl.FRAMEBUFFER, freshF); gl.viewport(0, 0, VW, VH);
+  gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
+  const V = P_DRAW.u; gl.useProgram(P_DRAW.p);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, state[cur]); gl.uniform1i(V.uState, 0);
+  common(V, d, t);
+  // brightness per particle = screen area of the picture ÷ particles drawing it, so colour holds at any count or size
+  const pxPerWorld = VH / 2, sY = LAY.ys * pxPerWorld, sP = d.ps * pxPerWorld;
+  const cY = (yakoCount[d.yl] * (1 - d.yf) + yakoCount[d.yl2] * d.yf) || 40000, cP = d.pl >= 0 ? propsCount[d.pl] : 1;
+  const nY = N * ROLE_Y, nP = N * (ROLE_P - ROLE_Y), nAmb = N * (1 - ROLE_P);
+  gl.uniform1f(V.uYI, Math.min(1.0, cY * sY * sY / nY) * 0.82);
+  gl.uniform1f(V.uPI, Math.min(1.0, cP * sP * sP / nP) * 0.9);
+  gl.uniform1f(V.uYJ, Math.sqrt(cY / L) * LAY.ys * 1.15); gl.uniform1f(V.uPJ, Math.sqrt(cP / L) * d.ps * 1.15);
+  gl.uniform1f(V.uSI, Math.min(1.0, (VW * VH * 0.085) / (nAmb * 0.74)) * 0.45);
+  gl.uniform1f(V.uKI, 0.045 * Math.min(4, 5308416 / N));
+  gl.uniform1f(V.uHigh, lv.high); gl.uniform1f(V.uFlash, flash); gl.uniform1f(V.uPFlash, pFlash);
+  gl.uniform1f(V.uRainbow, REDUCED ? psy.rainbow * 0.4 : psy.rainbow); gl.uniform1f(V.uGain, 1.0); gl.uniform1f(V.uPt, 1.0);
+  gl.drawArrays(gl.POINTS, 0, N);
+  gl.disable(gl.BLEND);
+
+  // — trails: the old trail zoomed, turned and hue-shifted, faded, with this frame poured in —
+  const cen = [(yakoX / LAY.A + 1) / 2, (LAY.feet + LAY.figH * 0.5 + 1) / 2];
+  gl.bindFramebuffer(gl.FRAMEBUFFER, hdrF[1 - hc]);
+  const F = P_FEED.u; gl.useProgram(P_FEED.p);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, hdr[hc]); gl.uniform1i(F.uPrev, 0);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, fresh); gl.uniform1i(F.uFresh, 1);
+  gl.uniform2f(F.uRes, VW, VH); gl.uniform2f(F.uC, cen[0], cen[1]); gl.uniform1f(F.uDecay, decay);
+  gl.uniform1f(F.uZoom, 1.0 + (0.003 + 0.012 * lv.bass) * f60);
+  gl.uniform1f(F.uRot, 0.0035 * Math.sin(t * 0.27) * f60); gl.uniform1f(F.uHue, (0.035 + 0.05 * lv.high) * f60);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  hc = 1 - hc;
+
+  present(t, d); lastD = d; lastT = t;
+
+  fpsN++; fpsT += dt; if (fpsT > 0.5) { $('fps').textContent = Math.round(fpsN / fpsT); fpsN = 0; fpsT = 0; }
+}
+function present(t, d) {                          // bloom + composite of the current buffers
+  let src = hdr[hc];
+  gl.useProgram(P_DOWN.p);
+  for (let i = 0; i < blooms.length; i++) {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, bloomF[i]); gl.viewport(0, 0, blooms[i].w, blooms[i].h);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, src); gl.uniform1i(P_DOWN.u.uSrc, 0);
+    gl.uniform2f(P_DOWN.u.uTx, 1 / (2 * blooms[i].w), 1 / (2 * blooms[i].h));
+    gl.drawArrays(gl.TRIANGLES, 0, 3); src = blooms[i].t;
+  }
+  gl.useProgram(P_UP.p); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
+  for (let i = blooms.length - 1; i > 0; i--) {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, bloomF[i - 1]); gl.viewport(0, 0, blooms[i - 1].w, blooms[i - 1].h);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, blooms[i].t); gl.uniform1i(P_UP.u.uSrc, 0);
+    gl.uniform2f(P_UP.u.uTx, 1 / blooms[i - 1].w, 1 / blooms[i - 1].h);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+  gl.disable(gl.BLEND);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, VW, VH);
+  const C = P_COMP.u; gl.useProgram(P_COMP.p);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, hdr[hc]); gl.uniform1i(C.uHdr, 0);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, blooms[0].t); gl.uniform1i(C.uBloom, 1);
+  gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, fresh); gl.uniform1i(C.uFresh, 2);
+  const since = Math.max(0, t - d.beatT), pulse = d.amp * (playing ? 0.4 + lv.bass : 0.5);
+  gl.uniform2f(C.uRes, VW, VH); gl.uniform1f(C.uBloomK, 0.28); gl.uniform1f(C.uExp, 1.0);
+  gl.uniform1f(C.uPulse, REDUCED ? pulse * 0.3 : pulse); gl.uniform1f(C.uT, t); gl.uniform1f(C.uBass, lv.bass);
+  gl.uniform1f(C.uKal, REDUCED ? 0 : psy.kal); gl.uniform1f(C.uCA, REDUCED ? 0 : 0.003 + 0.012 * Math.exp(-since * 6) * pulse);
+  gl.uniform2f(C.uRing, (yakoX / LAY.A + 1) / 2, (LAY.feet + 1) / 2); gl.uniform1f(C.uRingAge, since); gl.uniform1f(C.uPlasma, psy.plasma); gl.uniform1f(C.uMix, REDUCED ? psy.mix * 0.5 : psy.mix);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+}
+let lastD = null, lastT = 0;
+function loop(now) { if (ready) { if (HOLD) { if (lastD) present(lastT, lastD); } else frame(now); } requestAnimationFrame(loop); }
+
+// ───────────────────────────── boot ─────────────────────────────
+buildState(+$('q').value); buildScreen();
+addEventListener('resize', buildScreen);
+$('q').addEventListener('change', (e) => buildState(+e.target.value));
+$('mute').addEventListener('click', () => { muted = !muted; if (gain) gain.gain.value = muted ? 0 : 1; else song.muted = muted;
+  $('mute').textContent = muted ? '🔇' : '🔊'; $('mute').setAttribute('aria-label', muted ? 'Unmute music' : 'Mute music'); });
+$('pause').addEventListener('click', () => {
+  if (!started) return;
+  paused = !paused;
+  if (paused) { song.pause(); playing = false; } else { song.play(); playing = true; }
+  $('pause').textContent = paused ? '▶' : '⏸'; $('pause').setAttribute('aria-label', paused ? 'Play' : 'Pause');
+});
+$('go').addEventListener('click', async () => {
+  setupAudio(); try { await actx.resume(); } catch (e) {}
+  try { song.currentTime = 0; await song.play(); playing = true; started = true; clock = 0; prevT = 0; }
+  catch (e) { $('st').textContent = 'Tap again to start the music.'; return; }
+  $('gate').classList.add('gone');
+});
+(async () => {
+  const prog = (p) => { $('prog').style.width = (p * 100).toFixed(0) + '%'; };
+  try {
+    await loadYako(prog); $('st').textContent = 'Drawing the puzzles…';
+    await loadProps(prog); prog(1);
+  } catch (e) { fail('Could not load the animation pictures (' + e.message + ').'); }
+  layout(); yakoX = LAY.centerX; ready = true;
+  $('go').disabled = false; $('go').textContent = '▶ Start the music'; $('st').textContent = 'Turn your sound up!';
+  requestAnimationFrame(loop);
+  // ?at=<seconds> renders that moment of the song and holds it — used for headless checks
+  const qs = new URLSearchParams(location.search);
+  if (qs.has('at')) { $('gate').style.display = 'none'; window.__dance.at(+qs.get('at'), +(qs.get('settle') || 300)); document.title = 'ready'; }
+})();
+
+// Hooks for automated checks: render a given song moment deterministically, report stats.
+window.__dance = {
+  snap(on) { SNAP = !!on; },
+  layer(n) { FORCE_YL = n; },
+  hold(on) { HOLD = !!on; },
+  probe() {                                         // count NaN/Inf in each float buffer
+    const scan = (fb, w, h) => {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+      const W = Math.min(w, 256), H = Math.min(h, 256), px = new Float32Array(W * H * 4);
+      const x0 = Math.floor((w - W) / 2), y0 = Math.floor((h - H) / 2);
+      gl.readPixels(x0, y0, W, H, gl.RGBA, gl.FLOAT, px);
+      let nan = 0, inf = 0, max = 0;
+      for (const v of px) { if (Number.isNaN(v)) nan++; else if (!Number.isFinite(v)) inf++; else if (v > max) max = v; }
+      return { nan, inf, max: +max.toFixed(3) };
+    };
+    return { state: scan(stateF[cur], SW, SW), fresh: scan(freshF, VW, VH), trail: scan(hdrF[hc], VW, VH),
+             bloom0: scan(bloomF[0], blooms[0].w, blooms[0].h), glErr: gl.getError() };
+  },
+  dir(t) { const d = direct(t); return { yl: d.yl, yl2: d.yl2, yf: +d.yf.toFixed(2), pl: d.pl, cap: d.cap }; },
+  stats: () => ({ particles: N, side: SW, ready, layers: { yako: 120, props: propsCount ? propsCount.length : 0 },
+    yakoSamples: Array.from(yakoCount.slice(0, 3)), err: gl.getError() }),
+  at(t, settle = 90) {                              // simulate the run-up to song time t, draw it, and hold that frame
+    HOLD = true; song.pause(); manualClock = true; playing = true; started = true;
+    clock = Math.max(0, t - settle / 60); prevT = clock;
+    for (let i = 0; i < settle; i++) { clock = Math.min(t, clock + 1 / 60); frame(performance.now(), 1 / 60); }
+    playing = false; manualClock = false; return { t, step: capText, err: gl.getError() };
+  }
+};
+})();
+</script>
+</body>
+</html>

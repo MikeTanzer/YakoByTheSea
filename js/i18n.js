@@ -44,6 +44,7 @@ window.YAKO.i18n = (function () {
       next:       a => fmt(c.next, { key: dk(a) }),
       countIntro: (num, d) => fmt(c.countIntro, { num: num, digit: d }),
       sound:      (l, w, s) => fmt(c.sound, { letter: l, word: w, sound: s || '' }),
+      vowel:      (l, s, w) => fmt(c.vowel || S.en.vowel, { letter: l, sound: s || '', word: w || '' }),
       howMany:    cr => fmt(c.howMany, { creatures: cr }),
       mathAdd:    (a, b, cr) => fmt(c.mathAdd, { a: a, b: b, creatures: cr }),
       mathSub:    (a, b, cr) => fmt(c.mathSub, { a: a, b: b, creatures: cr }),
@@ -55,6 +56,13 @@ window.YAKO.i18n = (function () {
       again:      () => c.again,
       level:      lv => fmt(c.level, { level: lv }),
       cheers: c.cheers,
+      // `ramp` and `tries` MUST be exposed here. rampList() in keyboard-fun.html reads
+      // L().ramp and falls back to L().cheers when it is undefined — cheers has 16
+      // entries against ramp's 6, so the praise tier climbed to 16 and the game asked
+      // for ramp_7..ramp_16, which are not recorded. Every lesson's praise line was
+      // silently degrading to the speech synthesiser in all six languages.
+      ramp:   c.ramp,
+      tries:  c.tries,
       greet:  c.greet,
       prompt: c.prompt,
       verdicts: c.verdicts
@@ -79,6 +87,20 @@ window.YAKO.i18n = (function () {
     const c = S[p];
     return (c && c.creatures && c.creatures[eng]) || eng;
   }
+  // -> { k, sound, word, emoji } for one of the vowel's two sounds, or null if the
+  // letter is not a vowel. English-only on purpose: these are English vowel sounds,
+  // and the answer letters have to stay QWERTY A-Z in every language.
+  function vowelFor(letter, which) {
+    const V = (window.YAKO_VOCAB && window.YAKO_VOCAB.VOWELS) || null;
+    const e = V && V[letter];
+    if (!e || !e.length) return null;
+    return which === 'long' ? (e[1] || e[0]) : e[0];
+  }
+  function vowelLetters() {
+    const V = (window.YAKO_VOCAB && window.YAKO_VOCAB.VOWELS) || null;
+    return V ? Object.keys(V) : [];
+  }
+
   // -> [keyword, emoji, sound?]  (sound only exists for English)
   function phonFor(letter) {
     const c = S[langPrefix()] || S.en;
@@ -90,6 +112,7 @@ window.YAKO.i18n = (function () {
     setLang: setLang, getLang: getLang, langPrefix: langPrefix,
     setPlayerName: setPlayerName, withName: withName,
     TR: TR, L: L,
-    deacc: deacc, locName: locName, locLetter: locLetter, locCreat: locCreat, phonFor: phonFor
+    deacc: deacc, locName: locName, locLetter: locLetter, locCreat: locCreat, phonFor: phonFor,
+    vowelFor: vowelFor, vowelLetters: vowelLetters
   };
 })();

@@ -1,12 +1,14 @@
 # This folder is a multi-project workspace — the YakoByTheSea repo tracks ONLY
 # the game. Everything is ignored unless explicitly whitelisted below.
+#
+# NOTE: this repo is PUBLIC. CLAUDE.md and docs/ are deliberately NOT whitelisted:
+# .github/workflows/static.yml strips them from the published SITE, but anything
+# committed here is readable by anyone browsing the repository regardless.
 /*
 
 # --- the game ---
 !/.gitignore
 !/README.md
-!/CLAUDE.md
-!/docs/
 !/index.html
 !/keyboard-fun.html
 !/privacy.html
@@ -59,6 +61,10 @@ ui/_orig_btns/
 # recorded narration + the clip-review tools (raw source recordings excluded)
 !/voice/
 /voice/src_*.mp3
+# scratch voice auditions -- never loaded by the game, no reason to publish them
+/voice/_yako_candidates/
 
 # OS noise
 .DS_Store
+
+!/dance/

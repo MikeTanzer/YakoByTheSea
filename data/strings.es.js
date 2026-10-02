@@ -10,6 +10,7 @@ window.YAKO_STRINGS.es = {
   next: "¡Muy bien! Ahora encuentra {key}.",
   countIntro: "El siguiente número es {num}. ¡Primero, encuentra el número {digit}!",
   sound: "{letter}... de {word}. ¡Encuentra la letra {letter}!",
+  vowel: "La letra {letter} suena {sound} como en {word}. ¡Encuentra {letter}!",
   howMany: "¿Cuántos hay? ¡Cuéntalos y aprieta el número!",
   countAny: "¿Cuántos hay? ¡Cuéntalos y aprieta el número!",
   // exact per-creature questions for the recorded clips (correct gender: cuántas conchas/estrellas)
@@ -81,5 +82,34 @@ window.YAKO_STRINGS.es = {
     Q:{word:'Queso',emoji:'🧀'}, R:{word:'Rana',emoji:'🐸'}, S:{word:'Sol',emoji:'☀️'}, T:{word:'Tortuga',emoji:'🐢'},
     U:{word:'Uvas',emoji:'🍇'}, V:{word:'Vaca',emoji:'🐮'}, W:{word:'Wagón',emoji:'🚃'}, X:{word:'Xilófono',emoji:'🎼'},
     Y:{word:'Yoyo',emoji:'🪀'}, Z:{word:'Zorro',emoji:'🦊'}
+  },
+  // Mission Ranch counting activity (js/ranch.js) - shown on screen AND read aloud.
+  ranch: {
+    intro: "¡Vamos a contar las ovejas con Yako!",
+    count: "Toca cada oveja para contarlas.",
+    total: "¡{n} ovejas!",
+    totalOne: "¡Una oveja!",
+    which: "¿Cuál es el {n}?",
+    hint: "¡Toca esta oveja!",
+    nice: "¡Las contaste todas!",
+    round: "Ronda {r} de {t}",
+    again: "Otra vez",
+    explore: "Explorar",
+    finish: "Listo",
+    goodbye: "¡Hasta luego! ¡Vuelve pronto!",
+    replay: "Escuchar otra vez",
+    sheepLbl: "oveja",
+    countedLbl: "contada",
+    countAsk: "¿Cuántas ovejas hay? ¡Escribe el número!",
+    addAsk: "Hay {a} y {b} más. ¿Cuántas ovejas hay ahora?",
+    subAsk: "{a} ovejas. Quitamos {b}. ¿Cuántas quedan?",
+    mulAsk: "{g} grupos de {c} ovejas. ¿Cuántas hay en total?",
+    typeIt: "¡Escribe el número!",
+    stageCount: "Contar",
+    stageAdd: "Sumar",
+    stageSub: "Quitar",
+    stageMul: "Grupos",
+    clearLbl: "Borrar",
+    mulAskShort: "¿Cuántas hay en total?"
   }
 };

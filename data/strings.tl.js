@@ -12,6 +12,7 @@ window.YAKO_STRINGS.tl = {
   next: "Magaling! Ngayon hanapin {key}.",
   countIntro: "Ang susunod na numero ay {num}. Una, hanapin ang numerong {digit}!",
   sound: "Ang {letter} ay para sa {word}! Hanapin ang letrang {letter}!",
+  vowel: "Ang letrang {letter} ay {sound} tulad sa {word}. Hanapin ang {letter}!",
   howMany: "Ilan ang {creatures}? Bilangin mo, tapos pindutin ang numero!",
   countAny: "Ilan ang mga ito? Bilangin mo, tapos pindutin ang numero!",
   mathAdd: "{a} {creatures} at {b} pa. Ilan lahat?",
@@ -74,5 +75,34 @@ window.YAKO_STRINGS.tl = {
     Q:{word:'Queen',emoji:'👑'}, R:{word:'Rosas',emoji:'🌹'}, S:{word:'Saging',emoji:'🍌'}, T:{word:'Tren',emoji:'🚆'},
     U:{word:'Ulan',emoji:'🌧️'}, V:{word:'Vinta',emoji:'⛵'}, W:{word:'Walis',emoji:'🧹'}, X:{word:'Xylophone',emoji:'🎼'},
     Y:{word:'Yoyo',emoji:'🪀'}, Z:{word:'Zoo',emoji:'🐯'}
+  },
+  // Mission Ranch counting activity (js/ranch.js) - shown on screen AND read aloud.
+  ranch: {
+    intro: "Bilangin natin ang mga tupa kasama si Yako!",
+    count: "Pindutin mo ang bawat tupa para mabilang natin.",
+    total: "{n} ang tupa!",
+    totalOne: "Isa ang tupa!",
+    which: "Alin ang numerong {n}?",
+    hint: "Pindutin mo ang tupang ito!",
+    nice: "Nabilang mo silang lahat!",
+    round: "Laro {r} sa {t}",
+    again: "Maglaro ulit",
+    explore: "Mamasyal",
+    finish: "Tapos na",
+    goodbye: "Bye muna! Balik ka ulit!",
+    replay: "Pakinggan ulit",
+    sheepLbl: "tupa",
+    countedLbl: "nabilang",
+    countAsk: "Ilan ang tupa? Pindutin mo ang numero!",
+    addAsk: "{a} ang tupa, at {b} pa. Ilan na?",
+    subAsk: "{a} ang tupa. Alisin mo ang {b}. Ilan ang natira?",
+    mulAsk: "{g} ang grupo, {c} ang tupa sa bawat isa. Ilan lahat?",
+    typeIt: "Pindutin ang numero!",
+    stageCount: "Pagbibilang",
+    stageAdd: "Dagdag",
+    stageSub: "Bawas",
+    stageMul: "Grupo",
+    clearLbl: "Burahin",
+    mulAskShort: "Ilan lahat?"
   }
 };

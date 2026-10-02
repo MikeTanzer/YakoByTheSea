@@ -1,5 +1,5 @@
 /* Yako by the Sea — service worker (offline + installable PWA) */
-const CORE = 'yako-core-v73';    // versioned: bumped whenever the code/art below changes
+const CORE = 'yako-core-v161';    // versioned: bumped whenever the code/art below changes
 const MEDIA = 'yako-media';      // persistent: clips + scene stills cached as played (survives version bumps)
 // Retired: fonts are self-hosted and precached in CORE. The name is kept ONLY so the
 // activate handler below keeps deleting the old cache on clients that still carry it.
@@ -19,11 +19,13 @@ const CORE_ASSETS = [
   './js/i18n.js',
   './js/audio.js',
   './js/cloud.js',
+  './js/ranch.js',
   './data/firebase.js',
   './data/lessons.js',
   './data/vocab.js',
   './data/music.js',
   './data/stories.js',
+  './data/scene-views.js',
   './data/sentences.js',
   './data/strings.en.js',
   './data/strings.fr.js',
@@ -38,11 +40,16 @@ const CORE_ASSETS = [
   './yako_cheer.png',
   './ui/yako_wave2.png',
   './ui/yako_dog.png',
+  './ui/yako_poses.png',
+  './ui/icon_play.png',
+  './ui/icon_explore.png',
+  './ui/icon_watch.png',
   './ui/favicon.png',
   './ui/icon-192.png',
   './ui/icon-512.png',
   './ui/icon-maskable-512.png',
-  // Self-hosted webfonts — first-party since the Google Fonts <link> was removed.
+  // Self-hosted webfonts — first-party since the Google Fonts <link> was removed,
+  // so they belong in CORE rather than the old persistent FONTS cache.
   './fonts/Baloo2-500-latin-ext.woff2',
   './fonts/Baloo2-500-latin.woff2',
   './fonts/Baloo2-600-latin-ext.woff2',
@@ -67,6 +74,11 @@ const MEDIA_PRECACHE = [
   './scenes/mission.png', './scenes/bigsur.png', './scenes/carmelvalley.png',
   './scenes/pebble.png', './scenes/pacificgrove.png', './scenes/montereybay.png',
   './scenes/piper.png',
+  './scenes/music_clubhouse.jpg', './scenes/music_seawall.jpg', './scenes/music_point.jpg',
+  './scenes/music_cypress.jpg', './scenes/music_green.jpg',
+  './scenes/thumbs/mission.jpg', './scenes/thumbs/bigsur.jpg', './scenes/thumbs/carmelvalley.jpg',
+  './scenes/thumbs/pebble.jpg', './scenes/thumbs/pacificgrove.jpg', './scenes/thumbs/montereybay.jpg',
+  './scenes/mission_ranch_field.jpg',
   './decor/frame1.png', './decor/frame2.png', './decor/frame3.png', './decor/frame4.png'
 ];
 

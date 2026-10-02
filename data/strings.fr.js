@@ -10,6 +10,7 @@ window.YAKO_STRINGS.fr = {
   next: "Bravo ! Maintenant trouve {key}.",
   countIntro: "Le prochain nombre est {num}. D'abord, trouve le chiffre {digit} !",
   sound: "{letter}... comme {word} ! Trouve la lettre {letter} !",
+  vowel: "La lettre {letter} fait {sound} comme dans {word}. Trouve {letter} !",
   howMany: "Regarde bien ! Combien y en a-t-il ? Appuie sur le chiffre !",
   countAny: "Combien y en a-t-il ? Compte-les, puis appuie sur le chiffre !",
   // exact per-creature questions for the recorded clips (correct elision: "d'étoiles")
@@ -81,5 +82,34 @@ window.YAKO_STRINGS.fr = {
     Q:{word:'Quille',emoji:'🎳'}, R:{word:'Robot',emoji:'🤖'}, S:{word:'Soleil',emoji:'☀️'}, T:{word:'Tortue',emoji:'🐢'},
     U:{word:'Usine',emoji:'🏭'}, V:{word:'Vache',emoji:'🐮'}, W:{word:'Wagon',emoji:'🚃'}, X:{word:'Xylophone',emoji:'🎼'},
     Y:{word:'Yoyo',emoji:'🪀'}, Z:{word:'Zèbre',emoji:'🦓'}
+  },
+  // Mission Ranch counting activity (js/ranch.js) - shown on screen AND read aloud.
+  ranch: {
+    intro: "Comptons les moutons avec Yako !",
+    count: "Touche les moutons pour les compter.",
+    total: "{n} moutons !",
+    totalOne: "1 mouton !",
+    which: "Où est le {n} ?",
+    hint: "Touche ce mouton !",
+    nice: "Tu les as tous comptés !",
+    round: "Tour {r} sur {t}",
+    again: "Rejouer",
+    explore: "Explorer",
+    finish: "C'est fini",
+    goodbye: "À bientôt ! Reviens vite !",
+    replay: "Réécouter",
+    sheepLbl: "mouton",
+    countedLbl: "compté",
+    countAsk: "Combien de moutons ? Écris le nombre !",
+    addAsk: "{a} et encore {b}. Ça fait combien de moutons ?",
+    subAsk: "{a} moutons. On en enlève {b}. Il en reste combien ?",
+    mulAsk: "{g} groupes de {c} moutons. Ça fait combien en tout ?",
+    typeIt: "Écris le nombre !",
+    stageCount: "Compter",
+    stageAdd: "Ajouter",
+    stageSub: "Enlever",
+    stageMul: "Groupes",
+    clearLbl: "Effacer",
+    mulAskShort: "Ça fait combien en tout ?"
   }
 };

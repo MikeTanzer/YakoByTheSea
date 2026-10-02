@@ -1,9 +1,10 @@
 // Yako by the Sea — music playlist for the home-screen media player.
 // Pure data, shared by the game. Each track: { title, src }.
 //
-// The FIRST track is the default and plays on load. The current song LOOPS on
-// repeat; the ⏭ next button in the foot ribbon switches to the next song (which
-// then loops too). Songs never auto-advance on their own.
+// The FIRST track is the default and plays on load. Songs then play ONE AFTER
+// ANOTHER — when a track ends the player moves to the next one and wraps around at
+// the end, so the same song never plays twice in a row. The ⏭ next button in the
+// foot ribbon skips ahead early.
 //
 // TO ADD A SONG: drop the .mp3 in the music/ folder and add a line below.
 window.YAKO_MUSIC = [

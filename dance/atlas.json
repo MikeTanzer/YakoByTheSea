@@ -1,0 +1,1 @@
+{"cell": [384, 512], "clips": {"dance": {"file": "atlas_dance.webp", "frames": 61, "cols": 8}, "cheer": {"file": "atlas_cheer.webp", "frames": 54, "cols": 8}, "still": {"file": "atlas_still.webp", "frames": 5, "cols": 8}}, "stills": ["neutral", "wave", "laugh", "point", "aha"]}

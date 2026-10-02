@@ -11,6 +11,7 @@ window.YAKO_STRINGS.en = {
   next: "Great! Now find {key}.",
   countIntro: "The next number is {num}. First, find the number {digit}!",
   sound: "{letter} says {sound}. {letter} is for {word}! Find the letter {letter}!",
+  vowel: "The letter {letter} sounds like {sound} in {word}. Find {letter}!",
   howMany: "How many {creatures}? Count them, then press the number!",
   countAny: "How many? Count them, then press the number!",
   // recorded math clips are creature-generic (the creatures are shown on screen)
@@ -68,5 +69,36 @@ window.YAKO_STRINGS.en = {
     Q:{sound:'kwuh',word:'Queen',emoji:'👑'}, R:{sound:'rr',word:'Rainbow',emoji:'🌈'}, S:{sound:'sss',word:'Sun',emoji:'☀️'}, T:{sound:'tuh',word:'Tree',emoji:'🌳'},
     U:{sound:'uh',word:'Umbrella',emoji:'☂️'}, V:{sound:'vv',word:'Violin',emoji:'🎻'}, W:{sound:'wuh',word:'Whale',emoji:'🐳'}, X:{sound:'ks',word:'Fox',emoji:'🦊'},
     Y:{sound:'yuh',word:'Yo-yo',emoji:'🪀'}, Z:{sound:'zz',word:'Zebra',emoji:'🦓'}
+  },
+  // Mission Ranch counting activity (js/ranch.js). Every string here is BOTH
+  // shown on the card and read aloud, so keep them short and speakable.
+  ranch: {
+    intro:      "Let's count the sheep with Yako!",
+    count:      "Tap each sheep to count them.",
+    total:      "{n} sheep!",
+    totalOne:   "1 sheep!",
+    which:      "Which one says {n}?",
+    hint:       "Tap this sheep!",
+    nice:       "You counted them all!",
+    round:      "Round {r} of {t}",
+    again:      "Play again",
+    explore:    "Explore",
+    finish:     "All done",
+    goodbye:    "Bye for now! Come back soon!",
+    replay:     "Hear it again",
+    sheepLbl:   "sheep",
+    countedLbl: "counted",
+    typeIt:     "Type the number!",
+    addAsk:     "{a} sheep, and {b} more. How many now?",
+    subAsk:     "{a} sheep. Take away {b}. How many are left?",
+    mulAsk:     "{g} groups of {c} sheep. How many all together?",
+    countAsk:   "How many sheep? Type the number!",
+    stageCount: "Counting",
+    stageAdd:   "Adding",
+    stageSub:   "Taking away",
+    stageMul:   "Groups",
+    clearLbl:   "Clear",
+    mulAskShort: "How many all together?",
+    okLbl:      "Check"
   }
 };

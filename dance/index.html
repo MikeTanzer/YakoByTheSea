@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Yako's Sunset Vortex</title>
+<meta name="description" content="Yako and his dog watch the sunset, painted in five million particles that swirl through vortices and gyroid flows to Baby Yak.">
+<link rel="icon" href="../favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  :root { --gold:#f4c35a; --cream:#fdf3d6; --sea:#7fd3f2; --sun:#ff9a4a; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #07060f; color: var(--cream); overflow: hidden;
+    font-family: 'Baloo 2', 'Arial Rounded MT Bold', 'Trebuchet MS', system-ui, sans-serif; }
+  canvas#gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+
+  #gate { position: fixed; inset: 0; display: grid; place-items: center; z-index: 5;
+    background: radial-gradient(120% 90% at 50% 45%, rgba(20,10,30,.25), rgba(6,4,14,.8)); transition: opacity .6s ease; }
+  #gate.gone { opacity: 0; pointer-events: none; }
+  .card { text-align: center; padding: 28px 30px 24px; max-width: min(92vw, 560px); }
+  .card h1 { margin: 0; font-weight: 800; font-size: clamp(38px, 7.4vw, 78px); line-height: .95;
+    color: var(--gold); text-shadow: 0 4px 0 #8a4a12, 0 10px 34px rgba(255,154,74,.4); }
+  .card h1 span { display: block; color: var(--sea); font-size: .5em; text-shadow: 0 3px 0 #1d5a78; margin-top: .18em; }
+  .card p { margin: 16px auto 0; font-size: 18px; line-height: 1.35; color: #f0e6ff; max-width: 36ch; }
+  .card .count { font-variant-numeric: tabular-nums; color: var(--gold); }
+  #go { margin-top: 22px; font: 800 22px/1 'Baloo 2', sans-serif; padding: 16px 30px 13px; border-radius: 999px;
+    border: 3px solid #fff3c4; background: linear-gradient(#ffd977, #f08a3a); color: #4a1f00; cursor: pointer;
+    box-shadow: 0 6px 0 #9a4a15, 0 14px 30px rgba(0,0,0,.35); }
+  #go:disabled { filter: grayscale(.6) brightness(.8); cursor: progress; }
+  #go:focus-visible, .hud button:focus-visible, .hud select:focus-visible, .hud a:focus-visible { outline: 3px solid var(--sea); outline-offset: 3px; }
+  .bar { height: 6px; width: 260px; max-width: 70vw; margin: 18px auto 0; border-radius: 6px; background: rgba(255,255,255,.12); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--sea), var(--sun)); transition: width .2s; }
+  .status { margin-top: 8px; font-size: 14px; color: #c7b8de; min-height: 1.2em; }
+  .alt { display: inline-block; margin-top: 14px; color: #c7b8de; font-size: 15px; }
+  .alt a { color: var(--sea); }
+
+  #cap { position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+    text-align: center; pointer-events: none; z-index: 3; white-space: nowrap; }
+  #cap b { display: block; font-weight: 800; font-size: clamp(18px, 2.6vw, 30px); color: #fff;
+    text-shadow: 0 2px 0 rgba(0,0,0,.5), 0 0 18px rgba(255,154,74,.55); }
+  #cap code { display: block; margin-top: 2px; font: 500 clamp(11px, 1.3vw, 15px) 'IBM Plex Mono', ui-monospace, monospace;
+    color: #ffe7c2; text-shadow: 0 1px 0 rgba(0,0,0,.6); opacity: .92; min-height: 1.3em; }
+  .hud { position: fixed; z-index: 4; display: flex; gap: 8px; align-items: center; font-size: 13px;
+    padding: max(10px, env(safe-area-inset-top)) 12px 0; color: #d8cbe8; }
+  .hud.l { left: 0; top: 0; font-variant-numeric: tabular-nums; }
+  .hud.r { right: 0; top: 0; }
+  .hud b { color: var(--gold); font-weight: 800; }
+  .hud button, .hud select, .hud a { font: 700 14px 'Baloo 2', sans-serif; color: var(--cream); background: rgba(16,10,30,.62);
+    border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 6px 12px 4px; cursor: pointer; text-decoration: none; }
+  .hint { opacity: .75; }
+  #err { position: fixed; inset: 0; display: none; place-items: center; text-align: center; padding: 24px; z-index: 9; background: #07060f; }
+  #err.show { display: grid; }
+  @media (max-width: 620px) { .hud.l .fps, .hud.l .hint { display: none; } }
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<div id="gate" role="dialog" aria-labelledby="gt">
+  <div class="card">
+    <h1 id="gt">Yako by the Sea<span>Sunset Vortex</span></h1>
+    <p>Yako and Zoe watch the sun go down — painted in <b class="count" id="pc">5,308,416</b> particles that swirl through vortices and gyroid flows to <em>Baby Yak</em>.</p>
+    <button id="go" type="button" disabled>Loading…</button>
+    <div class="bar" aria-hidden="true"><i id="prog"></i></div>
+    <div class="status" id="st" role="status">Mixing the sunset…</div>
+    <span class="alt">or join the <a href="party.html">Dance Party</a></span>
+  </div>
+</div>
+
+<div id="cap" aria-live="polite"><b id="capT"></b><code id="capE"></code></div>
+
+<div class="hud l"><span><b id="hc">5,308,416</b> particles</span><span class="fps">· <span id="fps">–</span> fps</span><span class="hint">· drag to stir the sea</span></div>
+<div class="hud r">
+  <a href="party.html">Dance party ↗</a>
+  <select id="q" aria-label="Particle count">
+    <option value="2304" selected>5.3M</option>
+    <option value="1536">2.4M</option>
+    <option value="1024">1.0M</option>
+  </select>
+  <button id="mute" type="button" aria-label="Mute music">🔊</button>
+  <button id="pause" type="button" aria-label="Pause">⏸</button>
+</div>
+<div id="err"><div><h2>This device can't run the sunset</h2><p id="errmsg"></p></div></div>
+
+<video id="vid" src="sunset.mp4" muted loop playsinline preload="auto" crossorigin="anonymous"></video>
+<audio id="song" src="../music/baby-yak.mp3" loop preload="auto" crossorigin="anonymous"></audio>
+
+<script>
+(() => {
+'use strict';
+// ───────────────────────────── the song ─────────────────────────────
+// Beat grid measured offline from music/baby-yak.mp3 (comb-filter tempo/phase search over the whole track):
+// 92.44 BPM, kicks on beats 1 and 3, first downbeat 0.889 s.
+const BPM = 92.44, BEAT = 60 / BPM, BAR = BEAT * 4, PHASE = 0.240, T0 = PHASE + BEAT;
+const LOOP = 7.29;                                 // sunset.mp4 is a seamless 7.29 s loop
+const VRATE = LOOP / (3 * BAR);                    // …played so that one loop = three bars of the song
+
+const $ = (id) => document.getElementById(id);
+const canvas = $('gl'), song = $('song'), vid = $('vid');
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fail = (m) => { $('errmsg').textContent = m; $('err').classList.add('show'); throw new Error(m); };
+const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, depth: false, stencil: false,
+  premultipliedAlpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: false });
+if (!gl) fail('It needs WebGL 2, which this browser does not offer.');
+if (!gl.getExtension('EXT_color_buffer_float') && !gl.getExtension('EXT_color_buffer_half_float'))
+  fail('It needs floating-point render targets (EXT_color_buffer_float).');
+
+// ───────────────────────────── shaders ─────────────────────────────
+// Every particle has a fixed HOME on the painting and takes its colour from the video at that home.
+// The state holds only its offset from home and its velocity, so when a vortex or the gyroid moves a
+// particle it carries its colour with it — the painting itself gets stirred — and springs bring it back.
+const MAXV = 8;
+const HEAD = `#version 300 es
+precision highp float; precision highp int; precision highp sampler2D;
+uint pcg(uint v){ uint s = v * 747796405u + 2891336453u; uint w = ((s >> ((s >> 28u) + 4u)) ^ s) * 277803737u; return (w >> 22u) ^ w; }
+float u01(uint h){ return float(h) * (1.0 / 4294967296.0); }
+uniform vec2 uHalf;                       // world half-size of the painting (it covers the screen)
+vec2 homeUV(uint id){ uint h = pcg(id); float a = u01(h); return vec2(a, u01(pcg(h))); }
+vec2 homeOf(vec2 uv){ return vec2((uv.x - 0.5) * 2.0 * uHalf.x, (0.5 - uv.y) * 2.0 * uHalf.y); }
+vec3 rainbow(float h){ return 0.5 + 0.5 * cos(6.2831853 * (h + vec3(0.0, 0.33, 0.67))); }
+// The 3D gyroid sculpture. Each particle starts from its own spot on the painting (x, y) at a random
+// depth, is pulled onto the surface G = 0 by Newton steps, then the cube is turned and put in perspective.
+uniform float uSculpt, uYaw, uPitch, uSc;
+vec3 gyroidOnto(vec3 p){
+  for (int i = 0; i < 3; i++) {
+    vec3 s = sin(p), c = cos(p);
+    float G = s.x * c.y + s.y * c.z + s.z * c.x;
+    vec3 g = vec3(c.x * c.y - s.z * s.x, c.y * c.z - s.x * s.y, c.z * c.x - s.y * s.z);
+    vec3 st = G * g / (dot(g, g) + 0.25);           // damped: near saddle points grad G -> 0 and a raw step explodes
+    float sl = length(st); p -= st * min(1.0, 0.7 / (sl + 1e-6));
+  }
+  return p; }
+const float GS = 1.5 * 3.14159265;                     // one and a half periods across the cube
+vec3 seedOf(uint id, vec2 uv){ return vec3((uv.x - 0.5) * 2.0, (0.5 - uv.y) * 2.0, u01(pcg(id ^ 0xc2b2ae35u)) * 2.0 - 1.0); }
+vec3 turn(vec3 p){
+  float cy = cos(uYaw), sy = sin(uYaw), cp = cos(uPitch), sp = sin(uPitch);
+  p = vec3(cy * p.x + sy * p.z, p.y, -sy * p.x + cy * p.z);
+  return vec3(p.x, cp * p.y - sp * p.z, sp * p.y + cp * p.z); }
+vec3 sculptOf(uint id, vec2 uv){                       // returns screen xy (world units) and depth
+  vec3 p = clamp(gyroidOnto(seedOf(id, uv) * GS) / GS, -1.25, 1.25);
+  float cy = cos(uYaw), sy = sin(uYaw), cp = cos(uPitch), sp = sin(uPitch);
+  p = vec3(cy * p.x + sy * p.z, p.y, -sy * p.x + cy * p.z);
+  p = vec3(p.x, cp * p.y - sp * p.z, sp * p.y + cp * p.z);
+  return vec3(p.xy * (3.2 / (3.2 + p.z)) * uSc, p.z); }
+`;
+const VS_QUAD = `#version 300 es
+void main(){ vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2)); gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0); }`;
+
+const FS_UPDATE = HEAD + `
+uniform sampler2D uState; uniform int uW, uInit, uNV; uniform float uN, uA;
+uniform float uT, uPT, uDt, uK, uDrag, uGyA, uGyK, uGyF, uGyZ, uBeatT, uRip;
+uniform vec2 uRipC; uniform vec4 uV[${MAXV}];
+out vec4 o;
+void main(){
+  ivec2 c = ivec2(gl_FragCoord.xy); uint id = uint(c.y * uW + c.x);
+  vec2 huv = homeUV(id), H = homeOf(huv); uint h = pcg(id ^ 0x9e3779b9u); float r1 = u01(h), r2 = u01(pcg(h));
+  if (uInit == 1) {                                     // begin as a turning galaxy and fall into the painting
+    float a = r1 * 6.2831853 + r2 * 9.0, rad = 0.1 + pow(r2, 0.6) * 1.4;
+    o = vec4(vec2(cos(a) * rad * uA * 0.6, sin(a) * rad * 0.6) - H, vec2(-sin(a), cos(a)) * 0.3 * rad); return;
+  }
+  vec4 s = texelFetch(uState, c, 0); vec2 off = s.xy, v = s.zw, P = H + off;
+
+  // ── the gyroid: G = sin x cos y + sin y cos z + sin z cos x, sliced at depth z (which moves in time)
+  vec3 q = vec3(P * uGyF, uGyZ);
+  float sx = sin(q.x), cx = cos(q.x), sy = sin(q.y), cy = cos(q.y), sz = sin(q.z), cz = cos(q.z);
+  float G = sx * cy + sy * cz + sz * cx;
+  vec2 dG = vec2(cx * cy - sz * sx, cy * cz - sx * sy) * uGyF;          // ∇G in world units
+  float gl2 = dot(dG, dG) + 1e-4, gn = sqrt(gl2);
+  vec2 u = vec2(dG.y, -dG.x) / uGyF * uGyA;                               // flow along the labyrinth: curl of G, divergence-free
+
+  // ── vortices: Lamb–Oseen, v = Γ / 2πr · (1 − e^(−r²/rc²)), with a little drain for spiral arms
+  for (int i = 0; i < ${MAXV}; i++) {
+    if (i >= uNV) break;
+    vec4 V = uV[i]; vec2 dp = P - V.xy; float r2v = dot(dp, dp) + 1e-6, r = sqrt(r2v);
+    float sp = V.z / (6.2831853 * r) * (1.0 - exp(-r2v / (V.w * V.w))) * exp(-r2v / (V.w * V.w * 10.0));
+    u += vec2(-dp.y, dp.x) / r * sp - dp / r * abs(sp) * 0.16;
+  }
+
+  float dt = uDt;
+  v += (u - v) * uDrag * dt;                            // carried by the flow
+  vec2 tgt = vec2(0.0); float ks = uK;                 // pulled home — or, at the climax, onto the 3D gyroid
+  if (uSculpt > 0.001) { vec3 sc = sculptOf(id, huv); tgt = (sc.xy - H) * uSculpt; ks = mix(uK, 34.0, uSculpt); }
+  v += -(off - tgt) * ks * dt;
+  v += -(G / gn) * (dG / gn) * uGyK * dt;              // drawn onto the gyroid's zero surface
+  v *= exp(-2.0 * sqrt(ks + uGyK) * 0.42 * dt);
+  // the kick sends a ripple out across the painting from the sun
+  vec2 rd = H - uRipC; float dist = length(rd);
+  float hit = uBeatT + dist * 0.32 + r1 * 0.01;
+  if (hit > uPT && hit <= uT) v += rd / (dist + 1e-4) * uRip * (0.6 + 0.8 * r2) * exp(-dist * 0.6);
+  float vl = length(v); if (vl > 6.0) v *= 6.0 / vl;
+  off += v * dt;
+  float ol = length(off); if (ol > 2.8) off *= 2.8 / ol;
+  o = vec4(off, v);
+}`;
+
+const VS_DRAW = HEAD + `
+uniform sampler2D uState, uVideo; uniform int uW; uniform float uN, uA, uT, uI, uPsy, uHigh, uDusk, uKick;
+out vec3 vC;
+void main(){
+  uint id = uint(gl_VertexID); ivec2 c = ivec2(int(id % uint(uW)), int(id / uint(uW)));
+  vec4 s = texelFetch(uState, c, 0);
+  vec2 uv = homeUV(id), P = homeOf(uv) + s.xy;
+  uint h = pcg(id ^ 0x85ebca6bu); float r3 = u01(h);
+  vec3 col = texture(uVideo, uv).rgb; col *= col;                        // the painting, in linear light
+  // the song is the sunset: golden hour → dusk → night, with stars coming out in the sky
+  float sky = smoothstep(0.44, 0.28, uv.y);
+  col = mix(col, col * vec3(0.36, 0.40, 0.92) * (0.55 + 0.45 * (1.0 - sky)) + vec3(0.004, 0.003, 0.02), uDusk * 0.85);
+  float star = step(0.9962, r3) * sky * uDusk * (0.55 + 0.45 * sin(uT * 3.1 + r3 * 900.0));
+  col += vec3(0.9, 0.95, 1.0) * star * 7.0 * (1.0 + uHigh * 1.5);
+  vec2 sd = (uv - vec2(0.485, 0.30)) * vec2(1.78, 1.0);                  // the sun breathes on the kick
+  col *= 1.0 + exp(-dot(sd, sd) * 55.0) * uKick * 1.6 * (1.0 - uDusk * 0.7);
+  // psychedelic only where the physics acts: the further a particle is stirred, the more rainbow it glows
+  float d = length(s.xy), spd = length(s.zw), luma = max(max(col.r, col.g), col.b);
+  float fx = smoothstep(0.012, 0.22, d + spd * 0.08) * uPsy;
+  col = mix(col, rainbow(d * 4.0 + spd * 0.6 + uT * 0.12 + r3 * 0.25) * (0.35 + 1.15 * luma), fx * 0.65);
+  col *= 1.0 + step(0.985, r3) * uHigh * 3.0;                            // hi-hats glint on the water
+  if (uSculpt > 0.001) {                                                  // light the sculpture: near is warm, far is deep blue
+    float near = clamp(0.5 - turn(seedOf(id, uv)).z * 0.55, 0.0, 1.0);
+    vec3 tint = mix(vec3(0.08, 0.16, 0.6), vec3(1.0, 0.6, 0.22), near);
+    col = mix(col, col * (0.25 + 1.3 * near) * mix(vec3(0.7, 0.8, 1.25), vec3(1.2, 1.0, 0.8), near) + tint * 0.04, uSculpt * 0.9);
+  }
+  gl_Position = vec4(P.x / uA, P.y, 0.0, 1.0); gl_PointSize = 1.0;
+  vC = col * uI;
+}`;
+const FS_DRAW = `#version 300 es
+precision highp float; in vec3 vC; out vec4 o; void main(){ o = vec4(vC, 1.0); }`;
+
+// Trails: the old trail nudged bigger, turned a touch and hue-rotated, faded, with this frame poured in.
+const FS_FEED = `#version 300 es
+precision highp float; uniform sampler2D uPrev, uFresh; uniform vec2 uRes; uniform float uDecay, uZoom, uRot, uHue; out vec4 o;
+vec3 hueRot(vec3 c, float a){ const vec3 k = vec3(0.57735); float ca = cos(a), sa = sin(a); return c * ca + cross(k, c) * sa + k * dot(k, c) * (1.0 - ca); }
+void main(){
+  float asp = uRes.x / uRes.y; vec2 uv = gl_FragCoord.xy / uRes;
+  vec2 q = (uv - 0.5) * vec2(asp, 1.0); float ca = cos(uRot), sa = sin(uRot);
+  q = mat2(ca, sa, -sa, ca) * q / uZoom;
+  vec3 c = hueRot(texture(uPrev, q / vec2(asp, 1.0) + 0.5).rgb, uHue);
+  if (any(isnan(c)) || any(isinf(c))) c = vec3(0.0);
+  o = vec4(clamp(c, 0.0, 64.0) * uDecay + texture(uFresh, uv).rgb * (1.0 - uDecay), 1.0);
+}`;
+const FS_DOWN = `#version 300 es
+precision highp float; uniform sampler2D uSrc; uniform vec2 uTx; out vec4 o;
+void main(){ vec2 uv = gl_FragCoord.xy * uTx * 2.0; vec2 h = uTx;
+  vec3 c = texture(uSrc, uv).rgb * 4.0 + texture(uSrc, uv - h).rgb + texture(uSrc, uv + h).rgb
+         + texture(uSrc, uv + vec2(h.x, -h.y)).rgb + texture(uSrc, uv - vec2(h.x, -h.y)).rgb;
+  o = vec4(c / 8.0, 1.0); }`;
+const FS_UP = `#version 300 es
+precision highp float; uniform sampler2D uSrc; uniform vec2 uTx; out vec4 o;
+void main(){ vec2 uv = gl_FragCoord.xy * uTx; vec2 h = uTx;
+  vec3 c = texture(uSrc, uv + vec2(-h.x * 2.0, 0)).rgb + texture(uSrc, uv + vec2(-h.x, h.y)).rgb * 2.0
+         + texture(uSrc, uv + vec2(0, h.y * 2.0)).rgb + texture(uSrc, uv + vec2(h.x, h.y)).rgb * 2.0
+         + texture(uSrc, uv + vec2(h.x * 2.0, 0)).rgb + texture(uSrc, uv + vec2(h.x, -h.y)).rgb * 2.0
+         + texture(uSrc, uv + vec2(0, -h.y * 2.0)).rgb + texture(uSrc, uv + vec2(-h.x, -h.y)).rgb * 2.0;
+  o = vec4(c / 12.0, 1.0); }`;
+const FS_COMP = `#version 300 es
+precision highp float; uniform sampler2D uTrail, uFresh, uBloom; uniform vec2 uRes; uniform float uMix, uBloomK, uCA; out vec4 o;
+vec3 soft(vec3 x){ const float k = 0.75; return mix(x, k + (1.0 - k) * (1.0 - exp(-(x - k) / (1.0 - k))), step(k, x)); }
+void main(){
+  vec2 uv = gl_FragCoord.xy / uRes, dir = uv - 0.5;
+  vec3 tr = vec3(texture(uTrail, uv + dir * uCA).r, texture(uTrail, uv).g, texture(uTrail, uv - dir * uCA).b);
+  vec3 c = texture(uFresh, uv).rgb * (1.0 - uMix) + tr * uMix * 1.1 + texture(uBloom, uv).rgb * uBloomK;
+  float vig = smoothstep(1.3, 0.4, length(dir * vec2(1.25, 1.0)));
+  o = vec4(sqrt(soft(c * mix(0.7, 1.0, vig))), 1.0);
+}`;
+
+function compile(type, src) {
+  const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { const log = gl.getShaderInfoLog(s); console.error(log); fail('A shader failed to compile: ' + log); }
+  return s;
+}
+function program(vs, fs) {
+  const p = gl.createProgram(); gl.attachShader(p, compile(gl.VERTEX_SHADER, vs)); gl.attachShader(p, compile(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) fail('A shader failed to link: ' + gl.getProgramInfoLog(p));
+  const u = {}; const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+  for (let i = 0; i < n; i++) { const a = gl.getActiveUniform(p, i); u[a.name.replace(/\[0\]$/, '')] = gl.getUniformLocation(p, a.name); }
+  return { p, u };
+}
+const P_UPD = program(VS_QUAD, FS_UPDATE), P_DRAW = program(VS_DRAW, FS_DRAW), P_FEED = program(VS_QUAD, FS_FEED);
+const P_DOWN = program(VS_QUAD, FS_DOWN), P_UP = program(VS_QUAD, FS_UP), P_COMP = program(VS_QUAD, FS_COMP);
+const vao = gl.createVertexArray();                  // attribute-less: every vertex is gl_VertexID
+
+// ───────────────────────────── buffers ─────────────────────────────
+function tex2D(w, h, fmt, filter) {
+  const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.texStorage2D(gl.TEXTURE_2D, 1, fmt, w, h);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  return t;
+}
+function fbo(t) {
+  const f = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, f);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+  if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) fail('Float render targets are not supported here.');
+  return f;
+}
+let SW = 2304, N = SW * SW, state = [], stateF = [], cur = 0, needInit = true;
+function buildState(side) {
+  SW = Math.min(side, gl.getParameter(gl.MAX_TEXTURE_SIZE)); N = SW * SW;
+  state.forEach(t => gl.deleteTexture(t)); stateF.forEach(f => gl.deleteFramebuffer(f));
+  state = [tex2D(SW, SW, gl.RGBA16F, gl.NEAREST), tex2D(SW, SW, gl.RGBA16F, gl.NEAREST)]; stateF = state.map(fbo);
+  cur = 0; needInit = true;
+  const label = N.toLocaleString('en-US'); $('hc').textContent = label; $('pc').textContent = label;
+}
+let VW = 1, VH = 1, A = 1, HALF = [1, 1], fresh, freshF, trail = [], trailF = [], tc = 0, blooms = [], bloomF = [];
+function buildScreen() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  VW = Math.max(2, Math.round(innerWidth * dpr)); VH = Math.max(2, Math.round(innerHeight * dpr));
+  canvas.width = VW; canvas.height = VH; A = VW / VH;
+  const va = 16 / 9;                                   // cover the screen with the 16:9 painting
+  HALF = A >= va ? [A, A / va] : [va, 1];
+  if (fresh) { gl.deleteTexture(fresh); gl.deleteFramebuffer(freshF); }
+  trail.forEach(t => gl.deleteTexture(t)); trailF.forEach(f => gl.deleteFramebuffer(f));
+  blooms.forEach(b => gl.deleteTexture(b.t)); bloomF.forEach(f => gl.deleteFramebuffer(f));
+  fresh = tex2D(VW, VH, gl.RGBA16F, gl.LINEAR); freshF = fbo(fresh);
+  trail = [tex2D(VW, VH, gl.RGBA16F, gl.LINEAR), tex2D(VW, VH, gl.RGBA16F, gl.LINEAR)]; trailF = trail.map(fbo);
+  for (const f of trailF) { gl.bindFramebuffer(gl.FRAMEBUFFER, f); gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT); }
+  blooms = []; bloomF = []; let w = VW, h = VH;
+  for (let i = 0; i < 4; i++) { w = Math.max(1, w >> 1); h = Math.max(1, h >> 1); const t = tex2D(w, h, gl.RGBA16F, gl.LINEAR); blooms.push({ t, w, h }); bloomF.push(fbo(t)); }
+}
+// the video frame, re-uploaded whenever the browser has a new one
+const videoTex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, videoTex);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([20, 14, 30, 255]));
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+let videoDirty = false;
+if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
+  const onFrame = () => { videoDirty = true; vid.requestVideoFrameCallback(onFrame); };
+  vid.requestVideoFrameCallback(onFrame);
+}
+function uploadVideo() {
+  if (vid.readyState < 2) return;
+  if (!videoDirty && 'requestVideoFrameCallback' in HTMLVideoElement.prototype && !vid.paused) return;
+  gl.bindTexture(gl.TEXTURE_2D, videoTex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, vid);
+  videoDirty = false;
+}
+
+// ───────────────────────────── audio ─────────────────────────────
+let actx, analyser, gain, freq, playing = false, started = false, muted = false;
+const lv = { bass: 0, mid: 0, high: 0, pb: 0.25, pm: 0.2, ph: 0.15 };
+function setupAudio() {
+  if (actx) return;
+  actx = new (window.AudioContext || window.webkitAudioContext)();
+  const src = actx.createMediaElementSource(song);
+  analyser = actx.createAnalyser(); analyser.fftSize = 2048; analyser.smoothingTimeConstant = 0.55;
+  gain = actx.createGain(); src.connect(analyser); analyser.connect(gain); gain.connect(actx.destination);
+  freq = new Uint8Array(analyser.frequencyBinCount);
+}
+function readBands() {
+  if (!analyser || !playing) { lv.bass *= 0.92; lv.mid *= 0.92; lv.high *= 0.92; return; }
+  analyser.getByteFrequencyData(freq);
+  const hz = actx.sampleRate / analyser.fftSize;
+  const band = (a, b) => { let s = 0, n = 0; for (let i = Math.floor(a / hz); i <= Math.ceil(b / hz); i++) { s += freq[i]; n++; } return s / n / 255; };
+  const b = band(30, 150), m = band(300, 2000), h = band(4000, 11000);
+  lv.pb = Math.max(lv.pb * 0.997, b, 0.2); lv.pm = Math.max(lv.pm * 0.997, m, 0.15); lv.ph = Math.max(lv.ph * 0.997, h, 0.08);
+  const ease = (o, v) => o + (v - o) * 0.35;
+  lv.bass = ease(lv.bass, Math.pow(b / lv.pb, 1.6)); lv.mid = ease(lv.mid, m / lv.pm); lv.high = ease(lv.high, Math.pow(h / lv.ph, 1.4));
+}
+let clock = 0, plays = 0, idle = 0, manualClock = false;
+function advanceClock(dt) {
+  if (manualClock) return;
+  if (!playing) { idle += dt; return; }
+  clock += dt;
+  const a = song.currentTime;
+  if (a < clock - 2) plays++;
+  if (Math.abs(a - clock) > 0.05) clock = a;
+}
+
+// ───────────────────────────── the physics, scored to the song ─────────────────────────────
+// A 16-bar routine:  0–1 calm · 2–5 vortices · 6–9 gyroid (draw in, hold, release) · 10–13 storm · 14–15 reform
+const EQ_VORTEX = 'v = Γ / 2πr · (1 − e^(−r²/rₑ²))';
+const EQ_GYROID = 'sin x · cos y + sin y · cos z + sin z · cos x = 0';
+const SECT = {
+  idle:   { k: 14, drag: 2.0, gyA: 0.03, gyK: 0,  rip: 0.05, psy: 0.25, trail: 0.35, mix: 0.12, cap: '', eq: '' },
+  calm:   { k: 14, drag: 2.0, gyA: 0.03, gyK: 0,  rip: 0.10, psy: 0.25, trail: 0.35, mix: 0.12, cap: 'Yako & Zoe watch the sunset', eq: '' },
+  vortex: { k: 6, drag: 3.2, gyA: 0.04, gyK: 0, rip: 0.12, psy: 0.85, trail: 0.75, mix: 0.42, cap: 'Vortices', eq: EQ_VORTEX },
+  gyroid: { k: 3.5, drag: 2.2, gyA: 0.26, gyK: 55, rip: 0.06, psy: 0.9, trail: 0.8, mix: 0.5, cap: 'Gyroid flow', eq: EQ_GYROID },
+  sculpt: { k: 3.5, drag: 2.2, gyA: 0.0, gyK: 0, rip: 0.04, psy: 0.6, trail: 0.72, mix: 0.45, cap: 'The gyroid in 3D', eq: 'a triply periodic minimal surface · ' + EQ_GYROID },
+  release:{ k: 20, drag: 1.6, gyA: 0.08, gyK: 0,  rip: 0.08, psy: 0.5, trail: 0.6, mix: 0.3, cap: 'Gyroid flow', eq: EQ_GYROID },
+  storm:  { k: 4, drag: 3.0, gyA: 0.3, gyK: 0, rip: 0.16, psy: 1.0, trail: 0.82, mix: 0.55, cap: 'Vortex + gyroid storm', eq: 'curl of the gyroid + Σ Lamb–Oseen vortices' },
+  reform: { k: 22, drag: 1.5, gyA: 0.02, gyK: 0,  rip: 0.05, psy: 0.3, trail: 0.4, mix: 0.15, cap: '…and the sea settles', eq: '' }
+};
+// where vortices are born: the things in the painting (video uv)
+const FOCI = [[0.20, 0.72], [0.485, 0.30], [0.31, 0.77], [0.72, 0.55], [0.635, 0.30], [0.07, 0.40], [0.78, 0.17], [0.55, 0.86]];
+const uvToWorld = (u, v) => [(u - 0.5) * 2 * HALF[0], (0.5 - v) * 2 * HALF[1]];
+let vortices = [], lastBeat = -1, fociI = 0, sign = 1, finger = null, fingerSign = 1;
+function spawnVortex(x, y, g, rc, t, tau = 1.6) {
+  const v = { x, y, g, rc, born: t, tau };
+  vortices.push(v);
+  while (vortices.length > MAXV) { const i = vortices.findIndex(w => w !== finger); vortices.splice(i, 1); }
+  return v;
+}
+const gEff = (v, t) => v === finger ? v.g : v.g * Math.exp(-(t - v.born) / v.tau) * Math.min(1, (t - v.born) * 6 + 0.15);
+// the same screened Lamb–Oseen kernel the shader uses
+function kernel(dx, dy, g, rc) {
+  const r2 = dx * dx + dy * dy + 1e-6, r = Math.sqrt(r2);
+  const sp = g / (2 * Math.PI * r) * (1 - Math.exp(-r2 / (rc * rc))) * Math.exp(-r2 / (rc * rc * 10));
+  return [-dy / r * sp, dx / r * sp];
+}
+// point-vortex dynamics: every vortex is carried by the others' flow — pairs orbit, dipoles travel
+function stepVortices(t, dt) {
+  const g = vortices.map(v => gEff(v, t));
+  const vel = vortices.map((v, i) => { let ux = 0, uy = 0;
+    vortices.forEach((w, j) => { if (i !== j) { const k = kernel(v.x - w.x, v.y - w.y, g[j], w.rc); ux += k[0]; uy += k[1]; } });
+    return [ux, uy]; });
+  vortices.forEach((v, i) => { if (v !== finger) { v.x += vel[i][0] * dt; v.y += vel[i][1] * dt; } });
+  vortices = vortices.filter((v, i) => v === finger || (Math.abs(g[i]) > 0.03 && Math.abs(v.x) < A + 0.6 && Math.abs(v.y) < 1.6));
+}
+// a counter-rotating pair that sails off in direction (dx, dy), like a jet of wind skimming the sea
+function launchDipole(x, y, dx, dy, g, t) {
+  const l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l, h = 0.08;
+  spawnVortex(x - uy * h, y + ux * h, g, 0.1, t, 2.4);
+  spawnVortex(x + uy * h, y - ux * h, -g, 0.1, t, 2.4);
+}
+function direct(t, live) {
+  const gb = Math.floor((t - PHASE) / BEAT), beatT = PHASE + gb * BEAT, pos = ((gb - 1) % 4 + 4) % 4;
+  const b = (t - T0) / BEAT, bar = Math.floor(b / 4), cb = ((bar % 16) + 16) % 16, inBar = b / 4 - bar;
+  let s = SECT.calm, gyK = 0;
+  if (!live) s = SECT.idle;
+  else if (t < T0 || cb <= 1) s = SECT.calm;
+  else if (cb <= 5) s = SECT.vortex;
+  else if (cb === 6) { s = SECT.gyroid; gyK = s.gyK * inBar * inBar * (3 - 2 * inBar); }
+  else if (cb <= 8) s = SECT.sculpt;
+  else if (cb === 9) s = SECT.release;
+  else if (cb <= 13) s = SECT.storm;
+  else s = SECT.reform;
+  // a new beat: maybe give birth to a vortex
+  if (live && gb !== lastBeat) {
+    const kick = pos === 0 || pos === 2;
+    if (s === SECT.vortex && !kick) {                  // the snare: a dipole leaves Yako & Zoe and runs out to sea
+      const from = uvToWorld(0.25 + Math.sin(gb) * 0.03, 0.70), to = uvToWorld(0.62 + Math.cos(gb * 1.7) * 0.12, 0.42);
+      launchDipole(from[0], from[1], to[0] - from[0], to[1] - from[1], 1.7 * (0.6 + lv.bass), t);
+    }
+    if ((s === SECT.vortex && kick) || s === SECT.storm) {
+      const f = FOCI[fociI++ % FOCI.length], w = uvToWorld(f[0] + (Math.sin(gb * 12.9) * 0.04), f[1] + Math.cos(gb * 7.3) * 0.04);
+      sign = -sign;
+      spawnVortex(w[0], w[1], sign * (s === SECT.storm ? 1.25 : 1.6) * (0.6 + lv.bass), s === SECT.storm ? 0.16 : 0.22, t);
+    }
+  }
+  lastBeat = gb;
+  return { s, gyK: s === SECT.gyroid ? gyK : s.gyK, beatT, amp: (pos === 0 || pos === 2) ? 1 : 0.5 };
+}
+
+// stir the sea with a finger or the mouse
+let pointerDown = false, lastStir = 0, lastPX = 0;
+function pointerWorld(e) { const r = canvas.getBoundingClientRect(); return [((e.clientX - r.left) / r.width * 2 - 1) * A, 1 - (e.clientY - r.top) / r.height * 2]; }
+// hold to make a whirlpool that follows your finger; let go and it spins down
+canvas.addEventListener('pointerdown', (e) => {
+  pointerDown = true; fingerSign = -fingerSign; const w = pointerWorld(e);
+  finger = spawnVortex(w[0], w[1], 2.2 * fingerSign, 0.17, nowT(), 1.4);
+});
+canvas.addEventListener('pointermove', (e) => { if (pointerDown && finger) { const w = pointerWorld(e); finger.x = w[0]; finger.y = w[1]; } });
+const letGo = () => { if (finger) { finger.born = nowT(); finger = null; } pointerDown = false; };
+addEventListener('pointerup', letGo); addEventListener('pointercancel', letGo);
+const nowT = () => (playing ? clock : idle);
+
+// ───────────────────────────── frame ─────────────────────────────
+const P = Object.assign({}, SECT.idle); let curGyK = 0, sculpt = 0, dusk = 0, kickT = -9;
+let prevT = 0, lastNow = performance.now(), paused = false, ready = false, HOLD = false, fpsN = 0, fpsT = 0;
+let capT = '', capE = '';
+function frame(now, dtOverride) {
+  const dt = dtOverride != null ? dtOverride : Math.min(0.05, Math.max(0.001, (now - lastNow) / 1000));
+  lastNow = now;
+  if (!paused) advanceClock(dt);
+  readBands();
+  const t = nowT();
+  const d = direct(t, playing);
+  const e = Math.min(1, dt * 2.2);
+  for (const key of ['k', 'drag', 'gyA', 'rip', 'psy', 'trail', 'mix']) P[key] += (d.s[key] - P[key]) * e;
+  curGyK += (d.gyK - curGyK) * Math.min(1, dt * 4);
+  if (d.s.cap !== capT) { capT = d.s.cap; $('capT').textContent = capT; }
+  if (d.s.eq !== capE) { capE = d.s.eq; $('capE').textContent = capE; }
+  // keep the video in step with the song: one loop per three bars
+  if (playing && !vid.seeking && vid.readyState >= 2) {
+    const target = (((t - T0) / (3 * BAR)) % 1 + 1) % 1 * LOOP;
+    let diff = vid.currentTime - target; if (diff > LOOP / 2) diff -= LOOP; if (diff < -LOOP / 2) diff += LOOP;
+    if (Math.abs(diff) > 0.35) vid.currentTime = target;
+  }
+  uploadVideo();
+  stepVortices(t, paused ? 0 : dt);
+  sculpt += ((d.s === SECT.sculpt ? 1 : 0) - sculpt) * Math.min(1, dt * 3.2);
+  const songP = playing ? (t % 101.68) / 101.68 : 0;
+  dusk += ((playing ? Math.min(1, Math.max(0, (songP - 0.3) / 0.6)) * (1 - Math.max(0, (songP - 0.965) / 0.035)) : 0) - dusk) * Math.min(1, dt * 1.5);
+  if (d.amp === 1 && d.beatT !== kickT) kickT = d.beatT;
+  const kick = Math.exp(-Math.max(0, t - kickT) * 6) * (playing ? 0.45 + lv.bass : 0.4);
+
+  // — simulate —
+  gl.bindVertexArray(vao); gl.disable(gl.BLEND);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, stateF[1 - cur]); gl.viewport(0, 0, SW, SW);
+  const U = P_UPD.u; gl.useProgram(P_UPD.p);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, state[cur]); gl.uniform1i(U.uState, 0);
+  gl.uniform1i(U.uW, SW); gl.uniform1f(U.uN, N); gl.uniform1f(U.uA, A); gl.uniform2f(U.uHalf, HALF[0], HALF[1]);
+  gl.uniform1i(U.uInit, needInit ? 1 : 0);
+  const yaw = t * 0.45, pitch = 0.42 + 0.16 * Math.sin(t * 0.6), sc = 0.68 * (1 + 0.05 * kick);
+  gl.uniform1f(U.uSculpt, sculpt); gl.uniform1f(U.uYaw, yaw); gl.uniform1f(U.uPitch, pitch); gl.uniform1f(U.uSc, sc);
+  gl.uniform1f(U.uT, t); gl.uniform1f(U.uPT, paused ? t : Math.min(prevT, t)); gl.uniform1f(U.uDt, paused ? 0 : dt);
+  gl.uniform1f(U.uK, P.k); gl.uniform1f(U.uDrag, P.drag); gl.uniform1f(U.uGyA, REDUCED ? P.gyA * 0.4 : P.gyA);
+  gl.uniform1f(U.uGyK, curGyK * (0.8 + 0.2 * lv.bass)); gl.uniform1f(U.uGyF, 7.5); gl.uniform1f(U.uGyZ, t * 0.32);
+  gl.uniform1f(U.uBeatT, d.beatT); gl.uniform1f(U.uRip, (REDUCED ? 0.3 : 1) * P.rip * d.amp * (playing ? 0.5 + lv.bass : 0.5));
+  const sun = uvToWorld(0.485, 0.30); gl.uniform2f(U.uRipC, sun[0], sun[1]);
+  const vv = new Float32Array(MAXV * 4);
+  vortices.forEach((v, i) => vv.set([v.x, v.y, gEff(v, t) * (REDUCED ? 0.35 : 1), v.rc], i * 4));
+  gl.uniform4fv(U.uV, vv); gl.uniform1i(U.uNV, vortices.length);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  cur = 1 - cur; needInit = false; prevT = t;
+
+  // — particles into the fresh buffer —
+  gl.bindFramebuffer(gl.FRAMEBUFFER, freshF); gl.viewport(0, 0, VW, VH);
+  gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
+  const V = P_DRAW.u; gl.useProgram(P_DRAW.p);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, state[cur]); gl.uniform1i(V.uState, 0);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, videoTex); gl.uniform1i(V.uVideo, 1);
+  gl.uniform1i(V.uW, SW); gl.uniform1f(V.uN, N); gl.uniform1f(V.uA, A); gl.uniform2f(V.uHalf, HALF[0], HALF[1]);
+  // brightness per particle: the screen's pixels ÷ the particles that land on screen, so colour holds at any count
+  const onScreen = N * (A / (HALF[0] * HALF[1]));
+  gl.uniform1f(V.uI, (VW * VH / onScreen) * 0.88 * (1 - 0.7 * sculpt));
+  gl.uniform1f(V.uT, t); gl.uniform1f(V.uPsy, REDUCED ? P.psy * 0.4 : P.psy); gl.uniform1f(V.uHigh, lv.high);
+  gl.uniform1f(V.uSculpt, sculpt); gl.uniform1f(V.uYaw, yaw); gl.uniform1f(V.uPitch, pitch); gl.uniform1f(V.uSc, sc);
+  gl.uniform1f(V.uDusk, dusk); gl.uniform1f(V.uKick, REDUCED ? kick * 0.3 : kick);
+  gl.drawArrays(gl.POINTS, 0, N);
+  gl.disable(gl.BLEND);
+
+  // — trails —
+  const decay = REDUCED ? Math.min(P.trail, 0.45) : P.trail, f60 = dt * 60;
+  gl.bindFramebuffer(gl.FRAMEBUFFER, trailF[1 - tc]);
+  const F = P_FEED.u; gl.useProgram(P_FEED.p);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, trail[tc]); gl.uniform1i(F.uPrev, 0);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, fresh); gl.uniform1i(F.uFresh, 1);
+  gl.uniform2f(F.uRes, VW, VH); gl.uniform1f(F.uDecay, decay);
+  gl.uniform1f(F.uZoom, 1.0 + (0.0015 + 0.006 * lv.bass) * f60); gl.uniform1f(F.uRot, 0.002 * Math.sin(t * 0.21) * f60);
+  gl.uniform1f(F.uHue, (0.02 + 0.04 * lv.high) * f60 * P.psy);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  tc = 1 - tc;
+
+  present(t);
+  fpsN++; fpsT += dt; if (fpsT > 0.5) { $('fps').textContent = Math.round(fpsN / fpsT); fpsN = 0; fpsT = 0; }
+}
+function present(t) {
+  let src = trail[tc];
+  gl.useProgram(P_DOWN.p);
+  for (let i = 0; i < blooms.length; i++) {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, bloomF[i]); gl.viewport(0, 0, blooms[i].w, blooms[i].h);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, src); gl.uniform1i(P_DOWN.u.uSrc, 0);
+    gl.uniform2f(P_DOWN.u.uTx, 1 / (2 * blooms[i].w), 1 / (2 * blooms[i].h));
+    gl.drawArrays(gl.TRIANGLES, 0, 3); src = blooms[i].t;
+  }
+  gl.useProgram(P_UP.p); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
+  for (let i = blooms.length - 1; i > 0; i--) {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, bloomF[i - 1]); gl.viewport(0, 0, blooms[i - 1].w, blooms[i - 1].h);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, blooms[i].t); gl.uniform1i(P_UP.u.uSrc, 0);
+    gl.uniform2f(P_UP.u.uTx, 1 / blooms[i - 1].w, 1 / blooms[i - 1].h);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+  gl.disable(gl.BLEND);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, VW, VH);
+  const C = P_COMP.u; gl.useProgram(P_COMP.p);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, trail[tc]); gl.uniform1i(C.uTrail, 0);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, fresh); gl.uniform1i(C.uFresh, 1);
+  gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, blooms[0].t); gl.uniform1i(C.uBloom, 2);
+  gl.uniform2f(C.uRes, VW, VH); gl.uniform1f(C.uMix, REDUCED ? P.mix * 0.5 : P.mix); gl.uniform1f(C.uBloomK, 0.12);
+  gl.uniform1f(C.uCA, REDUCED ? 0 : 0.002 + 0.006 * lv.bass * P.psy);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+}
+let lastT = 0;
+function loop(now) { if (ready) { if (HOLD) present(lastT); else { frame(now); lastT = nowT(); } } requestAnimationFrame(loop); }
+
+// ───────────────────────────── boot ─────────────────────────────
+buildState(+$('q').value); buildScreen();
+addEventListener('resize', buildScreen);
+$('q').addEventListener('change', (e) => buildState(+e.target.value));
+$('mute').addEventListener('click', () => { muted = !muted; if (gain) gain.gain.value = muted ? 0 : 1; else song.muted = muted;
+  $('mute').textContent = muted ? '🔇' : '🔊'; $('mute').setAttribute('aria-label', muted ? 'Unmute music' : 'Mute music'); });
+$('pause').addEventListener('click', () => {
+  if (!started) return;
+  paused = !paused;
+  if (paused) { song.pause(); vid.pause(); playing = false; } else { song.play(); vid.play(); playing = true; }
+  $('pause').textContent = paused ? '▶' : '⏸'; $('pause').setAttribute('aria-label', paused ? 'Play' : 'Pause');
+});
+$('go').addEventListener('click', async () => {
+  setupAudio(); try { await actx.resume(); } catch (e) {}
+  try {
+    song.currentTime = 0; vid.currentTime = 0; vid.playbackRate = VRATE;
+    await Promise.all([song.play(), vid.play()]); playing = true; started = true; clock = 0; prevT = 0;
+  } catch (e) { $('st').textContent = 'Tap again to start the music.'; return; }
+  $('gate').classList.add('gone');
+});
+(async () => {
+  $('prog').style.width = '30%';
+  await new Promise((res, rej) => {
+    if (vid.readyState >= 2) return res();
+    vid.addEventListener('loadeddata', res, { once: true });
+    vid.addEventListener('error', () => rej(new Error('the sunset video did not load')), { once: true });
+  }).catch((e) => fail('Could not load the animation (' + e.message + ').'));
+  $('prog').style.width = '100%';
+  try { vid.playbackRate = VRATE; await vid.play(); } catch (e) {}   // muted, so it may run before the music starts
+  ready = true; requestAnimationFrame(loop);
+  $('go').disabled = false; $('go').textContent = '▶ Start the music'; $('st').textContent = 'Turn your sound up — then drag to stir the sea.';
+  const qs = new URLSearchParams(location.search);
+  if (qs.has('at')) { $('gate').style.display = 'none'; window.__sunset.at(+qs.get('at'), +(qs.get('settle') || 300)); document.title = 'ready'; }
+})();
+
+// Hooks for automated checks.
+window.__sunset = {
+  hold(on) { HOLD = !!on; },
+  stats: () => ({ particles: N, ready, sculpt: +sculpt.toFixed(2), dusk: +dusk.toFixed(2), vx: vortices.map(v => [+v.x.toFixed(2), +v.y.toFixed(2)]), video: { ready: vid.readyState, t: +vid.currentTime.toFixed(2), rate: vid.playbackRate }, vortices: vortices.length, err: gl.getError() }),
+  probe() {
+    const scan = (fb, w, h) => { gl.bindFramebuffer(gl.FRAMEBUFFER, fb); const W = Math.min(w, 256), H = Math.min(h, 256), px = new Float32Array(W * H * 4);
+      gl.readPixels(Math.floor((w - W) / 2), Math.floor((h - H) / 2), W, H, gl.RGBA, gl.FLOAT, px);
+      let nan = 0, max = 0, sum = 0; for (const v of px) { if (!Number.isFinite(v)) nan++; else { if (v > max) max = v; sum += v; } }
+      return { nan, max: +max.toFixed(3), mean: +(sum / px.length).toFixed(4) }; };
+    return { state: scan(stateF[cur], SW, SW), fresh: scan(freshF, VW, VH), trail: scan(trailF[tc], VW, VH), err: gl.getError() };
+  },
+  at(t, settle = 120) {                             // simulate the run-up to song time t, draw it, hold the frame
+    HOLD = true; song.pause(); manualClock = true; playing = true; started = true;
+    clock = Math.max(0, t - settle / 60); prevT = clock; lastBeat = Math.floor((clock - PHASE) / BEAT); vortices = []; finger = null;
+    for (let i = 0; i < settle; i++) { clock = Math.min(t, clock + 1 / 60); frame(performance.now(), 1 / 60); }
+    lastT = t; playing = false; manualClock = false;
+    return { t, caption: capT, vortices: vortices.length, err: gl.getError() };
+  }
+};
+})();
+</script>
+</body>
+</html>

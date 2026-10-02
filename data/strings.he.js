@@ -13,6 +13,7 @@ window.YAKO_STRINGS.he = {
   next: "יופי! עכשיו מצאו את {key}.",
   countIntro: "המספר הבא הוא {num}. קודם, מצאו את הספרה {digit}!",
   sound: "{letter} כמו {word}! מצאו את האות {letter}!",
+  vowel: "האות {letter} נשמעת {sound} כמו במילה {word}. מצאו את {letter}!",
   howMany: "כמה {creatures}? ספרו אותם ולחצו על המספר!",
   countAny: "כמה יש? ספרו אותם ולחצו על המספר!",
   mathAdd: "{a} {creatures} ועוד {b} {creatures}. כמה ביחד?",
@@ -70,5 +71,34 @@ window.YAKO_STRINGS.he = {
     Q:{word:'Queen',emoji:'👑'}, R:{word:'Rainbow',emoji:'🌈'}, S:{word:'Sun',emoji:'☀️'}, T:{word:'Tree',emoji:'🌳'},
     U:{word:'Umbrella',emoji:'☂️'}, V:{word:'Violin',emoji:'🎻'}, W:{word:'Whale',emoji:'🐳'}, X:{word:'Fox',emoji:'🦊'},
     Y:{word:'Yo-yo',emoji:'🪀'}, Z:{word:'Zebra',emoji:'🦓'}
+  },
+  // Mission Ranch counting activity (js/ranch.js) - shown on screen AND read aloud.
+  ranch: {
+    intro: "בואו נספור את הכבשים עם יאקו!",
+    count: "לחצו על כל כבשה ונספור אותן!",
+    total: "{n} כבשים!",
+    totalOne: "כבשה אחת!",
+    which: "איפה המספר {n}?",
+    hint: "לחצו על הכבשה הזאת!",
+    nice: "ספרתם את כל הכבשים!",
+    round: "סיבוב {r} מתוך {t}",
+    again: "שחקו שוב",
+    explore: "צאו לטייל",
+    finish: "סיימנו",
+    goodbye: "להתראות! תחזרו בקרוב!",
+    replay: "לשמוע שוב",
+    sheepLbl: "כבשה",
+    countedLbl: "נספרה",
+    countAsk: "כמה כבשות? תכתבו את המספר!",
+    addAsk: "{a} ועוד {b}. כמה כבשות יש עכשיו?",
+    subAsk: "{a} פחות {b}. כמה כבשות נשארו?",
+    mulAsk: "{g} קבוצות של {c} כבשות. כמה יש ביחד?",
+    typeIt: "תכתבו את המספר!",
+    stageCount: "סופרים",
+    stageAdd: "מוסיפים",
+    stageSub: "לוקחים",
+    stageMul: "קבוצות",
+    clearLbl: "מחיקה",
+    mulAskShort: "כמה יש ביחד?"
   }
 };

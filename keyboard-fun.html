@@ -188,7 +188,7 @@
       linear-gradient(180deg, color-mix(in srgb, var(--bg), #fff 12%), var(--bg));
     box-shadow: 0 8px 0 color-mix(in srgb, var(--bg), #000 38%), 0 14px 20px rgba(34,21,4,.24);
     outline: 3px solid color-mix(in srgb, var(--bg), #000 30%); outline-offset: 0;
-    transition: transform .12s ease, box-shadow .12s ease; }
+    transition: transform .12s ease, box-shadow .12s ease, filter .16s ease; }
   #start .btnGrid .modeBtn::before { content: ''; position: absolute; inset: 6px; pointer-events: none;
     border: 2px solid rgba(255,255,255,.7); border-radius: 16px; }
   #start .btnGrid .modeBtn::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .18;
@@ -210,6 +210,7 @@
   #start .modeBtn[data-mode="math"] .title { font-size: clamp(15px, 1.5vw, 23px); }
   /* longer labels get a smaller font so they never touch the inner border */
   #start .modeBtn[data-mode="countlang"] .title,
+  #start .modeBtn[data-mode="counting"] .title,
   #start .modeBtn[data-mode="colormix"] .title { font-size: clamp(14px, 1.35vw, 20px); }
   #start .modeBtn[data-mode="pitchtrain"] .title,
   #start .modeBtn[data-mode="pitchlisten"] .title { font-size: clamp(12px, 1.15vw, 17px); }
@@ -218,8 +219,10 @@
   #start .modeBtn[data-mode="guesslang"] .title,
   #start .modeBtn[data-mode="samediff"] .title { font-size: clamp(12px, 1.15vw, 17px); }
   #start .modeBtn[data-mode="free"] .sub  { letter-spacing: 0; font-size: clamp(24px, 2.2vw, 34px); }
+  #start .modeBtn[data-mode="vowels"] .sub { letter-spacing: .1em; font-size: clamp(13px, 1.25vw, 20px); white-space: nowrap; }
   /* per-mode colours */
   #start .modeBtn[data-mode="letters"]  { --bg: #137fc2; }
+  #start .modeBtn[data-mode="vowels"]   { --bg: #d4567a; }
   #start .modeBtn[data-mode="numbers"]  { --bg: #56aa2a; }
   #start .modeBtn[data-mode="both"]     { --bg: #a73bb0; }
   #start .modeBtn[data-mode="shapes"]   { --bg: #199f94; }
@@ -271,9 +274,10 @@
   #chooseBtn .chev, #chooseStoryBtn .chev { display: inline-block; transition: transform .2s ease; }
   .homeCard:not(.lessonsOpen) .lessonGroups { display: none; }
   .homeCard:not(.storiesOpen) .storyList { display: none; }
+  .homeCard:not(.storiesOpen) .storyTop { display: none; }
   /* ===== "Choose a lesson"/"Choose a story" swap the whole card to a dedicated page ===== */
   .homeCard.lessonsOpen > :not(.lessonGroups):not(.lessonsHead) { display: none !important; }
-  .homeCard.storiesOpen > :not(.storyList):not(.storiesHead) { display: none !important; }
+  .homeCard.storiesOpen > :not(.storyList):not(.storiesHead):not(.storyTop) { display: none !important; }
   .homeCard.storiesOpen { max-height: 80vh; }
   .homeCard.storiesOpen #chooseStoryBtn .chev { transform: rotate(180deg); }
   .storiesHead { display: none; width: 100%; align-items: center; gap: 1vw; }
@@ -300,7 +304,19 @@
   .lessonsHead .lhTitle, .storiesHead .lhTitle { flex: 1; min-width: 0; text-align: center; font-family: 'Baloo 2', sans-serif; font-weight: 800;
     color: #6e4f24; font-size: clamp(15px, 1.6vw, 22px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* invisible mirror of the Back button so the title stays centered */
-  .lessonsHead .lhSpacer, .storiesHead .lhSpacer { flex: 0 0 auto; visibility: hidden; border: 3px solid transparent;
+  /* Auto-start: a pre-reader who does not choose anything still gets a lesson.
+     Any touch, key or scroll on this page cancels it, so a grown-up reading the
+     list is never yanked into a game. */
+  .lessonsHead .lhNext, .storiesHead .lhNext { flex: 0 0 auto; cursor: pointer; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: .35em; min-height: 44px;
+    padding: .35em .9em; border-radius: 999px; border: 3px solid var(--gold);
+    background: #fff7e6; color: #6e4f24; font-family: 'Baloo 2', sans-serif;
+    font-weight: 800; font-size: clamp(13px, 1.7vw, 17px); }
+  .lessonsHead .lhNext b, .storiesHead .lhNext b { display: none; min-width: 1.6em; height: 1.6em; border-radius: 50%;
+    background: var(--gold); color: #5a3d12; display: none; place-items: center; font-size: .95em; }
+  .lessonsHead .lhNext.counting b, .storiesHead .lhNext.counting b { display: grid; }
+  .homeCard.subOpen .lessonsHead .lhNext { visibility: hidden; }
+  .lessonsHead .lhSpacer, .storiesHead .lhSpacer, .parentHead .lhSpacer { flex: 0 0 auto; visibility: hidden; border: 3px solid transparent;
     font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(13px, 1.2vw, 18px); padding: .7vh 1.6vw; }
   #lessonsFun { cursor: pointer; flex: 0 0 auto; border: 3px solid var(--gold); border-radius: 999px;
     background: linear-gradient(180deg, #ffd977, #f0b73c); color: #5b4327;
@@ -313,6 +329,8 @@
   /* closed groups sit in a 2×2 grid of square tiles; an open group spans the full width */
   .lessonGroups { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2vh 1.2vw; width: 100%; align-items: start; padding-bottom: 13vh; }
   .lgroup.open { grid-column: 1 / -1; }
+  .lgroup.spanWide:not(.open) { grid-column: 1 / -1; }
+  .lgroup.spanWide:not(.open) .groupHead { aspect-ratio: auto; flex-direction: row; justify-content: center; min-height: 66px; }
   .lgroup .btnGrid { grid-template-columns: repeat(2, 1fr); }   /* roomier buttons in the narrow card */
   .lgroup { border: 3px solid var(--gold); border-radius: 18px; background: rgba(255,255,255,.42); overflow: hidden; }
   /* square tile: big icon over a centered name */
@@ -398,6 +416,10 @@
     font-family: 'Baloo 2', Georgia, serif; font-weight: 800; font-size: clamp(15px, 1.5vw, 22px);
     padding: 1vh 2.6vw; box-shadow: 0 5px 0 #b8862a, 0 8px 14px rgba(60,45,15,.3);
     transition: transform .12s ease, box-shadow .12s ease; }
+  .winBtn .winCd { display: none; min-width: 1.6em; height: 1.6em; border-radius: 50%;
+    background: var(--gold); color: #5a3d12; place-items: center; font-size: .9em;
+    margin-inline-start: .5em; vertical-align: middle; }
+  .winBtn .winCd:not(:empty) { display: inline-grid; }
   .winBtn:hover { transform: translateY(-2px); }
   .winBtn:active { transform: translateY(3px); box-shadow: 0 2px 0 #b8862a; }
   .winBtn.alt { background: linear-gradient(180deg, #9ecdf0, #5ea0d6); border-color: #cfe6f7; box-shadow: 0 5px 0 #2f6fb0, 0 8px 14px rgba(20,45,75,.3); color: #123a5e; }
@@ -635,6 +657,9 @@
   /* Yako (opaque, clean cutout) on the right, behind the menu so he can't overlap it */
   /* Yako waves & the puppy wags its tail — a transparent PNG sprite sheet (40 frames)
      stepped by CSS, ping-ponged with 'alternate' for a seamless loop. */
+  /* Yako + the puppy now live INSIDE home_bg.mp4 (30s animated loop), so the
+     static cutout layers are retired to avoid two Yakos on screen. */
+  .homeChar, .homeDog, .homeHi { display: none !important; }
   .homeChar { position: fixed; right: 0; bottom: 0; z-index: 1; pointer-events: none;
     height: 52vh; width: calc(52vh * 0.5146);
     background-image: url('ui/yako_wave2.png'); background-repeat: no-repeat;
@@ -973,6 +998,8 @@
   .phonRow { display: flex; align-items: center; justify-content: center; gap: .35em; }
   .phonLetter { font-family: 'Baloo 2', sans-serif; font-weight: 800; color: var(--blue); line-height: 1; font-size: min(16vh, 16vw); }
   .phonPic { font-size: min(12vh, 12vw); }
+  /* the vowel being taught, picked out inside the example word */
+  .vowHit { color: #d4567a; text-shadow: 0 2px 0 rgba(35,22,8,.35); font-size: 1.22em; }
   .phonWord { text-align: center; font-family: 'Baloo 2', sans-serif; font-weight: 700; color: #5b4327; font-size: min(4vh, 5vw); margin-top: .15em; }
   /* How Many? + Add & Subtract object groups */
   .countObjRow, .mathRow { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .12em; max-width: 96%; line-height: 1; }
@@ -992,8 +1019,11 @@
   /* Yako character images (real artwork, with emoji fallback) */
   #yako .yakoChar { height: 17vh; border-radius: 18px; border: 4px solid var(--gold);
     box-shadow: 0 8px 16px rgba(0,0,0,.3); object-fit: cover; }
-  #buddy img.buddyFace { height: 1em; border-radius: 16px; border: 5px solid var(--gold);
-    box-shadow: 0 8px 16px rgba(0,0,0,.35); }
+  /* No frame: both the packed video and yako_cheer.png are cut-outs with their own
+     alpha, so the character stands free on the scene. A soft drop-shadow keeps it from
+     floating flat against a busy background. */
+  #buddy .buddyFace { height: 1em; width: auto; border: 0; border-radius: 0;
+    background: transparent; filter: drop-shadow(0 6px 10px rgba(0,0,0,.42)); }
 
   .swatch {
     width: min(20vh,22vw); height: min(20vh,22vw); border-radius: 22%;
@@ -1119,7 +1149,9 @@
   /* visible round Home + Sound buttons (the painted hotspots are hidden with the frame) */
   /* Icons are inline SVG background images (not emoji glyphs — those inherit the
      invisible-hotspot transparent color on some platforms and vanish). */
-  #game.adv #exit, #game.adv #sound { position: fixed; bottom: calc(2.5vh + env(safe-area-inset-bottom, 0px)); top: auto; width: min(8vh,13vw); height: min(8vh,13vw);
+  /* max(48px, ...) keeps these reachable in landscape, where 8vh of a 375px-tall
+     phone is 30px — half the touch target this game targets for small children. */
+  #game.adv #exit, #game.adv #sound { position: fixed; bottom: calc(2.5vh + env(safe-area-inset-bottom, 0px)); top: auto; width: max(48px, min(8vh,13vw)); height: max(48px, min(8vh,13vw));
     border-radius: 50%; background-color: var(--blue); background-repeat: no-repeat; background-position: center; background-size: 52%;
     border: 3px solid var(--blue-d); box-shadow: 0 5px 12px rgba(0,0,0,.4); z-index: 12; }
   #game.adv #exit  { left: calc(3vw + env(safe-area-inset-left, 0px)); right: auto;
@@ -1128,7 +1160,7 @@
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='white' d='M3 9v6h4l5 4V5L7 9H3z'/><path fill='none' stroke='white' stroke-width='2' stroke-linecap='round' d='M15.5 8.6a4.6 4.6 0 0 1 0 6.8M18.2 6a8 8 0 0 1 0 12'/></svg>"); }
   /* Just-for-Fun home button (Free Play hides the painted frame, so it needs its own) */
   #freeHome { position: fixed; left: calc(3vw + env(safe-area-inset-left, 0px)); bottom: calc(2.5vh + env(safe-area-inset-bottom, 0px)); z-index: 7; display: none;
-    width: min(8vh,13vw); height: min(8vh,13vw); align-items: center; justify-content: center;
+    width: max(48px, min(8vh,13vw)); height: max(48px, min(8vh,13vw)); align-items: center; justify-content: center;
     font-size: min(3.8vh,6vw); line-height: 1; cursor: pointer;
     background: #fff6e0; color: #6e4f24; border: 3px solid var(--gold-d); border-radius: 50%;
     box-shadow: 0 5px 12px rgba(0,0,0,.32); }
@@ -1145,7 +1177,7 @@
     box-shadow: 0 10px 22px rgba(60,45,15,.4);
     opacity: 0; pointer-events: none; transform: translateY(8px) scale(.9); transform-origin: bottom right;
     transition: opacity .16s ease, transform .16s cubic-bezier(.2,1.5,.4,1); }
-  #game #volPop { display: flex; }              /* only meaningful in-game */
+  body.playing #volPop { display: flex; }       /* shown on lesson, Story Time and Count Sheep */
   #volPop.show { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
   #volPop .volMute { cursor: pointer; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 14px;
     color: #6e4f24; background: #ffe9a8; border: 2px solid var(--gold-d); border-radius: 999px; padding: 5px 10px; }
@@ -1153,27 +1185,72 @@
   #volPop .volRow { display: flex; align-items: center; gap: 8px; }
   #volPop .vIco { font-size: 16px; line-height: 1; width: 1.3em; text-align: center; }
   #volMusic, #volVoice { width: min(180px, 46vw); accent-color: var(--gold-d); cursor: pointer; }
-  /* in-game media player — bottom center of every level page */
-  /* Sits centered at the very bottom — lift it above the iPad/iPhone home-indicator
-     safe area (env inset) so it isn't hidden/behind the indicator, and keep it on top. */
-  #gamePlayer { position: fixed; left: 50%; bottom: calc(2.6vh + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 40;
-    display: flex; align-items: center; gap: 10px; padding: 5px 12px;
-    background: linear-gradient(#f7e4b4, #e7c884); border: 3px solid var(--gold); border-radius: 999px;
-    box-shadow: 0 5px 14px rgba(60,45,15,.3), inset 0 0 0 2px rgba(255,255,255,.45); }
-  #gamePlayer .gpBtn { flex: 0 0 auto; width: min(6.4vh, 10.5vw); height: min(6.4vh, 10.5vw);
+  /* In-game media player. It used to be pinned to the bottom CENTRE of every level,
+     which put it straight on top of the answer tiles in Story Time — the child
+     could not reach the letter under it. It now lives INSIDE the speaker popover,
+     so no control ever floats over the play area: tap the speaker (lower right)
+     and the player is there with the volume sliders. */
+  #gamePlayer {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 4px 10px; align-self: stretch;
+    background: linear-gradient(#f7e4b4, #e7c884); border: 2px solid var(--gold); border-radius: 999px;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.45); }
+  #gamePlayer .gpBtn { flex: 0 0 auto; width: 52px; height: 52px;
     display: flex; align-items: center; justify-content: center; cursor: pointer;
     font-size: min(3vh, 5vw); line-height: 1; color: #6e4f24;
     background: #fff6e0; border: 2px solid var(--gold-d); border-radius: 50%; box-shadow: 0 2px 5px rgba(90,60,15,.28); }
   #gamePlayer .gpBtn:active { transform: scale(.9); }
   #gamePlayer .gpPlay { background: linear-gradient(#ffe9a8, #f0c869); }
   #gamePlayer .gpBtn svg { width: 52%; height: 52%; fill: #6e4f24; display: block; pointer-events: none; }
+  /* ---- Watch: the film reel ---- */
+  #watchReel { position: fixed; inset: 0; z-index: 120; background: #000;
+    display: flex; align-items: center; justify-content: center; }
+  #watchReel[hidden] { display: none; }
+  /* Two stacked <video>s cross-dissolve: the incoming clip is painted ON TOP of the
+     outgoing one and fades in, so the picture never dips to black between scenes. */
+  #watchReel video { position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: contain; display: block; background: #000;
+    opacity: 0; transition: opacity .6s ease; }
+  #watchReel video.on { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { #watchReel video { transition: none !important; } }
+  #watchReel .reelCap { position: absolute; z-index: 3; left: 50%; transform: translateX(-50%);
+    bottom: calc(6vh + env(safe-area-inset-bottom, 0px)); max-width: 86vw; text-align: center;
+    padding: .5em 1.1em; border-radius: 999px; background: rgba(255,247,223,.94);
+    border: 3px solid var(--gold); color: #6e4f24;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(15px, 2.4vw, 24px); }
+  /* the goodbye card carries the only text in the whole reel, so it gets more weight */
+  #watchReel.finale .reelCap { font-size: clamp(19px, 3.4vw, 34px); background: rgba(255,247,223,.97); }
+  #watchReel .reelClose, #watchReel .reelNext, #watchReel .reelPrev { z-index: 3;
+    position: absolute; top: calc(2vh + env(safe-area-inset-top, 0px));
+    min-height: 48px; min-width: 48px; cursor: pointer;
+    background: rgba(255,247,223,.94); border: 3px solid var(--gold); color: #6e4f24;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 18px; border-radius: 999px; }
+  #watchReel .reelClose { right: calc(2vw + env(safe-area-inset-right, 0px)); width: 48px; padding: 0; }
+  #watchReel .reelPrev  { left:  calc(2vw + env(safe-area-inset-left, 0px)); padding: .3em 1em; }
+  /* The reel had no way to silence the narration -- the in-game speaker is part of #game,
+     which the reel covers. This is the same round control in the same corner, driving the
+     same A.setMuted(), so muting here and muting in a lesson are one setting. */
+  #watchReel .reelSound { position: absolute; z-index: 3; padding: 0; cursor: pointer;
+    right: calc(2vw + env(safe-area-inset-right, 0px));
+    bottom: calc(2.5vh + env(safe-area-inset-bottom, 0px));
+    width: max(48px, min(8vh, 13vw)); height: max(48px, min(8vh, 13vw));
+    border-radius: 50%; background-color: var(--blue); border: 3px solid var(--blue-d);
+    background-repeat: no-repeat; background-position: center; background-size: 52%;
+    box-shadow: 0 5px 12px rgba(0,0,0,.4);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='white' d='M3 9v6h4l5 4V5L7 9H3z'/><path fill='none' stroke='white' stroke-width='2' stroke-linecap='round' d='M15.5 8.6a4.6 4.6 0 0 1 0 6.8M18.2 6a8 8 0 0 1 0 12'/></svg>"); }
+  #watchReel .reelSound:active { transform: scale(.92); }
+  #watchReel .reelSound.muted { background-color: #c0392b; border-color: #9a261a;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='white' d='M3 9v6h4l5 4V5L7 9H3z'/><path fill='none' stroke='white' stroke-width='2' stroke-linecap='round' d='M16 9l6 6M22 9l-6 6'/></svg>"); }
+  #watchReel .reelNext  { left:  calc(2vw + env(safe-area-inset-left, 0px) + 116px); padding: .3em 1em; }
+  body.reelOpen { overflow: hidden; }
+
   /* ===== Play / pause / next icons drawn in pure CSS (no SVG or emoji) =====
      iOS/iPadOS Safari was collapsing the percentage-sized inline <svg> in these
      flex buttons to nothing, so the buttons looked empty. CSS borders/bars render
      identically everywhere. Sized in em; font-size below sets the scale. */
   .micon { position: relative; }
   .homeFoot .mBtn.micon { font-size: clamp(30px, 3.2vw, 38px); }
-  #gamePlayer .gpBtn.micon { font-size: min(6.4vh, 10.5vw); }
+  #gamePlayer .gpBtn.micon { font-size: 52px; }
   .micon::before, .micon::after { pointer-events: none; }
   /* PLAY: a right-pointing triangle */
   .micon-play::before { content: ''; position: absolute; left: 52%; top: 50%; transform: translate(-50%, -50%);
@@ -1388,10 +1465,28 @@
   #buddy.left  { left: 2vw;  transform: translateX(-200%); }
   #buddy.right { right: 2vw; transform: translateX(200%); flex-direction: row-reverse; }
   #buddy.in { transform: translateX(0); }
-  #buddy .buddyFace { display: inline-block; animation: buddyBob .5s ease-in-out infinite alternate; }
-  #buddy .buddyGesture { display: inline-block; font-size: .68em; animation: gestureWiggle .32s ease-in-out infinite alternate; }
+  #buddy .buddyFace { display: inline-block; vertical-align: bottom; animation: buddyBob .5s ease-in-out infinite alternate; }
+  /* The celebratory item sits BEHIND Yako and Zoe, small and tucked in over his shoulder
+     on the side facing the middle of the screen. It used to be a hand twice this size in
+     FRONT of him, which covered the character and -- worse for a three-year-old -- read as
+     an instruction to do something with their own hands. Negative z-index stays inside
+     #buddy's own stacking context (the parent sets z-index: 8), so it slips behind the
+     canvas without falling behind the page. */
+  #buddy .buddyGesture {
+    position: absolute; bottom: 46%; z-index: -1;
+    font-size: .24em; line-height: 1; opacity: .85;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,.2));
+    animation: gesturePop .44s cubic-bezier(.2, 1.4, .4, 1) both,
+               gestureWiggle 1.5s ease-in-out .44s infinite alternate; }
+  #buddy.left  .buddyGesture { right: -7%; }
+  #buddy.right .buddyGesture { left:  -7%; }
   @keyframes buddyBob { from { transform: translateY(0); } to { transform: translateY(-2.2vh) rotate(-3deg); } }
-  @keyframes gestureWiggle { from { transform: rotate(-16deg) scale(.95); } to { transform: rotate(16deg) scale(1.12); } }
+  @keyframes gesturePop { from { transform: scale(.3) rotate(-14deg); opacity: 0; }
+                          to   { transform: scale(1)  rotate(-5deg);  opacity: .85; } }
+  @keyframes gestureWiggle { from { transform: rotate(-5deg) scale(.98); } to { transform: rotate(5deg) scale(1.03); } }
+  @media (prefers-reduced-motion: reduce) {
+    #buddy .buddyGesture { animation: none; transform: none; }
+  }
 
   /* round home / sound buttons */
   .roundBtn {
@@ -1423,7 +1518,10 @@
     animation: winPop .5s cubic-bezier(.2,1.4,.4,1);
   }
   @keyframes winPop { from { transform: scale(.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  /* the win art is a silent 5s loop rendered on the card's own parchment colour;
+     mix-blend-mode multiply is NOT used - the clip already matches --parch. */
   .winYako { display: block; width: min(26vh, 38vw); max-width: 240px; margin: -2vh auto 0; pointer-events: none;
+    background: transparent; border: 0;
     animation: winYakoJump .6s cubic-bezier(.2,1.6,.4,1) .15s both, winYakoBob 1.9s ease-in-out .8s infinite; }
   @keyframes winYakoJump { 0% { transform: translateY(40px) scale(.5); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
   @keyframes winYakoBob  { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
@@ -1756,6 +1854,68 @@
   .stCount { display: flex; flex-wrap: wrap; gap: .3em; justify-content: center; width: 100%; margin-bottom: .6vh; }
   .stCount span { font-size: clamp(30px, 4vw, 56px); animation: stPop .4s ease both; }
   /* choose-a-picture */
+  /* the spoken task instruction, shown above the pictures it refers to */
+  .stAsk { flex-basis: 100%; text-align: center; font-family: 'Baloo 2', sans-serif;
+    font-weight: 800; color: var(--blue-d); font-size: clamp(15px, 2.2vw, 21px);
+    margin: 0 0 .62em; width: 100%; }
+  /* The number a child presses to pick this option. Same gold disc as the countdown
+     pill so it reads as "a key you press" rather than as part of the picture. */
+  /* the disc sits ABOVE the card, not on it -- a number over the picture is the one
+     thing a pre-reader is actually looking at, so it has to clear it entirely. The
+     margin reserves the room it now needs so it never rides up into the question. */
+  .stChoice, .stFork { position: relative; margin-top: .42em; }
+  .stNum { position: absolute; top: -1.34em; left: 50%; transform: translateX(-50%); z-index: 2;
+    min-width: 1.5em; height: 1.5em; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--gold); color: #4a3410; border: 3px solid #fff7df;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: clamp(22px, 3.4vw, 34px);
+    box-shadow: 0 3px 6px rgba(60,40,10,.34); pointer-events: none; }
+
+  /* When the narrator asks the question, the options hop in turn — 1, then 2, then 3.
+     It answers two things at once for a child who cannot read: these are the things you
+     are choosing between, and this is the order their numbers run in. Fires with the
+     spoken prompt, not on render, so the movement arrives with the words. */
+  @keyframes stPeek {
+    0%   { transform: translateY(0)     scale(1);    }
+    30%  { transform: translateY(-16px) scale(1.07); }
+    55%  { transform: translateY(0)     scale(1);    }
+    70%  { transform: translateY(-6px)  scale(1.02); }
+    100% { transform: translateY(0)     scale(1);    }
+  }
+  .stChoice.peek, .stFork.peek, .stKey.peek, .stTile.peek {
+    animation: stPeek .78s ease-out calc(var(--n, 0) * .09s) both; }
+  /* the picture choices are few and large, so they can afford a slower cascade */
+  .stChoice.peek, .stFork.peek { animation-delay: calc(var(--n, 0) * .17s); }
+  @media (prefers-reduced-motion: reduce) {
+    .stChoice.peek, .stFork.peek, .stKey.peek, .stTile.peek { animation: none !important; }
+  }
+
+  /* A firework over the card the child just got right. Three shells go off in turn, each
+     throwing its own sparks out and letting them arc down -- the pay-off for a correct
+     answer, on top of the chime. The layer deletes itself, so nothing accumulates. */
+  .fxBurst { position: fixed; z-index: 60; width: 0; height: 0; pointer-events: none; }
+  .fxShell { position: absolute; }
+  .fxSpark { position: absolute; left: 0; top: 0;
+    width: var(--sz, 9px); height: var(--sz, 9px);
+    margin: calc(var(--sz, 9px) / -2) 0 0 calc(var(--sz, 9px) / -2);
+    border-radius: 50%; background: var(--c, #ffd34d);
+    box-shadow: 0 0 14px var(--c, #ffd34d), 0 0 0 1px rgba(70,45,10,.18);
+    animation: fxFly var(--dur, 1s) cubic-bezier(.11,.62,.3,1) var(--del, 0s) both; }
+  /* the +46px is gravity: the spark keeps going out, but it also falls */
+  @keyframes fxFly {
+    0%   { transform: translate(0, 0) scale(.45); opacity: 1; }
+    48%  { opacity: 1; }
+    100% { transform: translate(var(--dx, 0), calc(var(--dy, 0) + 46px)) scale(.2); opacity: 0; }
+  }
+  .fxRing { position: absolute; left: 0; top: 0; width: 16px; height: 16px; margin: -8px 0 0 -8px;
+    border-radius: 50%; border: 4px solid #ffc21a;
+    animation: fxRing .46s ease-out var(--del, 0s) both; }
+  @keyframes fxRing {
+    0%   { transform: scale(.35); opacity: .95; }
+    100% { transform: scale(9);    opacity: 0;   }
+  }
+  @media (prefers-reduced-motion: reduce) { .fxBurst { display: none; } }
+  .stChoice .stPic { display: block; line-height: 1; }
   .stChoice { cursor: pointer; border: 4px solid var(--gold); border-radius: 20px; background: #fff7df;
     font-size: clamp(40px, 5vw, 72px); padding: 1.2vh 1.4vw; line-height: 1; box-shadow: 0 5px 0 var(--gold-d);
     transition: transform .1s ease, box-shadow .1s ease; }
@@ -1894,6 +2054,892 @@
   #panel .pcorner.bl { bottom: 3px; left: 3px; transform: scaleY(-1); }
   #panel .pcorner.br { bottom: 3px; right: 3px; transform: scale(-1, -1); }
   #panel > #prompt, #panel > #target { position: relative; z-index: 1; }
+
+  /* ===================== Mission Ranch counting activity =====================
+     A standalone full-screen activity (js/ranch.js). It follows the #story
+     precedent: a fixed overlay stacked ABOVE #start (z-index 10) rather than
+     swapping display on #start, so the home screen never repaints underneath. */
+  .ranchScreen {
+    position: fixed; inset: 0; z-index: 45;
+    display: flex; flex-direction: column;
+    background: #cfe0ea; font-family: 'Baloo 2', sans-serif;
+    overscroll-behavior: contain;      /* the activity never scrolls the page */
+    user-select: none; -webkit-user-select: none;
+  }
+  .ranchScreen[hidden] { display: none; }   /* [hidden] loses to display:flex without this */
+
+  .ranchScreen .rTop {
+    position: absolute; z-index: 6;
+    top: max(10px, env(safe-area-inset-top));
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    display: flex; align-items: center; gap: 10px;
+  }
+  .ranchScreen .rRound {
+    margin-inline-start: auto;
+    background: rgba(255,250,235,.86); color: var(--ink);
+    border: 2px solid var(--gold); border-radius: 999px;
+    padding: 4px 14px; font-weight: 800; font-size: clamp(12px, 1.7vmin, 16px);
+  }
+  .ranchScreen .rIcon {
+    width: 56px; height: 56px; min-width: 56px;
+    display: grid; place-items: center;
+    font-size: 26px; line-height: 1; cursor: pointer;
+    background: var(--parch2); color: var(--ink);
+    border: 3px solid var(--gold); border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(80,60,20,.26);
+    touch-action: manipulation; padding: 0;
+  }
+  .ranchScreen .rIcon:active { transform: scale(.92); }
+
+  .ranchScreen .rStage {
+    position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden;
+    /* 21:9 so a wide, short stage still keeps the farmhouse, coast and sky in
+       frame. The meadow is deliberately EMPTY — painted livestock in the
+       background would get counted along with the game's sheep. */
+    background: url('scenes/mission_ranch_field.jpg') center/cover no-repeat, #b9c2c6;
+  }
+  .ranchScreen .rFlock { position: absolute; inset: 0; }
+
+  /* ---- a tappable sheep ---- */
+  .ranchScreen .sheep {
+    position: absolute; transform: translate(-50%, -50%);
+    width: clamp(78px, 15vmin, 148px); aspect-ratio: 120 / 100;
+    padding: 0; margin: 0; border: 0; background: none; cursor: pointer;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    animation: sheepIn .5s cubic-bezier(.2,1.3,.4,1) var(--d, 0ms) backwards;
+  }
+  /* The shared walking loop draws into a canvas inside each sheep; the painted still
+     underneath stays as the fallback and is hidden only once a canvas is actually there. */
+  .ranchScreen .shArt canvas.shWalk {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: contain; display: block; pointer-events: none;
+  }
+  .ranchScreen .shArt.hasWalk { background-image: none !important; }
+  .ranchScreen .sheep .shSvg {
+    width: 100%; height: 100%; display: block;
+    transform: scale(var(--s, 1)); transform-origin: 50% 85%;
+    filter: hue-rotate(var(--tone, 0deg));
+    animation: sheepIdle 4.4s ease-in-out infinite;
+    animation-delay: var(--d, 0ms);
+  }
+  .ranchScreen .sheep:focus-visible { outline: none; }
+  .ranchScreen .sheep:focus-visible .shSvg {
+    outline: 4px solid #2b7fff; outline-offset: 4px; border-radius: 18px;
+  }
+  .ranchScreen .sheep:active .shSvg { transform: scale(calc(var(--s, 1) * .94)); }
+
+  .shShadow { fill: rgba(70,80,40,.20); }
+  .shWool   { fill: #f0e6cd; }
+  .shLegs rect { fill: #a3906a; }
+  .shFace   { fill: #cbb68c; }
+  .shEar    { fill: #b5a07a; }
+  .shEye    { fill: #5b4a33; }
+  .shGlint  { fill: #fff; }
+
+  /* counted: a persistent marker AND a number — never colour alone */
+  .ranchScreen .sheep.counted .shWool { fill: #fffdf4; }
+  .ranchScreen .sheep.counted .shSvg  { animation: sheepCounted .55s ease-out; }
+  .ranchScreen .shBadge {
+    position: absolute; top: -6%; inset-inline-end: -6%;
+    min-width: 34%; height: 34%;
+    display: none; place-items: center;
+    background: var(--blue); color: #fff;
+    border: 3px solid #fff; border-radius: 999px;
+    font-weight: 900; font-size: clamp(15px, 3.4vmin, 30px);
+    box-shadow: 0 3px 9px rgba(0,0,0,.3);
+    animation: badgePop .38s cubic-bezier(.2,1.5,.4,1);
+  }
+  .ranchScreen .sheep.counted .shBadge { display: grid; }
+  .ranchScreen .sheep.nudge .shSvg { animation: sheepNudge .9s ease-in-out 2; }
+
+  /* ---- Yako + puppy: whole-character motion only (a flat image must never be
+         skewed to fake limb movement) ---- */
+  .ranchScreen .rYako {
+    position: absolute; bottom: 0; inset-inline-start: 1%;
+    width: clamp(88px, 15vmin, 190px); height: auto;
+    pointer-events: none; transform-origin: 50% 100%;
+    filter: drop-shadow(0 6px 10px rgba(60,50,20,.3));
+    transition: transform .35s ease;
+  }
+  .ranchScreen .rYako.welcome { animation: yakoWelcome 1.5s ease-in-out; }
+  .ranchScreen .rYako.cheer   { animation: yakoCheer .75s ease-in-out 2; }
+  .ranchScreen .rYako.point   { animation: yakoPoint 1s ease-in-out 2; }
+
+  /* ---- instruction bar ---- */
+  .ranchScreen .rBar {
+    flex: 0 0 auto; display: flex; flex-wrap: wrap;
+    align-items: center; justify-content: center; gap: 10px 14px;
+    padding: 12px clamp(12px, 3vw, 26px);
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    background: var(--parch); border-top: 5px solid var(--gold);
+    box-shadow: 0 -6px 18px rgba(80,60,20,.18);
+  }
+  .ranchScreen .rText {
+    margin: 0; flex: 1 1 260px; min-width: 0;
+    color: var(--ink); font-weight: 800; text-align: center;
+    font-size: clamp(17px, 2.6vmin, 28px); line-height: 1.25;
+  }
+  .ranchScreen .rChoices {
+    display: none; width: 100%; flex-wrap: wrap;
+    justify-content: center; gap: clamp(10px, 2vw, 18px);
+  }
+  .ranchScreen .rChoices.on { display: flex; }
+  .ranchScreen .rNum {
+    min-width: 84px; min-height: 84px; padding: 0 10px;
+    font-family: inherit; font-weight: 900; font-size: clamp(30px, 6vmin, 52px);
+    color: var(--blue-d); background: var(--parch2);
+    border: 4px solid var(--gold); border-radius: 20px; cursor: pointer;
+    box-shadow: 0 5px 0 var(--gold-d), 0 8px 16px rgba(80,60,20,.22);
+    touch-action: manipulation;
+  }
+  .ranchScreen .rNum:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--gold-d); }
+  .ranchScreen .rNum.right { background: #d8f5e3; border-color: #2bb673; color: #1d7a4c; }
+  .ranchScreen .rNum.nope  { opacity: .45; }
+  .ranchScreen .rNum.show  { animation: numShow 1.1s ease-in-out 3; }
+  .ranchScreen .rNum[disabled] { cursor: default; }
+  .ranchScreen .rBig {
+    min-height: 68px; padding: 0 clamp(18px, 4vw, 34px);
+    font-family: inherit; font-weight: 900; font-size: clamp(17px, 2.5vmin, 24px);
+    color: #fff; background: var(--blue);
+    border: 4px solid var(--blue-d); border-radius: 20px; cursor: pointer;
+    box-shadow: 0 5px 0 var(--blue-d), 0 8px 16px rgba(80,60,20,.22);
+    touch-action: manipulation;
+  }
+  .ranchScreen .rBig:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--blue-d); }
+
+  .ranchScreen .rSpark {
+    position: absolute; pointer-events: none; font-size: clamp(18px, 3.4vmin, 32px);
+    animation: rSpark 1.3s ease-out var(--d, 0ms) forwards;
+  }
+
+  @keyframes sheepIn   { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.5); }
+                       100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+  @keyframes sheepIdle { 0%,100% { transform: scale(var(--s,1)) translateY(0); }
+                          50%    { transform: scale(var(--s,1)) translateY(-2.5%); } }
+  @keyframes sheepCounted { 0% { transform: scale(var(--s,1)); }
+                           35% { transform: scale(calc(var(--s,1) * 1.22)); }
+                          100% { transform: scale(var(--s,1)); } }
+  @keyframes sheepNudge { 0%,100% { transform: scale(var(--s,1)) rotate(0); }
+                          25%     { transform: scale(calc(var(--s,1) * 1.06)) rotate(-4deg); }
+                          75%     { transform: scale(calc(var(--s,1) * 1.06)) rotate(4deg); } }
+  @keyframes badgePop  { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+  @keyframes yakoWelcome { 0%,100% { transform: translateY(0) rotate(0); }
+                            30%    { transform: translateY(-5%) rotate(-3deg); }
+                            65%    { transform: translateY(-2%) rotate(3deg); } }
+  @keyframes yakoCheer { 0%,100% { transform: translateY(0) scale(1); }
+                          45%    { transform: translateY(-8%) scale(1.04); } }
+  @keyframes yakoPoint { 0%,100% { transform: translateX(0) rotate(0); }
+                          50%    { transform: translateX(6%) rotate(5deg); } }
+  @keyframes numShow   { 0%,100% { transform: scale(1); box-shadow: 0 5px 0 var(--gold-d); }
+                          50%    { transform: scale(1.09); box-shadow: 0 5px 0 var(--gold-d), 0 0 0 6px rgba(43,182,115,.45); } }
+  @keyframes rSpark    { 0%   { opacity: 0; transform: translate(0,0) scale(.4); }
+                         25%  { opacity: 1; }
+                         100% { opacity: 0; transform: translate(var(--dx,0), var(--dy,-60px)) scale(1.15); } }
+
+  /* Respect the OS setting: keep every state change, drop the motion. The
+     entrance keyframe starts at opacity 0, so it needs an explicit reset. */
+  @media (prefers-reduced-motion: reduce) {
+    .ranchScreen .sheep, .ranchScreen .sheep .shSvg, .ranchScreen .shBadge,
+    .ranchScreen .rYako, .ranchScreen .rNum.show, .ranchScreen .rSpark {
+      animation: none !important;
+    }
+    .ranchScreen .sheep { opacity: 1; }
+    .ranchScreen .rSpark { display: none; }
+  }
+  .ranchScreen.reduce .sheep, .ranchScreen.reduce .sheep .shSvg,
+  .ranchScreen.reduce .rYako { animation: none !important; }
+  .ranchScreen.reduce .sheep { opacity: 1; }
+
+  /* Phones: shrink the chrome, never the touch targets. */
+  @media (max-width: 760px) {
+    .ranchScreen .rIcon { width: 50px; height: 50px; min-width: 50px; font-size: 22px; }
+    .ranchScreen .rBar { gap: 8px 10px; padding: 10px 12px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+    .ranchScreen .rNum { min-width: 72px; min-height: 72px; }
+  }
+  /* Landscape phones are short: give the meadow the room, keep targets big. */
+  @media (max-height: 560px) {
+    .ranchScreen .rText { font-size: clamp(15px, 3.4vmin, 20px); flex-basis: 180px; }
+    .ranchScreen .rNum { min-width: 66px; min-height: 66px; font-size: clamp(24px, 7vmin, 34px); }
+    .ranchScreen .rBig { min-height: 56px; }
+    .ranchScreen .rYako { width: clamp(70px, 13vmin, 120px); }
+  }
+
+  /* ================= Phase 1 home: three choices + a grown-ups page =========
+     One clear task at a time. The old START/Choose-a-lesson/Story buttons are
+     NOT deleted — they are relocated into the pages below by JS at start-up so
+     every listener already bound to them keeps working. */
+  .homeChoices { display: flex; flex-direction: column; gap: clamp(9px, 1.4vh, 15px); }
+  .bigChoice {
+    display: flex; align-items: center; justify-content: center; gap: clamp(10px, 2vw, 18px);
+    width: 100%; text-align: center; cursor: pointer;
+    padding: clamp(12px, 1.9vh, 20px) clamp(14px, 2.4vw, 22px);
+    border-radius: 20px; border: 4px solid var(--gold-d);
+    background: linear-gradient(#f6d98b, #e8bf5e); color: #4a3617;
+    box-shadow: 0 6px 0 var(--gold-d), 0 10px 22px rgba(80,60,20,.26);
+    font-family: 'Baloo 2', sans-serif;
+    position: relative;
+    transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+  }
+  .bigChoice .bcIcon, .bigChoice .bcWrap { position: relative; z-index: 1; }
+  .bigChoice:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--gold-d), 0 5px 12px rgba(80,60,20,.24); }
+  /* Painted icons rather than emoji, so the card matches the storybook art.
+     Sized in px/vw because an <img> has no font-size to inherit. */
+  .bigChoice .bcIcon { flex: 0 0 auto; display: block;
+    width: clamp(40px, 6.6vw, 60px); height: clamp(40px, 6.6vw, 60px);
+    object-fit: contain; transform-origin: 50% 65%;
+    filter: drop-shadow(0 2px 3px rgba(60,40,10,.3));
+    transition: transform .25s cubic-bezier(.34,1.56,.64,1); }
+  .bigChoice .bcIconFallback { font-size: clamp(30px, 5.2vw, 46px); line-height: 1; height: auto; filter: none; }
+  .bigChoice .bcWrap { display: flex; flex-direction: column; min-width: 0; text-align: center; }
+  .bigChoice .bcTitle { font-weight: 900; font-size: clamp(25px, 4.2vw, 40px); line-height: 1.08; }
+  .bigChoice .bcSub { font-weight: 700; font-size: clamp(12px, 1.7vw, 16px); opacity: .8; }
+
+  /* Hover is a pointer-only flourish: on a touch screen :hover sticks after a tap and the
+     button would stay lifted. Each icon moves the way the thing it depicts would. */
+  @media (hover: hover) and (pointer: fine) {
+    .bigChoice:hover { transform: translateY(-3px); }
+    .bigChoice.games:hover  { box-shadow: 0 9px 0 var(--blue-d), 0 16px 26px rgba(30,60,90,.3); }
+    .bigChoice.carmel:hover { box-shadow: 0 9px 0 #6f58ab, 0 16px 26px rgba(60,45,100,.3); }
+    .bigChoice.watch:hover  { box-shadow: 0 9px 0 #c07f2c, 0 16px 26px rgba(120,70,20,.3); }
+    .bigChoice:hover .bcTitle { letter-spacing: .01em; }
+    .bigChoice.games:hover  .bcIcon { animation: bcHop .55s ease-in-out; }
+    .bigChoice.carmel:hover .bcIcon { animation: bcSway .9s ease-in-out; }
+    .bigChoice.watch:hover  .bcIcon { animation: bcPulse .62s ease-out; }
+    .bigChoice:active .bcIcon { transform: scale(.9); }
+  }
+
+  @keyframes bcHop  { 0%,100% { transform: translateY(0) rotate(0); }
+                      35% { transform: translateY(-9px) rotate(-7deg); }
+                      65% { transform: translateY(-3px) rotate(4deg); } }
+  @keyframes bcSway { 0%,100% { transform: rotate(0) scale(1); }
+                      30% { transform: rotate(-8deg) scale(1.07); }
+                      70% { transform: rotate(6deg)  scale(1.07); } }
+  @keyframes bcPulse { 0%,100% { transform: scale(1) rotate(0); }
+                       45% { transform: scale(1.14) rotate(-4deg); }
+                       75% { transform: scale(1.04) rotate(1.5deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .bigChoice .bcIcon { transition: none !important; }
+    .bigChoice:hover .bcIcon { animation: none !important; }
+  }
+  .bigChoice.games { background: linear-gradient(#a9d6f5, #74b3e4); border-color: var(--blue-d); color: #16324e;
+                       box-shadow: 0 6px 0 var(--blue-d), 0 10px 22px rgba(30,60,90,.26); }
+  .bigChoice.games:active { box-shadow: 0 2px 0 var(--blue-d), 0 5px 12px rgba(30,60,90,.24); }
+  .bigChoice.watch { background: linear-gradient(#ffd9a8, #f2b167); border-color: #c07f2c; color: #4d3111;
+    box-shadow: 0 6px 0 #c07f2c, 0 10px 18px rgba(120,70,20,.26); }
+  .bigChoice.watch:active { box-shadow: 0 2px 0 #c07f2c, 0 5px 12px rgba(120,70,20,.24); }
+  .bigChoice.carmel { background: linear-gradient(#cdbdf0, #a892e0); border-color: #6f58ab; color: #2e2350;
+                       box-shadow: 0 6px 0 #6f58ab, 0 10px 22px rgba(60,45,100,.26); }
+  .bigChoice.carmel:active { box-shadow: 0 2px 0 #6f58ab, 0 5px 12px rgba(60,45,100,.24); }
+
+  /* ---- shared hover wash -------------------------------------------------------
+     Every button on the home card lightens by the same amount on hover, so the three
+     big cards, the lesson tiles, START, the pickers and the grown-ups door all answer
+     the pointer identically. It has to be `filter` rather than a tint overlay: .modeBtn
+     already spends both ::before and ::after (inner border, dot texture) and paints a
+     two-layer gradient background, so it has nowhere left to put one. filter works on
+     all of them regardless of how they are painted.
+     Pointer-only: on a touch screen :hover sticks after a tap and the button would stay
+     lit until something else was pressed. */
+  .bigChoice, #start .btnGrid .modeBtn, #startBtn, #storyBtn, #chooseBtn, #chooseStoryBtn,
+  .pickBtn, .parentDoor, .groupHead, .flagBtn, .personaBtn {
+    transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .bigChoice:hover, #start .btnGrid .modeBtn:hover, #startBtn:hover, #storyBtn:hover,
+    #chooseBtn:hover, #chooseStoryBtn:hover, .pickBtn:hover, .parentDoor:hover,
+    .groupHead:hover, .flagBtn:hover, .personaBtn:hover {
+      filter: brightness(1.09) saturate(1.14);
+    }
+    .bigChoice:active, #start .btnGrid .modeBtn:active, #startBtn:active, #storyBtn:active,
+    #chooseBtn:active, #chooseStoryBtn:active, .pickBtn:active, .parentDoor:active,
+    .groupHead:active, .flagBtn:active, .personaBtn:active {
+      filter: brightness(1.03) saturate(1.06);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bigChoice, #start .btnGrid .modeBtn, #startBtn, #storyBtn, #chooseBtn, #chooseStoryBtn,
+    .pickBtn, .parentDoor, .groupHead, .flagBtn, .personaBtn { transition: none !important; }
+  }
+
+  .parentDoor {
+    align-self: center; margin-top: .3em; cursor: pointer;
+    background: transparent; border: 2px dashed #cdbb8e; border-radius: 999px;
+    color: #8a6a35; font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: clamp(12px, 1.6vw, 15px); padding: .42em 1.1em;
+  }
+  .parentDoor:hover { background: #fdf6e0; }
+
+  /* the grown-ups page swaps the card, exactly like the lessons/stories pages */
+  .homeCard:not(.parentOpen) .parentPage, .homeCard:not(.parentOpen) .parentHead { display: none; }
+  .homeCard.parentOpen > :not(.parentPage):not(.parentHead) { display: none !important; }
+  .homeCard.parentOpen { max-height: 80vh; }
+  .homeCard.parentOpen .parentHead { display: flex; }
+  .parentHead { align-items: center; justify-content: space-between; gap: .5em; padding-bottom: .4em; }
+  .parentHead #parentBack {
+    cursor: pointer; background: #fdf6e0; border: 2px solid var(--gold); border-radius: 999px;
+    color: var(--ink); font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: clamp(12px, 1.6vw, 15px); padding: .35em .9em;
+  }
+  .parentPage { display: flex; flex-direction: column; gap: clamp(10px, 1.6vh, 16px); text-align: start; }
+  .parentPage .ppNote { margin: 0; color: #8a6a35; font-weight: 700; font-size: clamp(12px, 1.6vw, 15px); line-height: 1.35; }
+  .ppGroup { display: flex; flex-direction: column; gap: .5em;
+             border-top: 1.5px solid #ece0bf; padding-top: .6em; }
+  .ppHead { font-family: 'Baloo 2', sans-serif; font-weight: 800; color: #8a6a35; font-size: clamp(13px, 1.7vw, 16px); }
+  .ppTiers { display: flex; gap: .5em; flex-wrap: wrap; }
+  .ppTier {
+    flex: 1 1 30%; min-height: 58px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .1em;
+    background: #fdf6e0; border: 3px solid var(--gold); border-radius: 14px;
+    font-family: 'Baloo 2', sans-serif; color: var(--ink); padding: .4em .5em;
+  }
+  .ppTier b { font-size: clamp(13px, 1.7vw, 16px); }
+  .ppTier i { font-style: normal; font-size: clamp(11px, 1.4vw, 13px); opacity: .72; }
+  .ppTier[aria-pressed="true"] { background: var(--blue); border-color: var(--blue-d); color: #fff; }
+  .ppSlide { display: flex; align-items: center; gap: .7em; font-weight: 800; color: var(--ink);
+             font-size: clamp(13px, 1.7vw, 16px); }
+  .ppSlide input[type="range"] { flex: 1; min-width: 0; accent-color: var(--blue); height: 30px; }
+  .ppProgressLine { color: var(--ink); font-weight: 700; font-size: clamp(13px, 1.7vw, 16px); }
+  .ppBtn {
+    min-height: 48px; cursor: pointer; font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: clamp(13px, 1.8vw, 17px); color: #fff; background: var(--blue);
+    border: 3px solid var(--blue-d); border-radius: 14px; padding: .5em 1em;
+  }
+  .ppBtn.ghost { background: #fdf6e0; color: var(--ink); border-color: var(--gold); }
+  .ppLinks { text-align: center; font-size: clamp(11px, 1.4vw, 13px); color: #8a6a35; }
+  .ppLinks a { color: #8a6a35; }
+
+  /* the language menu names each language, not just its flag */
+  #langPop { flex-direction: column; align-items: stretch; }
+  #langPop .flagBtn { display: flex; align-items: center; gap: .55em; width: 100%; justify-content: flex-start; }
+  #langPop .flagName { font-family: 'Baloo 2', sans-serif; font-weight: 800;
+                       font-size: clamp(13px, 1.7vw, 16px); color: var(--ink); }
+
+  /* the relocated name field and pickers sit in the grown-ups page now */
+  .parentPage .nameRow, .parentPage .pickRow { margin: 0; }
+  .parentPage .pickRow { display: flex; gap: .6em; flex-wrap: wrap; }
+
+  @media (prefers-reduced-motion: reduce) { .bigChoice { transition: none !important; } }
+
+  /* ============ Explore drill-down: tidier group page ============
+     Three fixes to the sub-lesson page:
+     1. The campaign button belongs on the Explore landing, not repeated inside
+        every group where it dwarfs the actual lesson tiles.
+     2. The 13vh foot-ribbon clearance leaves a huge empty well on a short page.
+     3. An odd number of tiles left a hole in the last row; centre it instead. */
+  .homeCard.subOpen #startBtn { display: none !important; }
+  .homeCard.subOpen .lessonGroups { padding-bottom: 5vh; }
+  .homeCard.subOpen .lgroup.open .btnGrid { align-content: start; }
+  .homeCard.subOpen .lgroup.open .btnGrid > *:last-child:nth-child(odd) {
+    grid-column: 1 / -1; justify-self: center; width: min(100%, calc(50% - 0.5vw));
+  }
+  /* the group name is the page title, so let it carry the weight */
+  .homeCard.subOpen .lhTitle { font-size: clamp(18px, 2.6vw, 27px); }
+  @media (max-width: 760px) {
+    .homeCard.subOpen .lessonGroups { padding-bottom: 4vh; }
+    .homeCard.subOpen .lgroup.open .btnGrid > *:last-child:nth-child(odd) { width: 100%; }
+  }
+
+  /* ---- Mission Ranch: typed answer pad + 4-pose Yako (replaces tap-to-count) ---- */
+  .ranchScreen .sheep { pointer-events: none; }        /* decorative now: the answer is typed */
+  .ranchScreen .sheep.ping .shSvg { animation: sheepCounted .5s ease-out; }
+  .ranchScreen .rSep {
+    position: absolute; top: 46%; transform: translate(-50%, -50%);
+    font-family: 'Baloo 2', sans-serif; font-weight: 900;
+    font-size: clamp(30px, 6vmin, 62px); color: #fff;
+    text-shadow: 0 3px 10px rgba(40,50,20,.55), 0 0 3px rgba(40,50,20,.5);
+    pointer-events: none;
+  }
+  .ranchScreen .rAnswer {
+    min-width: clamp(96px, 20vmin, 150px); min-height: clamp(58px, 9vmin, 84px);
+    display: grid; place-items: center; padding: 0 .4em;
+    background: #fffdf4; border: 4px dashed var(--gold); border-radius: 18px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 900; color: var(--blue-d);
+    font-size: clamp(30px, 6.4vmin, 56px); line-height: 1;
+  }
+  .ranchScreen .rAnswer.empty::after { content: '_'; opacity: .35; }
+  .ranchScreen .rAnswer.right { background: #d8f5e3; border-style: solid; border-color: #2bb673; color: #1d7a4c; }
+  .ranchScreen .rAnswer.nope  { animation: answerShake .4s ease-in-out; border-color: #d9534f; }
+  .ranchScreen .rPad {
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    gap: clamp(5px, .9vmin, 10px); flex: 1 1 320px; max-width: 560px;
+  }
+  .ranchScreen .rKey {
+    min-height: clamp(48px, 7.4vmin, 66px);
+    font-family: 'Baloo 2', sans-serif; font-weight: 900;
+    font-size: clamp(20px, 3.6vmin, 30px);
+    color: var(--blue-d); background: var(--parch2);
+    border: 3px solid var(--gold); border-radius: 13px; cursor: pointer;
+    box-shadow: 0 4px 0 var(--gold-d); touch-action: manipulation; padding: 0;
+  }
+  .ranchScreen .rKey:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--gold-d); }
+  .ranchScreen .rKey.back { color: #a9762a; }
+  .ranchScreen .rKey:focus-visible { outline: 3px solid #2b7fff; outline-offset: 2px; }
+
+  /* Yako + puppy: a real 4-frame flipbook, not a squashed single image */
+  .ranchScreen .rYako {
+    position: absolute; bottom: 0; inset-inline-start: 1%;
+    width: clamp(96px, 17vmin, 210px); aspect-ratio: 408 / 516;
+    background: url('ui/yako_poses.png') no-repeat 0% bottom / 400% 100%;
+    pointer-events: none; transform-origin: 50% 100%;
+    filter: drop-shadow(0 6px 10px rgba(60,50,20,.3));
+    animation: yakoIdle 4.6s ease-in-out infinite;
+  }
+  .ranchScreen .rYako.welcome { animation: yakoWaveFrames .5s steps(1) infinite, yakoBounce 1.1s ease-in-out infinite; }
+  .ranchScreen .rYako.cheer   { animation: yakoWaveFrames .28s steps(1) infinite, yakoBounce .55s ease-in-out infinite; }
+  .ranchScreen .rYako.point   { background-position-x: 100%; animation: yakoLean 1.1s ease-in-out infinite; }
+  /* waiting for the child to type — calm, slow, never demanding attention */
+  .ranchScreen .rYako.idle    { background-position-x: 0%; animation: yakoIdle 4.6s ease-in-out infinite; }
+  /* wrong answer — a gentle "that's OK, keep going" sway, not a negative reaction */
+  .ranchScreen .rYako.sorry   { background-position-x: 0%; animation: yakoSorry 1.15s ease-in-out 2; }
+
+  @keyframes yakoSorry { 0%,100% { transform: translateX(0) rotate(0); }
+                         30% { transform: translateX(-3.5%) rotate(-3deg); }
+                         70% { transform: translateX(3.5%) rotate(3deg); } }
+  @keyframes yakoWaveFrames { 0% { background-position-x: 33.333%; } 50% { background-position-x: 66.666%; } 100% { background-position-x: 33.333%; } }
+  @keyframes yakoBounce { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-4%) scale(1.02); } }
+  @keyframes yakoIdle   { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-1.6%); } }
+  @keyframes yakoLean   { 0%,100% { transform: translateX(0) rotate(0); } 50% { transform: translateX(3%) rotate(2deg); } }
+  @keyframes sheepAway  { 0%,100% { transform: translateX(0); } 50% { transform: translateX(7%); } }
+  @keyframes answerShake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-7px); } 75% { transform: translateX(7px); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ranchScreen .rYako, .ranchScreen .rYako.welcome, .ranchScreen .rYako.cheer,
+    .ranchScreen .rYako.idle, .ranchScreen .rYako.sorry,
+    .ranchScreen .rAnswer.nope { animation: none !important; }
+    .ranchScreen .rYako.welcome, .ranchScreen .rYako.cheer { background-position-x: 33.333%; }
+  }
+  @media (max-width: 760px) {
+    /* 6 columns cannot reach the 64px touch-target floor on a 375px phone
+       (375 - padding - gaps) / 6 = ~54px. Four columns gives ~84px. */
+    .ranchScreen .rPad { grid-template-columns: repeat(4, 1fr); gap: 7px; flex-basis: 100%; }
+    .ranchScreen .rKey { min-height: 64px; font-size: 24px; }
+    .ranchScreen .rAnswer { min-width: 84px; min-height: 56px; font-size: 28px; }
+  }
+  /* Landscape phones are short, so keep the pad wide and flat there instead. */
+  @media (max-height: 560px) and (orientation: landscape) {
+    .ranchScreen .rPad { grid-template-columns: repeat(6, 1fr); gap: 5px; }
+    .ranchScreen .rKey { min-height: 44px; font-size: 20px; }
+  }
+  @media (max-height: 560px) {
+    .ranchScreen .rKey { min-height: 44px; }
+    .ranchScreen .rAnswer { min-height: 46px; font-size: 26px; }
+  }
+
+  /* =================== Story Time as a picture book =======================
+     Two rows: a full-bleed painted plate, and an opaque paper band. The old
+     look floated a parchment CARD over a dark scrim, which read as a quiz
+     worksheet laid on top of the art. Nothing floats now.
+     Organising rule: things you POINT AT live in the picture; letters,
+     numbers and words live on the paper. ==================================== */
+  /* place-* must be explicit: the original #story rule centres its children for
+     the old flex card, and in grid that makes each row size to content — the
+     stage then collapses to 0 because everything inside it is absolute. */
+  #story.book.show {
+    display: grid; grid-template-rows: minmax(0, 1fr) auto; grid-template-columns: 100%;
+    place-items: stretch; place-content: stretch; padding: 0;
+  }
+
+  #story.book #bookStage { position: relative; overflow: hidden; min-height: 0; background: #b9c2c6; }
+  #story.book #storyBg {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  /* was a flat dark scrim over everything; now just enough weight at the seam
+     so the plate meets the paper without a hard edge */
+  #story.book #storyScrim {
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(to bottom, rgba(20,30,45,.20) 0%, rgba(20,30,45,0) 26%,
+                                rgba(20,30,45,0) 62%, rgba(60,45,20,.30) 100%);
+  }
+  /* the emoji cast now stands IN the picture, at picture-book scale */
+  /* A soft halo behind the cast. The painted backdrops have their own scenery
+     (Mission Ranch has a whole flock), so on a counting beat the countable
+     emoji must read as separate from the painting without a hard box. */
+  #story.book #storyArt::before {
+    content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 118%; height: 190%; z-index: -1; pointer-events: none;
+    background: radial-gradient(ellipse at center, rgba(255,250,232,.80) 0%,
+                                rgba(255,250,232,.52) 42%, rgba(255,250,232,0) 72%);
+  }
+  #story.book #storyArt {
+    position: absolute; left: 50%; top: 56%; transform: translate(-50%, -50%); isolation: isolate;
+    width: min(92%, 1100px); text-align: center; line-height: 1.05;
+    font-size: clamp(44px, 12vmin, 128px);
+    filter: drop-shadow(0 8px 14px rgba(30,40,20,.42));
+    animation: bookArtIn .5s cubic-bezier(.2,1.3,.4,1) both;
+  }
+
+  /* ---- the paper band ---- */
+  #story.book #bookPage {
+    position: static; transform: none; max-height: none; width: auto;
+    display: flex; flex-direction: column; align-items: center; gap: .7vh;
+    background: var(--parch); border: none; border-top: 6px solid var(--gold);
+    border-radius: 0; box-shadow: 0 -8px 26px rgba(60,45,20,.30);
+    padding: clamp(10px, 1.8vh, 20px) clamp(14px, 4vw, 44px);
+    padding-bottom: calc(clamp(10px, 1.8vh, 20px) + env(safe-area-inset-bottom, 0px));
+    overflow: visible;
+  }
+  #story.book #storyTitle {
+    font-family: 'Baloo 2', sans-serif; font-weight: 900; color: var(--blue);
+    font-size: clamp(15px, 2.1vh, 24px); line-height: 1.1; text-align: center;
+  }
+  /* the sentence is the page: generous, centred, book-like measure */
+  #story.book #storyText {
+    max-width: 44ch; text-align: center; color: #4a3617;
+    font-family: 'Baloo 2', sans-serif; font-weight: 700;
+    font-size: clamp(17px, 2.5vh, 30px); line-height: 1.34; margin: 0;
+    animation: bookTextIn .45s ease-out both;
+  }
+  #story.book #storyTask {
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+    gap: clamp(8px, 1.4vh, 16px); width: 100%;
+  }
+  #story.book #storyTask:empty { display: none; }
+  #story.book #storyNav { display: flex; justify-content: center; width: 100%; }
+  #story.book #storyNav:empty { display: none; }
+
+  /* page beads instead of progress dots */
+  #story.book #storyDots { display: flex; justify-content: center; gap: 7px; margin-top: .2vh; }
+  #story.book #storyDots span {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: #ddcb9d; transition: transform .25s ease, background .25s ease;
+  }
+  #story.book #storyDots span.on   { background: var(--gold-d); transform: scale(1.25); }
+  #story.book #storyDots span.done { background: var(--blue); }
+
+  /* ---- task controls: storybook, not keypad ---- */
+  #story.book .stKey, #story.book .stChoice, #story.book .stTile, #story.book .stFork {
+    font-family: 'Baloo 2', sans-serif; cursor: pointer;
+    background: var(--parch2); color: var(--blue-d);
+    border: 3px solid var(--gold); border-radius: 18px;
+    box-shadow: 0 4px 0 var(--gold-d); touch-action: manipulation;
+  }
+  #story.book .stKey {
+    min-width: 72px; min-height: 72px; font-weight: 900; font-size: clamp(26px, 4.4vh, 40px);
+  }
+  #story.book .stChoice {
+    min-width: 88px; min-height: 88px; font-size: clamp(30px, 5vh, 50px);
+    display: grid; place-items: center; padding: .3em .5em;
+  }
+  #story.book .stTile {
+    min-height: 64px; padding: 0 clamp(12px, 2vw, 22px);
+    font-weight: 800; font-size: clamp(16px, 2.2vh, 26px); color: #4a3617;
+  }
+  #story.book .stTile.used { opacity: .38; }
+  #story.book .stFork {
+    min-height: 76px; padding: .5em 1.1em; display: flex; align-items: center; gap: .6em;
+    font-weight: 800; font-size: clamp(15px, 2.1vh, 23px); color: #4a3617;
+  }
+  #story.book .stKey:active, #story.book .stChoice:active,
+  #story.book .stTile:active, #story.book .stFork:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--gold-d); }
+  #story.book .stKey.right, #story.book .stChoice.right,
+  #story.book .stFork.right { background: #d8f5e3; border-color: #2bb673; color: #1d7a4c; }
+  /* gentle: a miss dims and drifts back, it never flashes red or buzzes */
+  #story.book .stKey.wrong, #story.book .stChoice.wrong { opacity: .45; }
+
+  /* the Next control reads as turning a page */
+  #story.book .stNext {
+    min-height: 60px; padding: 0 clamp(18px, 3.4vw, 34px);
+    font-family: 'Baloo 2', sans-serif; font-weight: 900; font-size: clamp(16px, 2.2vh, 24px);
+    color: #fff; background: var(--blue); border: 3px solid var(--blue-d);
+    border-radius: 18px; box-shadow: 0 4px 0 var(--blue-d); cursor: pointer;
+    touch-action: manipulation;
+  }
+  #story.book .stNext:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--blue-d); }
+
+  /* corner chips sit lighter on a reading surface */
+  #story.book #storyBeta {
+    background: rgba(255,250,235,.85); color: #8a6a35; border: 2px solid var(--gold);
+    font-size: clamp(10px, 1.5vh, 13px); letter-spacing: .04em;
+  }
+
+  /* a flat paper wipe. NO perspective/3-D: a perspective ancestor becomes a
+     containing block for position:fixed descendants — the popover bug. */
+  #story.book #pageSheet {
+    position: absolute; inset: 0; z-index: 8; pointer-events: none; opacity: 0;
+    background: linear-gradient(105deg, rgba(255,250,235,0) 38%, rgba(255,248,226,.92) 50%, rgba(255,250,235,0) 62%);
+  }
+  #story.book.turning #pageSheet { animation: pageWipe .52s ease-in-out; }
+
+  @keyframes pageWipe   { 0% { opacity: 0; transform: translateX(-60%); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateX(60%); } }
+  @keyframes bookArtIn  { 0% { opacity: 0; transform: translate(-50%, -44%) scale(.86); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+  @keyframes bookTextIn { 0% { opacity: 0; transform: translateY(7px); } 100% { opacity: 1; transform: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    #story.book #storyArt, #story.book #storyText, #story.book #pageSheet { animation: none !important; }
+    #story.book #storyArt { opacity: 1; transform: translate(-50%, -50%); }
+  }
+  /* phone portrait: keep the plate big, the paper compact */
+  @media (max-width: 760px) {
+    #story.book #bookPage { gap: .5vh; padding: 10px 14px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+    #story.book #storyText { font-size: clamp(16px, 2.2vh, 22px); max-width: 100%; }
+    #story.book .stKey { min-width: 64px; min-height: 64px; }
+    #story.book .stChoice { min-width: 76px; min-height: 76px; }
+  }
+  /* short landscape: the plate shrinks first, targets stay tappable */
+  @media (max-height: 560px) {
+    #story.book #storyArt { font-size: clamp(34px, 13vh, 76px); }
+    #story.book #storyText { font-size: clamp(14px, 3.4vh, 20px); }
+    #story.book .stKey { min-width: 58px; min-height: 58px; font-size: clamp(20px, 5vh, 30px); }
+    #story.book .stChoice { min-width: 64px; min-height: 64px; font-size: clamp(24px, 5.6vh, 34px); }
+    #story.book .stNext { min-height: 48px; }
+    #story.book #storyTitle { display: none; }
+  }
+
+  /* ---- intro films: a painted Yako clip before a story / Count Sheep ---- */
+  #introFilm {
+    position: fixed; inset: 0; z-index: 70; background: #000;
+    display: grid; place-items: center; cursor: pointer;
+    animation: introIn .3s ease-out;
+  }
+  #introFilm[hidden] { display: none; }
+  #introFilm video { width: 100%; height: 100%; object-fit: contain; display: block; background: #000; }
+  #introFilm .introSkip {
+    position: absolute; z-index: 2;
+    bottom: max(18px, env(safe-area-inset-bottom)); right: max(18px, env(safe-area-inset-right));
+    min-height: 56px; padding: 0 22px; cursor: pointer;
+    font-family: 'Baloo 2', sans-serif; font-weight: 900; font-size: clamp(15px, 2vh, 20px);
+    color: var(--ink); background: rgba(255,250,235,.92);
+    border: 3px solid var(--gold); border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.4);
+  }
+  #introFilm .introSkip:active { transform: translateY(2px); }
+  @keyframes introIn { from { opacity: 0; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { #introFilm { animation: none; } }
+
+  /* ===== sub-menus: one big "play / continue" button, then the level list =====
+     The child can either hit play straight away or pick a different level. The
+     play button spans the SAME width as the rows beneath it so the page reads as
+     one column. The old "Choose a lesson"/"Choose a story" buttons are gone from
+     the UI — the three home choices open these pages directly. */
+  .homeCard.lessonsOpen #startBtn,
+  .homeCard.storiesOpen #storyBtn {
+    display: block !important;
+    width: 100%; box-sizing: border-box; margin: 0 0 1.2vh;
+  }
+  /* #startBtn sits inside the 2-column .lessonGroups grid, so it must be told to
+     span both columns or it shrinks to one tile's width. */
+  .homeCard.lessonsOpen #startBtn { grid-column: 1 / -1; margin-bottom: 0; }
+  /* the lesson tiles and story rows share the play button's width */
+  .homeCard.lessonsOpen .lessonGroups,
+  .homeCard.storiesOpen .storyList,
+  .homeCard.storiesOpen .storyTop { width: 100%; box-sizing: border-box; }
+  .homeCard.storiesOpen #storyBtn .betaBadge { transform: scale(.82); }
+  /* the campaign button stays hidden one level deeper, inside a single group */
+  .homeCard.subOpen #startBtn { display: none !important; }
+
+  /* ===== the Games landing reads as a LIST, matching the Explore page =====
+     Was a 2-column grid of square tiles; now one column of rows (icon, name,
+     chevron) so both sub-menus share one shape: a full-width play button on
+     top, then the levels beneath it at that same width. */
+  .homeCard.lessonsOpen:not(.subOpen) .lessonGroups { grid-template-columns: 1fr; gap: 1.1vh; }
+  .homeCard.lessonsOpen:not(.subOpen) .lgroup {
+    background: #f4f8ff; border: 3px solid var(--blue); border-radius: 18px;
+  }
+  .homeCard.lessonsOpen:not(.subOpen) .groupHead {
+    aspect-ratio: auto; flex-direction: row; align-items: center; justify-content: flex-start;
+    gap: .75em; min-height: 66px; padding: .55em .9em; text-align: start;
+    background: transparent; color: var(--ink);
+    font-size: clamp(15px, 2vw, 21px);
+  }
+  .homeCard.lessonsOpen:not(.subOpen) .groupHead .ghIcon { font-size: 1.85em; flex: 0 0 auto; }
+  .homeCard.lessonsOpen:not(.subOpen) .groupHead .ghName { flex: 1; font-weight: 800; }
+  .homeCard.lessonsOpen:not(.subOpen) .groupHead .chev {
+    display: block; flex: 0 0 auto; color: var(--blue); font-size: .9em; opacity: .75;
+  }
+  .homeCard.lessonsOpen:not(.subOpen) .groupHead:hover { transform: none; background: #e9f2ff; }
+
+  /* the transparent dance loop sits exactly where the sprite is; when it mounts
+     successfully the sprite underneath is hidden, so only one Yako is ever shown */
+  .ranchScreen .rDance {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: contain; display: block; pointer-events: none;
+  }
+  .ranchScreen .rDance { display: none; }
+  .ranchScreen .rYako.hasDance.cheer .rDance { display: block; }
+  .ranchScreen .rYako.hasDance.cheer { background-image: none; animation: none; }
+  @media (prefers-reduced-motion: reduce) { .ranchScreen .rDance { display: none; } }
+
+  /* Language + Narrator live on the main menu, under the three big choices */
+  .homeChoices .pickRow {
+    display: flex; justify-content: center; gap: clamp(8px, 1.6vw, 16px);
+    flex-wrap: wrap; width: 100%; margin-top: .2em;
+  }
+  .homeChoices .pickRow .picker { flex: 1 1 0; min-width: 0; max-width: 50%; }
+  .homeChoices .pickRow .pickBtn {
+    width: 100%; justify-content: center; align-items: center;
+    white-space: nowrap; min-height: 46px;      /* keep both pills the same height */
+  }
+  .homeChoices .pickRow .pkVal { display: inline-flex; align-items: center; gap: .35em; }
+  .homeChoices .pickRow .flagName { font-size: .95em; }
+
+  /* moving painted scene on a location card, layered over its still */
+  #placeCard .pcSceneVid {
+    position: absolute; left: 0; top: 0; width: 100%; aspect-ratio: 16 / 9;
+    object-fit: cover; display: block; border-radius: 16px 16px 0 0;
+    pointer-events: none;
+  }
+  #placeCard .pcSceneVid[hidden] { display: none; }
+  @media (prefers-reduced-motion: reduce) { #placeCard .pcSceneVid { display: none; } }
+
+  /* ==================== mobile pass ====================
+     Fixes found by measuring at 375x812:
+       1. the Language pill's content ran past its own border (flag + name +
+          chevron needed 193px inside a 150px pill)
+       2. the Games / Explore / grown-ups lists ran underneath the fixed foot
+          ribbon, so the last row could not be reached
+       3. "For grown-ups" was a 34px tap target
+       4. the Count Sheep input bar took 48% of the screen height           */
+  @media (max-width: 760px) {
+    /* 1. give each picker its own full-width row instead of squeezing two side by side */
+    .homeChoices .pickRow { flex-direction: column; gap: 8px; }
+    .homeChoices .pickRow .picker { max-width: none; width: 100%; }
+    .homeChoices .pickRow .pickBtn { min-height: 48px; gap: .5em; padding: .3em .9em; }
+
+    /* 2. keep the card clear of the fixed foot ribbon, and let the last row
+          scroll fully into view inside it.
+          PORTRAIT ONLY: on a sideways phone (667x375) 100dvh - 15.5rem collapses the
+          card to ~127px and its contents render outside the parchment panel. */
+    @media (orientation: portrait) {
+      .homeCard, .homeCard.lessonsOpen, .homeCard.storiesOpen, .homeCard.parentOpen {
+        max-height: calc(100vh - 15.5rem);
+        max-height: calc(100dvh - 15.5rem);
+      }
+    }
+    .homeCard.lessonsOpen .lessonGroups,
+    .homeCard.storiesOpen .storyList,
+    .homeCard.parentOpen .parentPage { padding-bottom: 1.2rem; }
+
+    /* 3. a comfortable tap target for the grown-ups door */
+    .parentDoor { min-height: 44px; padding: .5em 1.3em; }
+
+    /* roomier rows and a calmer rhythm on a phone */
+    .homeChoices { gap: 10px; }
+    .bigChoice { padding: 12px 14px; }
+    .bigChoice .bcTitle { font-size: 26px; }
+    .bigChoice .bcSub { font-size: 12.5px; }
+    .homeCard { padding: 14px 14px; gap: 10px; }
+  }
+
+  /* 4. Count Sheep: hand the meadow back its height on a phone */
+  @media (max-width: 760px) and (orientation: portrait) {
+    .ranchScreen .rStage { flex: 1 1 58%; }
+    .ranchScreen .rBar { gap: 6px 8px; padding: 8px 10px;
+      padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+    .ranchScreen .rText { font-size: 16px; flex-basis: 100%; }
+    .ranchScreen .rAnswer { min-height: 50px; font-size: 26px; min-width: 76px; }
+    .ranchScreen .rKey { min-height: 64px; font-size: 22px; }
+    .ranchScreen .rPad { gap: 6px; }
+  }
+
+  /* the language name beside the flag: readable, never the emoji's size */
+  .pickBtn .pkName {
+    font-family: 'Baloo 2', sans-serif; font-weight: 800; color: #8a6a35;
+    font-size: clamp(12px, 1.1vw, 15px); line-height: 1;
+    max-width: 9ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .pickBtn .pkName:empty { display: none; }
+  .pickBtn { flex-wrap: nowrap; min-width: 0; }
+
+  /* painted sheep (objects/sheep_*.png) replace the old flat SVG */
+  .ranchScreen .sheep .shArt {
+    display: block; position: relative; width: 100%; height: 100%;
+    background-repeat: no-repeat; background-position: center bottom;
+    background-size: contain;
+    transform: scale(var(--s, 1)); transform-origin: 50% 90%;
+    filter: drop-shadow(0 6px 5px rgba(70,80,40,.28));
+    animation: sheepIdle 4.4s ease-in-out infinite; animation-delay: var(--d, 0ms);
+  }
+  .ranchScreen .sheep .shArt.flipped { transform: scale(var(--s, 1)) scaleX(-1); }
+  .ranchScreen .sheep.ping .shArt { animation: sheepCounted .5s ease-out; }
+  @media (prefers-reduced-motion: reduce) { .ranchScreen .sheep .shArt { animation: none !important; } }
+
+  /* ---- sheep arriving and leaving (addition / subtraction) ----
+     The child should SEE the change, not just be told about it: the starting
+     flock is already grazing, then each new sheep walks in from off-stage one
+     at a time. Subtraction plays it backwards. Works for 1, 2, 3 or 4 arrivals
+     because each one is staggered as its own event. */
+  .ranchScreen .sheep.arrives {
+    animation: sheepArrive 1.05s cubic-bezier(.25,.9,.35,1) var(--d, 0ms) backwards;
+  }
+  .ranchScreen .sheep.arrives .shArt { animation: sheepTrot .34s ease-in-out var(--d, 0ms) 3, sheepIdle 4.4s ease-in-out 1.4s infinite; }
+  .ranchScreen .sheep.departs {
+    animation: sheepDepart 1.15s cubic-bezier(.4,0,.7,.4) var(--d, 0ms) forwards;
+  }
+  .ranchScreen .sheep.departs .shArt { animation: sheepTrot .34s ease-in-out var(--d, 0ms) 4; }
+
+  @keyframes sheepArrive {
+    0%   { opacity: 0; transform: translate(calc(-50% + var(--from, 52vw)), -50%); }
+    14%  { opacity: 1; }
+    100% { opacity: 1; transform: translate(-50%, -50%); }
+  }
+  @keyframes sheepDepart {
+    0%   { opacity: 1; transform: translate(-50%, -50%); }
+    70%  { opacity: .85; }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--to, 50vw)), -50%); }
+  }
+  /* a small gait bob so they read as walking rather than sliding */
+  @keyframes sheepTrot {
+    0%,100% { transform: scale(var(--s,1)) translateY(0); }
+    50%     { transform: scale(var(--s,1)) translateY(-7%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* no travel, but the outcome still reads: leavers are simply gone */
+    .ranchScreen .sheep.arrives, .ranchScreen .sheep.departs,
+    .ranchScreen .sheep.arrives .shArt, .ranchScreen .sheep.departs .shArt { animation: none !important; }
+    .ranchScreen .sheep.arrives { opacity: 1; }
+    .ranchScreen .sheep.departs { opacity: 0; }
+  }
+
+  /* ---- shared sound + music player (lesson / Story Time / Count Sheep) ----
+     #sound used to be positioned only by `#game.adv #sound`, so lifting it out of
+     #game means restating that geometry unscoped. All three hide on the home
+     screen, where the foot ribbon already carries its own player. */
+  #sound { display: none; }
+  body.playing #sound { display: flex; }
+  body.playing #sound {
+    position: fixed; z-index: 46;
+    bottom: calc(2.5vh + env(safe-area-inset-bottom, 0px)); top: auto;
+    right: calc(3vw + env(safe-area-inset-right, 0px)); left: auto;
+    width: max(48px, min(8vh, 13vw)); height: max(48px, min(8vh, 13vw));
+    align-items: center; justify-content: center;
+    background-color: #2f6fb0; border: 3px solid #27598f; border-radius: 50%;
+    box-shadow: 0 5px 14px rgba(20,30,50,.45); cursor: pointer;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M3 10v4h4l5 4V6L7 10H3zm13.5 2a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a6.8 6.8 0 0 1 0 13.4v2.1a8.9 8.9 0 0 0 0-17.6z'/></svg>");
+    background-repeat: no-repeat; background-position: center; background-size: 52%;
+  }
+  body.playing #sound.muted { background-color: #c0392b; border-color: #9a261a; }
+  /* Story Time and Count Sheep own the full screen, so lift the controls above them */
+  body.playing #volPop { z-index: 96; }
+  body.playing #sound { z-index: 95; }
+
+  /* Count Sheep fills the bottom with the number pad, so the shared controls move
+     to the top of the meadow where nothing else sits. Story Time's paper band
+     does the same, so lift them above its stage too. */
+  /* one speaker only, in the lower right: the sound control lives where the old
+     in-bar replay button used to sit, and the popover opens upward from it. */
+  /* ONE control cluster, lower right: play / next / sound in a row, sitting just
+     above the paper bar (--ranchBarH is published by js/ranch.js) so it never
+     covers the number pad. The old in-bar replay speaker is gone. */
+  body.ranchOpen #sound {
+    top: auto; bottom: calc(var(--ranchBarH, 220px) + 10px);
+    right: max(12px, env(safe-area-inset-right));
+    width: min(6.4vh, 12vw); height: min(6.4vh, 12vw);
+  }
+  body.ranchOpen #volPop {
+    top: auto; bottom: calc(var(--ranchBarH, 220px) + 10px + min(6.4vh, 12vw) + 10px);
+    right: max(12px, env(safe-area-inset-right));
+  }
+  @media (max-width: 760px) {
+    body.ranchOpen #sound { width: 48px; height: 48px; }
+    body.ranchOpen #volPop { bottom: calc(var(--ranchBarH, 220px) + 68px); }
+  }
+
+  /* The in-card replay speaker overlapped the phonics line ("S is for Square")
+     and duplicated the shared sound control, so it is retired. */
+  #panel #replay { display: none !important; }
 </style>
 </head>
 <body>
@@ -1901,7 +2947,7 @@
   <!-- START SCREEN: the painted home menu with invisible clickable hotspots -->
   <div id="start">
     <video id="bgvid" autoplay muted playsinline>
-      <source src="home_bg.mp4" type="video/mp4">
+      <source src="home_bg.mp4?v=2" type="video/mp4">
     </video>
     <div class="homeUI">
       <div class="homeTitle">Yako <span>by the Sea</span></div>
@@ -1912,6 +2958,24 @@
           <span class="pcText"><span class="pcHi">Welcome back,</span><span class="pcName" id="pcName"></span></span>
           <span class="pcStars" id="pcStars">⭐ 0</span>
           <button class="pcSwitch" id="pcSwitch" type="button" aria-label="Not you? Switch player">switch</button>
+        </div>
+        <div class="homeChoices">
+          <button class="bigChoice games" id="exploreBtn" type="button">
+            <img class="bcIcon" src="ui/icon_play.png?v=1" alt="" aria-hidden="true" width="60" height="60" decoding="async" data-fallback="🧩">
+            <span class="bcWrap"><span class="bcTitle">Play</span>
+            <span class="bcSub">Letters, numbers, music and more</span></span>
+          </button>
+          <button class="bigChoice carmel" id="storiesBtn" type="button">
+            <img class="bcIcon" src="ui/icon_explore.png?v=1" alt="" aria-hidden="true" width="60" height="60" decoding="async" data-fallback="🗺️">
+            <span class="bcWrap"><span class="bcTitle">Explore</span>
+            <span class="bcSub">Story adventures around Carmel</span></span>
+          </button>
+          <button class="bigChoice watch" id="watchBtn" type="button">
+            <img class="bcIcon" src="ui/icon_watch.png?v=1" alt="" aria-hidden="true" width="60" height="60" decoding="async" data-fallback="🎬">
+            <span class="bcWrap"><span class="bcTitle">Watch</span>
+            <span class="bcSub">A little film about Yako and Zoe</span></span>
+          </button>
+          <button class="parentDoor" id="parentBtn" type="button">⚙️ For grown-ups</button>
         </div>
         <div class="nameRow">
           <label for="nameInput">My name is</label>
@@ -1932,15 +2996,15 @@
           <div class="pickRow">
             <div class="picker">
               <button class="pickBtn" id="langPickBtn" aria-haspopup="true" aria-expanded="false">
-                <span class="pkCap">Language</span><span class="pkVal" id="langVal">🇬🇧</span><span class="chev">▾</span>
+                <span class="pkCap">Language</span><span class="pkVal" id="langVal">🇬🇧</span><span class="pkName" id="langName"></span><span class="chev">▾</span>
               </button>
               <div class="pickPop" id="langPop" role="menu" aria-label="Choose language">
-                <button class="flagBtn" data-lang="en-GB" title="English" aria-label="English">🇬🇧</button>
-                <button class="flagBtn" data-lang="fr-FR" title="Français" aria-label="French">🇫🇷</button>
-                <button class="flagBtn" data-lang="es-ES" title="Español" aria-label="Spanish">🇪🇸</button>
-                <button class="flagBtn" data-lang="he-IL" title="עברית" aria-label="Hebrew">🇮🇱</button>
-                <button class="flagBtn" data-lang="tl-PH" title="Tagalog" aria-label="Tagalog">🇵🇭</button>
-                <button class="flagBtn" data-lang="zh-CN" title="中文" aria-label="Mandarin Chinese">🇨🇳</button>
+                <button class="flagBtn" data-lang="en-GB" title="English" aria-label="English">🇬🇧<span class="flagName">English</span></button>
+                <button class="flagBtn" data-lang="fr-FR" title="Français" aria-label="French">🇫🇷<span class="flagName">Français</span></button>
+                <button class="flagBtn" data-lang="es-ES" title="Español" aria-label="Spanish">🇪🇸<span class="flagName">Español</span></button>
+                <button class="flagBtn" data-lang="he-IL" title="עברית" aria-label="Hebrew">🇮🇱<span class="flagName">עברית</span></button>
+                <button class="flagBtn" data-lang="tl-PH" title="Tagalog" aria-label="Tagalog">🇵🇭<span class="flagName">Tagalog</span></button>
+                <button class="flagBtn" data-lang="zh-CN" title="中文" aria-label="Mandarin Chinese">🇨🇳<span class="flagName">中文</span></button>
               </div>
             </div>
             <div class="picker">
@@ -1956,10 +3020,45 @@
             </div>
           </div>
         </div>
+        <div class="parentHead">
+          <button id="parentBack" type="button" aria-label="Back">🏠 Back</button>
+          <span class="lhTitle">⚙️ For grown-ups</span>
+          <span class="lhSpacer" aria-hidden="true">🏠 Back</span>
+        </div>
+        <div class="parentPage" id="parentPage">
+          <p class="ppNote">Settings live here so little hands don’t change them by accident. Playing never needs a name or any typing.</p>
+          <div class="ppGroup">
+            <div class="ppHead">🐑 Counting difficulty</div>
+            <div class="ppTiers" id="ppTiers" role="group" aria-label="Counting difficulty">
+              <button class="ppTier" data-tier="beginner"  type="button" aria-pressed="false"><b>Beginner</b><i>1–3 sheep</i></button>
+              <button class="ppTier" data-tier="growing"   type="button" aria-pressed="false"><b>Growing</b><i>1–5 sheep</i></button>
+              <button class="ppTier" data-tier="confident" type="button" aria-pressed="false"><b>Confident</b><i>1–10 sheep</i></button>
+            </div>
+          </div>
+          <div class="ppGroup" id="ppSound">
+            <div class="ppHead">🔊 Sound</div>
+            <label class="ppSlide">Voice <input type="range" id="ppVoice" min="0" max="100" step="1"></label>
+            <label class="ppSlide">Music <input type="range" id="ppMusic" min="0" max="100" step="1"></label>
+          </div>
+          <div class="ppGroup" id="ppProgressGroup">
+            <div class="ppHead">📈 Progress</div>
+            <div class="ppProgressLine" id="ppProgressLine">No practice yet.</div>
+            <button class="ppBtn" id="ppSeeProgress" type="button">See my progress</button>
+          </div>
+          <div class="ppGroup">
+            <div class="ppHead">🗑️ This child's data</div>
+            <div class="ppProgressLine">Everything this game saves stays on this device. Nothing is uploaded.</div>
+            <button class="ppBtn ghost" id="ppWipe" type="button">Delete this child's data</button>
+          </div>
+          <div class="ppGroup">
+            <button class="ppBtn ghost" id="ppAbout" type="button">ℹ️ About Yako</button>
+            <div class="ppLinks"><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></div>
+          </div>
+        </div>
         <div class="lessonsHead">
           <button id="lessonsBack" type="button" aria-label="Back">🏠 Back</button>
           <span class="lhTitle" id="lhTitle">📚 Pick a lesson</span>
-          <span class="lhSpacer" aria-hidden="true">🏠 Back</span>
+          <button id="pickNext" class="lhNext" type="button" aria-label="Start the next lesson now">Next ▶<b id="pickNextN"></b></button>
         </div>
         <div class="lessonGroups">
           <section class="lgroup" data-group="basics">
@@ -1968,6 +3067,7 @@
               <button class="modeBtn" data-mode="letters" aria-label="Letters"><span class="title">Letters</span><span class="sub">A B C</span></button>
               <button class="modeBtn" data-mode="numbers" aria-label="Numbers"><span class="title">Numbers</span><span class="sub">1 2 3</span></button>
               <button class="modeBtn" data-mode="both"    aria-label="Letters and Numbers"><span class="title">Letters &amp; Numbers</span><span class="sub">A 1 B 2</span></button>
+              <button class="modeBtn" data-mode="vowels"  aria-label="Vowels"><span class="title">Vowels</span><span class="sub">A E I O U</span></button>
             </div>
           </section>
           <section class="lgroup" data-group="match">
@@ -1979,17 +3079,27 @@
               <button class="modeBtn" data-mode="objects" aria-label="Objects"><span class="title">Objects</span><span class="icons">🥛 🚗 🪑</span></button>
             </div>
           </section>
+          <!-- Reading and Counting used to share one tile. They are separate skills that
+               progress differently, so they are now separate sections: sounds -> words ->
+               sentences for reading, and objects -> numerals -> arithmetic for counting.
+               Count Sheep is a counting game, so it lives here rather than beside "Play Games". -->
           <section class="lgroup" data-group="reading">
-            <button class="groupHead" type="button" aria-expanded="false"><span class="ghIcon">📖</span><span class="ghName">Reading &amp; Counting</span><span class="chev">▾</span></button>
+            <button class="groupHead" type="button" aria-expanded="false"><span class="ghIcon">📖</span><span class="ghName">Reading &amp; Words</span><span class="chev">▾</span></button>
             <div class="btnGrid">
-              <button class="modeBtn" data-mode="spelling" aria-label="Spelling"><span class="title">Spelling</span><span class="sub">CAT DOG</span></button>
-              <button class="modeBtn" data-mode="sentences" aria-label="Sentences"><span class="title">Sentences</span><span class="sub">The ___ ran</span></button>
               <button class="modeBtn" data-mode="sounds"   aria-label="Letter Sounds"><span class="title">Letter Sounds</span><span class="icons">🔊 A a</span></button>
               <button class="modeBtn" data-mode="listen"   aria-label="Listen and Find"><span class="title">Listen &amp; Find</span><span class="icons">👂 🔊 ❓</span></button>
               <button class="modeBtn" data-mode="earmatch" aria-label="Listen and Match"><span class="title">Listen &amp; Match</span><span class="icons">👂 🔊 ⌨️</span></button>
-              <button class="modeBtn" data-mode="counting" aria-label="Counting"><span class="title">Counting</span><span class="sub">1 2 3</span></button>
+              <button class="modeBtn" data-mode="spelling" aria-label="Spelling"><span class="title">Spelling</span><span class="sub">CAT DOG</span></button>
+              <button class="modeBtn" data-mode="sentences" aria-label="Sentences"><span class="title">Sentences</span><span class="sub">The ___ ran</span></button>
+            </div>
+          </section>
+          <section class="lgroup" data-group="counting">
+            <button class="groupHead" type="button" aria-expanded="false"><span class="ghIcon">🔢</span><span class="ghName">Counting</span><span class="chev">▾</span></button>
+            <div class="btnGrid">
               <button class="modeBtn" data-mode="countobj" aria-label="How Many"><span class="title">How Many?</span><span class="icons">🐚 🐚 🐚</span></button>
+              <button class="modeBtn" data-mode="counting" aria-label="Large Numbers"><span class="title">Large Numbers</span><span class="sub">1 2 3</span></button>
               <button class="modeBtn" data-mode="math"     aria-label="Add and Subtract"><span class="title">Add &amp; Subtract</span><span class="icons">🦀 ➕ 🦀</span></button>
+              <button class="modeBtn" data-mode="ranch"    aria-label="Count Sheep"><span class="title">Count Sheep</span><span class="icons">🐑 🐑 🐑</span></button>
             </div>
           </section>
           <section class="lgroup" data-group="lang">
@@ -2021,8 +3131,9 @@
         <div class="storiesHead">
           <button id="storiesBack" type="button" aria-label="Back">🏠 Back</button>
           <span class="lhTitle">📖 Pick a story</span>
-          <span class="lhSpacer" aria-hidden="true">🏠 Back</span>
+          <button id="storyNext" class="lhNext" type="button" aria-label="Start story time now">Next ▶<b id="storyNextN"></b></button>
         </div>
+        <div class="storyTop" id="storyTop"></div>
         <div class="storyList" id="storyList"></div>
       </div>
     </div>
@@ -2034,7 +3145,7 @@
 
   <!-- GAME: the painted interface illustration with live overlays -->
   <div id="game">
-    <video id="freeBg" src="home_bg.mp4" muted loop playsinline preload="auto"></video>
+    <video id="freeBg" src="home_bg.mp4?v=2" muted loop playsinline preload="auto"></video>
     <div id="freeVignette"></div>
     <div id="flash"></div>
     <video id="sceneBg" muted loop playsinline preload="auto"></video>
@@ -2048,17 +3159,8 @@
       <div class="pcFact"></div>
       <div class="pcLoves"></div>
     </div>
-    <div id="volPop">
-      <button class="volMute" id="volMute" type="button">🔊 Sound on</button>
-      <div class="volRow"><span class="vIco">🎵</span><input type="range" id="volMusic" min="0" max="100" step="1" aria-label="Music volume"></div>
-      <div class="volRow"><span class="vIco">🗣️</span><input type="range" id="volVoice" min="0" max="100" step="1" aria-label="Voice volume"></div>
-    </div>
-    <div id="gamePlayer" aria-label="Music player">
-      <button class="gpBtn gpPlay micon micon-play" id="gpPlay" type="button" title="Play or pause music" aria-label="Play or pause music"></button>
-      <button class="gpBtn micon micon-next" id="gpNext" type="button" title="Next song" aria-label="Next song"></button>
-    </div>
     <div class="gameStage">
-      <video id="gameBg" class="bg" src="gameui_anim.mp4" poster="gameui.png" muted loop autoplay playsinline preload="auto"></video>
+      <video id="gameBg" class="bg" src="gameui_anim.mp4" poster="gameui.png" muted loop autoplay playsinline preload="none"></video>
       <div id="starbar"></div>
       <div id="score">⭐ 0</div>
       <div id="gameRibbon">🐚 Have fun counting &amp; spelling! ⭐</div>
@@ -2070,7 +3172,6 @@
       <div id="fbBad"></div>
       <button id="logo" class="hotspot" title="Back to menu" aria-label="Back to menu"></button>
       <button id="exit" class="hotspot" title="Menu" aria-label="Menu"></button>
-      <button id="sound" class="hotspot" title="Sound on/off" aria-label="Sound"></button>
     </div>
     <div id="yako">👦🐕</div>
     <div id="buddy"></div>
@@ -2078,29 +3179,52 @@
     <button id="freeHome" type="button" title="Back to menu" aria-label="Back to menu">🏠</button>
     <div id="hint">Look closely and find the key!</div>
     <div id="reactionBox">
-      <video id="reactionVid" src="reactions.mp4" playsinline preload="auto"></video>
+      <video id="reactionVid" src="reactions.mp4" playsinline preload="none"></video>
       <div id="reactionCaption"></div>
     </div>
     <div id="win"></div>
   </div>
 
   <!-- STORY TIME: a self-contained storybook player over a painted Monterey scene -->
-  <div id="story">
-    <video id="storyBg" muted loop playsinline preload="auto"></video>
-    <div id="storyScrim"></div>
-    <button id="storyHome" type="button" title="Back to menu" aria-label="Back to menu">🏠</button>
-    <div id="storyBeta" aria-hidden="true">📖 STORY TIME · BETA</div>
-    <div id="storyStars">⭐ 0</div>
-    <div class="storyCard">
-      <div id="storyTitle"></div>
-      <div id="storyDots" aria-hidden="true"></div>
+  <!-- Story Time reads as a picture book: a full-bleed painted plate on top, an
+       opaque paper band underneath. Things you can point at live in the picture;
+       letters, numbers and words live on the paper. #storyTask and #storyNav keep
+       their ids (the engine writes .innerHTML into both unguarded) and the task
+       buttons stay INSIDE #storyTask, because storyKey() scopes its keyboard
+       lookups to that container. -->
+  <div id="story" class="book">
+    <div id="bookStage" aria-hidden="true">
+      <video id="storyBg" muted loop playsinline preload="auto"></video>
+      <div id="storyScrim"></div>
       <div id="storyArt" aria-hidden="true"></div>
+    </div>
+    <button id="storyHome" type="button" title="Back to menu" aria-label="Back to menu">🏠</button>
+    <div id="storyBeta" aria-hidden="true">📖 STORY TIME</div>
+    <div id="storyStars">⭐ 0</div>
+    <div class="storyCard" id="bookPage">
+      <div id="storyTitle"></div>
       <div id="storyText"></div>
       <div id="storyTask"></div>
       <div id="storyNav"></div>
+      <div id="storyDots" aria-hidden="true"></div>
     </div>
+    <div id="pageSheet" aria-hidden="true"></div>
     <div id="storyWin"></div>
   </div>
+
+  <!-- Sound + music player: shared by the lesson screen, Story Time and Count
+       Sheep. Mounted at body level (they used to live inside #game, which is
+       why they vanished on the other two screens). -->
+    <div id="volPop">
+      <button class="volMute" id="volMute" type="button">🔊 Sound on</button>
+      <div id="gamePlayer" aria-label="Music player">
+        <button class="gpBtn gpPlay micon micon-play" id="gpPlay" type="button" title="Play or pause music" aria-label="Play or pause music"></button>
+        <button class="gpBtn micon micon-next" id="gpNext" type="button" title="Next song" aria-label="Next song"></button>
+      </div>
+      <div class="volRow"><span class="vIco">🎵</span><input type="range" id="volMusic" min="0" max="100" step="1" aria-label="Music volume"></div>
+      <div class="volRow"><span class="vIco">🗣️</span><input type="range" id="volVoice" min="0" max="100" step="1" aria-label="Voice volume"></div>
+    </div>
+    <button id="sound" class="hotspot" title="Sound on/off" aria-label="Sound"></button>
 
   <!-- Player profile: a round avatar pinned to the upper-right corner (both home & in-game).
        Tap it for a little menu — name, total stars, and the progress ("success") page. -->
@@ -2204,10 +3328,13 @@
 <script src="data/vocab.js"></script>
 <script src="data/music.js"></script>
 <script src="data/stories.js"></script>
+<script src="data/scene-views.js"></script>
 <script src="data/sentences.js"></script>
+<script src="data/reel.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/cloud.js"></script>
+<script src="js/ranch.js"></script>
 <script>
 (function () {
   // ---------- Elements ----------
@@ -2281,18 +3408,21 @@
   const LESSONS = [
     ['numbers',  'Numbers'],
     ['letters',  'Letters'],
+    ['vowels',   'Vowels'],
     ['both',     'Letters & Numbers'],
     ['shapes',   'Shapes'],
     ['colors',   'Colors'],
     ['animals',  'Animals'],
     ['objects',  'Objects'],
+    // reading: sound -> word -> sentence
     ['sounds',   'Letter Sounds'],
     ['listen',   'Listen & Find'],
     ['earmatch', 'Listen & Match'],
-    ['countobj', 'How Many?'],
     ['spelling', 'Spelling'],
     ['sentences', 'Sentences'],
-    ['counting', 'Counting'],
+    // counting: count objects -> write the numeral -> arithmetic
+    ['countobj', 'How Many?'],
+    ['counting', 'Large Numbers'],
     ['math',     'Add & Subtract'],
     // ----- Music: hear a pitch, match the note; build chords (synth tones) -----
     ['pitchtrain',  'Pitch Training'],
@@ -2400,7 +3530,8 @@
   // Local aliases so the game code below keeps its familiar names.
   const I = window.YAKO.i18n, A = window.YAKO.audio;
   const L = I.L, langPrefix = I.langPrefix,
-        locName = I.locName, locLetter = I.locLetter, locCreat = I.locCreat, phonFor = I.phonFor;
+        locName = I.locName, locLetter = I.locLetter, locCreat = I.locCreat, phonFor = I.phonFor,
+        vowelFor = I.vowelFor, vowelLetters = I.vowelLetters;
   const ensureAudio = A.ensureAudio, stopAllSounds = A.stopAllSounds,
         playApplause = A.playApplause, playChime = A.playChime,
         playTryAgainTone = A.playTryAgainTone, playNote = A.playNote, playTone = A.playTone,
@@ -2487,13 +3618,17 @@
     }
     return parts.slice(0, best + 1).join(' ') + '<br>' + parts.slice(best + 1).join(' ');
   }
+  // "C is for Cat" — the joining phrase between the letter and its keyword.
+  const PHON_JOIN = { fr: ' comme ', es: ' — ', zh: ' 代表 ' };
+  function phonConnector() { return PHON_JOIN[langPrefix()] || ' is for '; }
+
   function renderItemWithLetter(item, kind, letter) {
     // Show the reference picture + its word so the child connects the letter to a thing
     // it starts with (e.g. 🐱 "C is for Cat"), then finds that key.
     letter = letter || item.letter;
     const nm = (locName(item.name) || item.name || '');
     const Name = nm.charAt(0).toUpperCase() + nm.slice(1);
-    const connector = langPrefix() === 'fr' ? ' comme ' : (langPrefix() === 'es' ? ' — ' : ' is for ');
+    const connector = phonConnector();
     targetEl.style.color = '';
     targetEl.innerHTML =
       '<div class="phonCol">' +
@@ -2646,7 +3781,7 @@
   function buildSounds() {
     const Lr = pick(LETTERS); const pf = phonFor(Lr);   // [word, emoji, (sound for en)]
     const word = pf[0], emoji = pf[1], snd = pf[2] || '';
-    const connector = langPrefix() === 'fr' ? ' comme ' : (langPrefix() === 'es' ? ' — ' : ' is for ');
+    const connector = phonConnector();
     return { answer: Lr, kind: 'letter', name: 'snd_' + Lr, style: 'sound', sound: snd, word: word, emoji: emoji,
       render() { targetEl.style.color = '';
         targetEl.innerHTML = '<div class="phonCol"><span class="phonLetter">' + Lr + '</span>' +
@@ -2654,6 +3789,34 @@
           '<div class="phonWord">' + Lr + connector + word + '</div></div>'; },
       revealAnswer() {} };
   }
+  // ----- Vowels: A E I O U Y, and the sound each one makes INSIDE a word -----
+  // Deliberately not the same as Letter Sounds. That mode teaches the initial sound
+  // ("A is for Apple"); this one teaches the vowel itself, so the example word has to
+  // carry the vowel in the middle (cat, cake). Each letter alternates between its
+  // short and long sound so a child does not come away thinking A only says "aah".
+  let vowelWhich = 'short';
+  function buildVowels() {
+    const pool = vowelLetters();
+    if (!pool.length) return buildSounds();            // data missing -> never a dead lesson
+    const Lr = pick(pool);
+    vowelWhich = vowelWhich === 'short' ? 'long' : 'short';   // alternate, so both get taught
+    const v = vowelFor(Lr, vowelWhich) || vowelFor(Lr, 'short');
+    return { answer: Lr, kind: 'letter', name: 'vow_' + Lr + '_' + v.k, style: 'vowel',
+      sound: v.sound, word: v.word, emoji: v.emoji, which: v.k,
+      render() { targetEl.style.color = '';
+        targetEl.innerHTML = '<div class="phonCol"><span class="phonLetter">' + Lr + '</span>' +
+          '<span class="phonPic">' + v.emoji + '</span>' +
+          '<div class="phonWord">' + vowelMark(v.word, Lr) + '</div></div>'; },
+      revealAnswer() {} };
+  }
+  // Highlight the vowel inside the example word so the child can SEE which letter is
+  // making the sound they just heard — the whole point of the lesson.
+  function vowelMark(word, letter) {
+    const i = word.toUpperCase().indexOf(letter);
+    if (i < 0) return word;
+    return word.slice(0, i) + '<b class="vowHit">' + word.slice(i, i + 1) + '</b>' + word.slice(i + 1);
+  }
+
   // ----- Listen & Find: the child only HEARS the letter (plus a picture clue) -----
   function buildListen() {
     const Lr = pick(LETTERS); const pf = phonFor(Lr);
@@ -2872,9 +4035,24 @@
   // ================= Monterey Adventures: count local animals around the peninsula =================
   const MONT = window.YAKO_MONTEREY;
   const SCENE_V = 2;   // bump when scene .mp4s are regenerated, to bust the cache-first media cache
+  // Painted scenes that have an animated ambient loop beside them (scenes/<id>.mp4).
+  // Kling-generated, 5s, played back at 0.40 so it reads as ~12s of slow living motion.
+  const SCENE_LOOPS = new Set(['music_clubhouse']);
   function setSceneBg(scene) {   // scene = 'scenes/<id>.png'; the living loop is the matching .mp4
     const el = document.getElementById('sceneBg'); if (!el) return;
-    const mp4 = scene.replace(/\.png$/, '.mp4') + '?v=' + SCENE_V;
+    // A .jpg scene is a still UNLESS a matching loop has been produced for it.
+    // SCENE_LOOPS names the ones that have; everything else shows the poster only,
+    // so a scene without a loop never fires a 404 for a missing .mp4.
+    if (/\.jpg$/i.test(scene) && !SCENE_LOOPS.has(scene.replace(/^scenes\/|\.jpg$/g, ''))) {
+      if (el.dataset.still === scene) return;
+      el.dataset.still = scene;
+      el.poster = scene;
+      el.removeAttribute('src');                 // stop the previous place's loop
+      try { el.load(); } catch (e) {}
+      return;
+    }
+    delete el.dataset.still;
+    const mp4 = scene.replace(/\.(png|jpg)$/i, '.mp4') + '?v=' + SCENE_V;
     if (el.getAttribute('src') === mp4) return;             // already showing this place
     el.poster = scene;                                      // painted still shows instantly / video fallback
     el.src = mp4;
@@ -2907,7 +4085,12 @@
     if (mode === 'free') return;
     if (MUSIC_MODES.indexOf(mode) >= 0) {                 // Music lessons are always at Pebble Beach (the bagpiper's spot)
       const pi = MONT.PLACES.findIndex(p => p.id === 'pebble');
-      showPlace(pi >= 0 ? pi : 3);
+      showPlace(pi >= 0 ? pi : 3);                        // keeps the place pill on Pebble Beach
+      // ...but each Music lesson gets its own painted scene of the piper playing
+      // around the links — the clubhouse terrace, the seawall hole, the point,
+      // the lone cypress and the practice green at sunset.
+      const ms = MUSIC_SCENE[mode];
+      if (ms) setSceneBg(ms);
       return;
     }
     if (mode === 'countobj') {                            // How Many? always takes place at Mission Ranch
@@ -2956,6 +4139,15 @@
     { name: 'Row, Row, Row',   d: 3, notes: ['C', 'C', 'C', 'D', 'E', 'D'] }
   ];
   const MUSIC_MODES = ['pitchtrain', 'pitchlisten', 'chords', 'melody', 'notefind'];
+  // The piper famously plays for guests by the clubhouse restaurant; the other four
+  // scenes walk the child around the most recognisable holes on the links.
+  const MUSIC_SCENE = {
+    pitchtrain:  'scenes/music_clubhouse.jpg',   // the terrace where he plays for guests
+    pitchlisten: 'scenes/music_seawall.jpg',     // the oceanside finishing hole
+    chords:      'scenes/music_point.jpg',       // the little green out on the rocky point
+    melody:      'scenes/music_cypress.jpg',     // the lone cypress above the sea
+    notefind:    'scenes/music_green.jpg'        // the practice green at sunset
+  };
   // Pitch Training / Listen & Match ramp up: A B C first, then + D E, then + F G.
   // (Musical Letters always uses the full set — see buildNoteFind.)
   function notePool() {
@@ -3140,6 +4332,7 @@
     if (mode === 'colormix')   return buildWordPick(COLORS_DATA.concat(SHAPES_DATA));
     if (mode === 'countlang')  return buildCountLang();
     if (mode === 'samediff')   return buildSameDiff();
+    if (mode === 'vowels')   return buildVowels();
     if (mode === 'sounds')   return buildSounds();
     if (mode === 'listen')   return buildListen();
     if (mode === 'earmatch') return buildEarMatch();
@@ -3206,6 +4399,8 @@
     // counting: speak the FULL multi-digit number, then the first digit
     // (all 90 two-digit numbers are recorded; longer numbers fall back to synth)
     if (s === 'seq')   { sayPrompt('count_' + challenge.word, t.countIntro(challenge.word, ans), { rate: 0.95 }); return; }
+    if (s === 'vowel') { sayPrompt('vowel_' + ans + '_' + challenge.which,
+                                   t.vowel(ans, challenge.sound, challenge.word), { rate: 0.9 }); return; }
     if (s === 'sound') { sayPrompt('sound_' + ans, t.sound(ans, challenge.word, challenge.sound), { rate: 0.95 }); return; }
     if (s === 'listen'){ sayPrompt('sound_' + ans, t.sound(ans, challenge.word, challenge.sound), { rate: 0.95 }); return; }
     if (s === 'count') { sayPrompt('howmany_' + challenge.creatures, t.howMany(locCreat(challenge.creatures)), { rate: 0.95 }); return; }
@@ -3318,15 +4513,34 @@
       setTimeout(() => c.remove(), 2000);
     }
   }
-  const BUDDY_GESTURES = ['👏', '👍', '🤜', '🙌', '🎉', '✌️'];
+  // Ten celebratory items, grouped by how loud they are. The first right answers of a
+  // level get a quiet sparkle; it grows as the level goes on, and finishing earns the cup.
+  // No hands in the pool: a thumbs-up at this size covered Yako and read as an instruction.
+  const BUDDY_ITEMS = {
+    soft: ['✨', '⭐', '🌟'],
+    mid:  ['🎈', '🌈', '🎵', '🎊'],
+    big:  ['🎉', '🎇'],
+    last: ['🏆']
+  };
+  // Which tier a given answer earns. STARS_PER_LEVEL is 5, so a level runs
+  // soft -> mid -> mid -> big -> (completeLevel passes 'last').
+  function buddyTier(done, total) {
+    const p = total ? done / total : 0.5;
+    return p < 0.4 ? 'soft' : p < 0.8 ? 'mid' : 'big';
+  }
   let buddyTimer = null;
   let buddyFace = '👦';
-  function showBuddy() {
+  let lastBuddyItem = '';
+  function showBuddy(tier) {
     const side = Math.random() < 0.5 ? 'left' : 'right';
-    const gesture = pick(BUDDY_GESTURES);
+    const pool = BUDDY_ITEMS[tier] || BUDDY_ITEMS.mid;
+    let gesture = pick(pool);
+    // never the same item twice running, so a short level still feels varied
+    for (let i = 0; i < 4 && pool.length > 1 && gesture === lastBuddyItem; i++) gesture = pick(pool);
+    lastBuddyItem = gesture;
     buddyEl.className = 'buddy ' + side;
     buddyEl.innerHTML = '';
-    buddyEl.appendChild(makeImg('yako_cheer.png', 'buddyFace', '👦'));
+    buddyEl.appendChild(buddyCheer(tier));
     const g = document.createElement('span'); g.className = 'buddyGesture'; g.textContent = gesture;
     buddyEl.appendChild(g);
     void buddyEl.offsetWidth;
@@ -3334,7 +4548,70 @@
     clearTimeout(buddyTimer);
     buddyTimer = setTimeout(() => buddyEl.classList.remove('in'), 2400);
   }
-  function hideBuddy() { clearTimeout(buddyTimer); buddyEl.classList.remove('in'); }
+  function hideBuddy() { clearTimeout(buddyTimer); buddyEl.classList.remove('in'); stopBuddyVid(); }
+
+  // The animated cheer, composited from the alpha-packed clip. Falls straight back to the
+  // cut-out still if the video cannot play or the child has asked for reduced motion —
+  // yako_cheer.png already has its own alpha, so neither path needs a frame.
+  let buddyVid = null, buddyRaf = null;
+  function stopBuddyVid() {
+    if (buddyRaf) { try { (buddyVid && buddyVid.cancelVideoFrameCallback ? buddyVid.cancelVideoFrameCallback(buddyRaf) : cancelAnimationFrame(buddyRaf)); } catch (e) {} buddyRaf = null; }
+    if (buddyVid) { try { buddyVid.pause(); buddyVid.removeAttribute('src'); buddyVid.load(); } catch (e) {} buddyVid = null; }
+  }
+  // Five celebration clips, keyed to the same tiers as BUDDY_ITEMS. A level runs
+  // soft -> mid -> mid -> big -> last, so `mid` carries two so nothing repeats inside
+  // one level. All are alpha-packed (colour over its own matte) like the original.
+  const BUDDY_CLIPS = {
+    soft: ['video/cheer_soft_a.mp4'],
+    mid:  ['video/cheer_mid_a.mp4', 'video/cheer_mid_b.mp4'],
+    big:  ['video/cheer_big_a.mp4'],
+    last: ['video/cheer_last_a.mp4']
+  };
+  let lastBuddyClip = '';
+  function buddyCheer(tier) {
+    let reduce = false;
+    try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+    if (reduce) return makeImg('yako_cheer.png', 'buddyFace', '👦');
+    stopBuddyVid();
+    const cv = document.createElement('canvas');
+    cv.className = 'buddyFace';
+    cv.setAttribute('aria-hidden', 'true');
+    const ctx = cv.getContext('2d', { willReadFrequently: true });
+    const off = document.createElement('canvas');
+    const octx = off.getContext('2d', { willReadFrequently: true });
+    const v = document.createElement('video');
+    v.muted = true; v.loop = true; v.playsInline = true;
+    v.setAttribute('playsinline', ''); v.setAttribute('muted', '');
+    const clips = BUDDY_CLIPS[tier] || BUDDY_CLIPS.mid;
+    let src = pick(clips);
+    for (let i = 0; i < 3 && clips.length > 1 && src === lastBuddyClip; i++) src = pick(clips);
+    lastBuddyClip = src;
+    v.preload = 'auto'; v.src = src;
+    buddyVid = v;
+    const fail = () => { stopBuddyVid(); try { cv.replaceWith(makeImg('yako_cheer.png', 'buddyFace', '👦')); } catch (e) {} };
+    v.addEventListener('error', fail);
+    v.addEventListener('loadeddata', () => {
+      const w = v.videoWidth, h = v.videoHeight / 2;        // colour half only
+      if (!w || !h) { fail(); return; }
+      cv.width = w; cv.height = h; off.width = w; off.height = h;
+      const pr = v.play();
+      if (pr && pr.catch) pr.catch(fail);
+      (function tick() {
+        if (buddyVid !== v) return;
+        octx.clearRect(0, 0, w, h);
+        octx.drawImage(v, 0, h, w, h, 0, 0, w, h);          // matte half
+        const mat = octx.getImageData(0, 0, w, h);
+        ctx.clearRect(0, 0, w, h);
+        ctx.drawImage(v, 0, 0, w, h, 0, 0, w, h);           // colour half
+        const col = ctx.getImageData(0, 0, w, h);
+        const c = col.data, m = mat.data;
+        for (let i = 0; i < c.length; i += 4) c[i + 3] = m[i];   // luminance -> alpha
+        ctx.putImageData(col, 0, 0);
+        buddyRaf = v.requestVideoFrameCallback ? v.requestVideoFrameCallback(tick) : requestAnimationFrame(tick);
+      })();
+    });
+    return cv;
+  }
 
   // Light up the matching painted card: top "Great job!" for correct, bottom "Oops!" for wrong.
   function showFeedback(ok) {
@@ -3360,7 +4637,10 @@
   function celebrateTarget() {
     if (!targetEl) return;
     targetEl.style.transform = '';            // let the keyframes own the transform
-    targetEl.classList.remove('celebrate');
+    // `#target.enter` is declared AFTER `#target.celebrate` at equal specificity, so the
+    // `enter` class left over from the question's entry animation won the cascade and the
+    // celebration never rendered in ANY lesson. Clear it before celebrating.
+    targetEl.classList.remove('enter', 'leave', 'celebrate');
     void targetEl.offsetWidth;                // reflow so the animation restarts every time
     targetEl.classList.add('celebrate');
   }
@@ -3446,7 +4726,8 @@
     bumpPraise();                               // a completed word/number climbs the praise ladder too
     celebrateTarget();                          // the finished word / number bounces
     const w = challenge.word;
-    confetti(); showBuddy(); showFeedback(true); playReaction(true); playChime();
+    confetti(); showBuddy(finished ? 'last' : buddyTier(levelStars, STARS_PER_LEVEL));
+    showFeedback(true); playReaction(true); playChime();
     const dur = 2.0 + Math.random() * 1.5;
     playApplause(dur);
     if (mode === 'melody') {
@@ -3521,7 +4802,7 @@
     if (challenge.style === 'plain') targetEl.style.color = '#2bb673';
 
     confetti();
-    showBuddy();
+    showBuddy(finished ? 'last' : buddyTier(levelStars, STARS_PER_LEVEL));
     showFeedback(true);
     playReaction(true);
     playChime();
@@ -3622,7 +4903,7 @@
 
     winEl.innerHTML =
       '<div class="winCard">' +
-        '<img class="winYako" src="yako_cheer.png" alt="" onerror="this.style.display=\'none\'">' +
+        '<video class="winYako" src="video/cheer.mp4" poster="yako_cheer.png" muted loop playsinline autoplay preload="auto" aria-hidden="true"></video>' +
         '<div class="winTitle">' + lessonName(mode) + ' — Level ' + level + ' complete!</div>' +
         '<div class="winStars">★★★★★</div>' +
         '<div class="winTime">Time: ' + fmt(levelElapsed) + 's</div>' +
@@ -3638,7 +4919,7 @@
       b.addEventListener('click', e => { e.stopPropagation(); finishWin(b.dataset.act); }));
 
     confetti();
-    showBuddy();
+    showBuddy('last');
     playChime();
     playApplause(4.5);
     // spoken: level fanfare → performance verdict → (campaign) what's next
@@ -3678,7 +4959,7 @@
     defaultWinAct = 'home';
     winEl.innerHTML =
       '<div class="winCard">' +
-        '<img class="winYako" src="yako_cheer.png" alt="" onerror="this.style.display=\'none\'">' +
+        '<video class="winYako" src="video/cheer.mp4" poster="yako_cheer.png" muted loop playsinline autoplay preload="auto" aria-hidden="true"></video>' +
         '<div class="winTitle">🏆 You finished EVERY lesson!</div>' +
         '<div class="winStars">★★★★★</div>' +
         '<div class="winVerdict">' + L().verdicts.perfect + '</div>' +
@@ -3686,7 +4967,7 @@
       '</div>';
     winEl.classList.add('show');
     winEl.querySelector('.winBtn').addEventListener('click', e => { e.stopPropagation(); finishWin('home'); });
-    confetti(); showBuddy(); playChime(); playApplause(5);
+    confetti(); showBuddy('last'); playChime(); playApplause(5);
     playPersonaChain(['level', 'cheer_8', 'verdict_perfect'], L().verdicts.perfect, { rate: 1.0 });
     clearTimeout(winTimer);
     winTimer = setTimeout(() => finishWin('home'), 14000);
@@ -3710,17 +4991,298 @@
   const storyWinEl   = document.getElementById('storyWin');
   const storyListEl  = document.getElementById('storyList');
   let curStoryIdx = 0, curStory = null, curBeat = 0, storyCampaign = false;
+  // The end card's default action, read by BOTH the countdown and Enter/Space so the two
+  // can never point at different buttons. The lesson card keeps the same invariant via
+  // defaultWinAct; before this the story card resolved keys to "whichever button is first
+  // in the DOM", which silently re-points itself whenever the button order changes.
+  let storyDefaultAct = 'home', storyCdTimer = null;
   let storyLocked = false, storyTimer = null, beatWrongs = 0;
 
+  // Only the six base scenes were filmed as looping video; every extra view is a still,
+  // so asking for its .mp4 would just 404 behind the poster.
+  const SCENE_MP4 = new Set(['bigsur', 'carmelvalley', 'mission', 'montereybay', 'pacificgrove', 'pebble']);
+  // The eight original backdrops are PNGs; the extra painted views of each place are JPEGs,
+  // which keeps 32 more scenes to ~7MB instead of ~80MB in the offline cache.
+  const SCENE_PNG = new Set(['bigsur', 'carmelvalley', 'mission', 'montereybay', 'pacificgrove',
+                             'pebble', 'carmelstreet', 'carmeltown']);
   function setStoryScene(id) {
     if (!storyBgEl || !id) return;
-    const png = 'scenes/' + id + '.png';
-    const mp4 = png.replace(/\.png$/, '.mp4') + '?v=' + SCENE_V;
-    if (storyBgEl.getAttribute('src') === mp4) return;   // already showing this place
+    const png = 'scenes/' + id + (SCENE_PNG.has(id) ? '.png' : '.jpg');
+    if (storyBgEl.dataset.scene === id) return;          // already showing this view
+    storyBgEl.dataset.scene = id;
     storyBgEl.poster = png;
-    storyBgEl.src = mp4;
+    if (!SCENE_MP4.has(id)) {                            // a painted still: poster only
+      try { storyBgEl.pause(); } catch (e) {}
+      storyBgEl.removeAttribute('src');
+      try { storyBgEl.load(); } catch (e) {}
+      return;
+    }
+    storyBgEl.src = 'scenes/' + id + '.mp4?v=' + SCENE_V;
     try { storyBgEl.load(); } catch (e) {}
     storyBgEl.play().catch(() => {});
+  }
+
+  // ---- Watch: the whole Yako library as one little film -----------------------
+  // Ordered as a day out rather than a dump: leaving town, the ranch in the morning,
+  // adventures down the coast, sunset, a celebration, then a goodbye card. The
+  // scene_* clips have no characters in them and act as breathers between the
+  // character scenes, which is what stops it feeling like a showreel.
+  // `vk` is the clip's narration key; the LINE ITSELF lives in data/reel.js so the game
+  // and tools/check-voices.mjs read the same source. A clip with NO vk deliberately keeps
+  // the previous line running across it — clip_sealion is only 1.7s, far too short for a
+  // line of its own, so it shares the narration of the wide shot before it.
+  const REEL_SAY = window.YAKO_REEL_SAY || {};
+  // reel_04 is "One shell, two shells, three. | Then apples under the oaks." -- one
+  // recording covering two shots that the 2026-10-02 reorder pulled apart. Rather than
+  // play the whole line twice, each shot plays its own half. These offsets are MEASURED,
+  // not guessed: the mp3s have no digital silence, so they were found by RMS analysis of
+  // each file (40ms windows) and are the midpoint of the pause after "three.". They
+  // differ by nearly half a second across personas, which is why a single number is wrong.
+  const SPLIT_04 = { mom: 3.86, dad: 4.04, grandpa: 3.78, grandma: 3.66 };
+
+  const WATCH_REEL = [
+    // Running order, reset 2026-10-02 at the owner's direction. The old six-act structure
+    // is gone: the reel now runs TOWN -> INLAND -> THE COAST AND ITS ANIMALS -> THE BEACH
+    // -> GOODBYE. Both wide->close pairs (point lobos/sea lion, and the two pelican shots)
+    // are adjacent and in order; clip_picnic and `beach` share one recording, split by
+    // SPLIT_04 above.
+    //
+    // --- town ---
+    { f: 'clip_street_walk', vk: 'reel_01' },        // morning on the cobbles, crosses to the shore ~2.5s
+    { f: 'leash', vk: 'reel_07' },                   // crossing the street to the shop
+    // clip_picnic plays only the SECOND half of reel_04 -- "Then apples under the oaks."
+    // -- which was always its cue; the reorder just moved it away from the shot that used
+    // to carry the whole line. See SPLIT_04 above.
+    { f: 'clip_picnic', vk: 'reel_04', from: SPLIT_04, say: 'Then apples under the oaks.' },
+    //
+    // --- inland ---
+    { f: 'valley', vk: 'reel_06' },                  // tall grass, arms up, laughing
+    { f: 'ranch', vk: 'reel_03' },                   // Yako + Zoe + the sheep
+    //
+    // --- the coast and its animals ---
+    { f: 'bigsur', vk: 'reel_08' },                  // the bridge and the deer
+    { f: 'scene_pointlobos', vk: 'reel_09' },        // wide: rocks and water; the line ends "A sea lion."
+    { f: 'clip_sealion', vk: 'reel_10' },            // close: the sea lion -- carries its own line now
+                                                     // (reel_10); still belongs straight after the wide shot
+    // Wide, then close, and the narration depends on that order: reel_11 introduces the
+    // birds ("Three pelicans on the rocks.") and reel_12 pays it off ("The birds don't
+    // move. Yako doesn't move either."). Briefly reversed on 2026-10-02 and put back.
+    { f: 'scene_pelican_sunset', vk: 'reel_11' },    // wide: the pelicans on the rocks
+    { f: 'scene_pelican_rocks', vk: 'reel_12' },     // close: Yako and Zoe arrive to watch them
+    //
+    // --- the beach ---
+    { f: 'scene_wharf_otters', vk: 'reel_13' },      // the otters, watched from the sand
+    { f: 'beach', vk: 'reel_05' },                   // its own line now, not half of reel_04
+    { f: 'scene_sandcastle', vk: 'reel_14' },        // the sandcastle and its red flag
+    { f: 'bay', vk: 'reel_15' },                     // the two of them together on the sand
+    //
+    // --- goodbye ---
+    { f: 'village', vk: 'reel_16', cap: 'More adventures coming soon!', last: true }
+    //
+    // NOT here: 'cheer' is a cutout on a flat cream card; 'coming_soon' was deleted;
+    // 'family_stroller' has realistic adults instead of the cartoon Yako. 'dance' and
+    // 'sheep_walk' are ALPHA-PACKED (colour over a matte) for the canvas compositor, so a
+    // plain player would show the silhouette underneath — never add those two.
+  ];
+  let reelSoundEl = null;
+  let reelWrap = null, reelVids = null, reelCur = 0, reelCap = null, reelIdx = 0,
+      reelGuard = null, reelSwap = null;
+  // Two interchangeable players so one clip can dissolve into the next. Only the element
+  // that is currently on screen is allowed to drive the reel forward, otherwise the one
+  // fading out would fire 'ended' and skip a scene.
+  function mkReelVid() {
+    const v = document.createElement('video');
+    v.muted = true; v.playsInline = true;
+    v.setAttribute('playsinline', ''); v.setAttribute('muted', '');
+    v.preload = 'auto';
+    v.addEventListener('ended', () => { if (v === reelVids[reelCur]) playReel(reelIdx + 1, 'auto'); });
+    v.addEventListener('error', () => { if (v === reelVids[reelCur]) playReel(reelIdx + 1, 'auto'); });
+    return v;
+  }
+  function buildReel() {
+    reelWrap = document.createElement('div');
+    reelWrap.id = 'watchReel'; reelWrap.hidden = true;
+    reelVids = [mkReelVid(), mkReelVid()];
+    reelCap = document.createElement('div'); reelCap.className = 'reelCap';
+    const close = document.createElement('button');
+    close.type = 'button'; close.className = 'reelClose';
+    close.setAttribute('aria-label', 'Close'); close.textContent = '✕';
+    close.addEventListener('click', e => { e.stopPropagation(); endReel(); });
+    const next = document.createElement('button');
+    next.type = 'button'; next.className = 'reelNext';
+    next.setAttribute('aria-label', 'Next clip'); next.textContent = 'Next ▶';
+    next.addEventListener('click', e => { e.stopPropagation(); playReel(reelIdx + 1); });
+    // Next alone would leave touch users unable to go back, which the keyboard now can.
+    const prev = document.createElement('button');
+    prev.type = 'button'; prev.className = 'reelPrev';
+    prev.setAttribute('aria-label', 'Previous clip'); prev.textContent = '◀ Back';
+    prev.addEventListener('click', e => { e.stopPropagation(); playReel(reelIdx - 1); });
+    const snd = document.createElement('button');
+    snd.type = 'button'; snd.className = 'reelSound';
+    snd.title = 'Sound on/off'; snd.setAttribute('aria-label', 'Sound on/off');
+    snd.addEventListener('click', e => {
+      e.stopPropagation();                      // the reel advances on a tap; this must not
+      A.setMuted(!A.isMuted());
+      syncMuteUI();                             // keeps the in-game speaker in step
+    });
+    reelSoundEl = snd;
+    reelWrap.append(reelVids[0], reelVids[1], reelCap, prev, next, close, snd);
+    document.body.appendChild(reelWrap);
+  }
+  // Retire every player that is not the one on screen. Done by index rather than by
+  // holding a reference, so a child mashing the arrow keys mid-dissolve can never leave
+  // an old clip playing invisibly underneath.
+  function retireIdleReel() {
+    if (!reelVids) return;
+    reelVids.forEach((v, n) => {
+      if (n === reelCur) return;
+      try { v.pause(); } catch (e) {}
+      v.classList.remove('on');
+      if (v.getAttribute('src')) { v.removeAttribute('src'); try { v.load(); } catch (e) {} }
+    });
+  }
+  // `how` is 'auto' when a clip ran to its end — that transition is a slow, deliberate
+  // dissolve. A tap or a key press is a deliberate skip, so it cuts over quickly instead.
+  function playReel(i, how) {
+    if (!reelWrap) return;
+    clearTimeout(reelGuard); clearTimeout(reelSwap);
+    if (i < 0) i = 0;                                   // stepping back from the first clip replays it
+    if (i >= WATCH_REEL.length) { endReel(); return; }
+    reelIdx = i;
+    const item = WATCH_REEL[i];
+    const ms = (how === 'auto') ? 600 : 200;
+    if (how !== 'auto') { try { A.stopVoice(); } catch (e) {} }   // a tapped skip cuts the line now
+    const inc = reelVids[reelCur ^ 1];
+    reelCur ^= 1;                                       // `inc` is the on-screen clip from here on
+    reelVids[reelCur ^ 1].style.zIndex = '1';
+    inc.style.zIndex = '2';
+    inc.style.transitionDuration = ms + 'ms';
+    inc.classList.remove('on');                         // start transparent, then fade up over the old clip
+    // Only the closing card carries text; every other clip plays wordless, which is
+    // what a 3-year-old needs and what stops the reel feeling like a travelogue.
+    reelCap.textContent = item.cap || '';
+    reelCap.hidden = !item.cap;
+    reelWrap.classList.toggle('finale', !!item.last);
+    inc.src = 'video/' + item.f + '.mp4';
+    try { inc.load(); } catch (e) {}
+    let shown = false;
+    const reveal = () => {
+      if (shown) return;
+      shown = true;
+      void inc.offsetWidth;                             // flush, or the 0 -> 1 transition is skipped
+      inc.classList.add('on');
+      reelSwap = setTimeout(retireIdleReel, ms + 60);
+      // A clip with no line of its own leaves the previous narration playing rather than
+      // cutting it off, which is how the 1.7s sea lion shares the line before it.
+      const line = item.vk && REEL_SAY[item.vk];
+      // `say` overrides the synth fallback when this shot plays only PART of a clip --
+      // otherwise a missing recording would speak the whole line over a segment.
+      if (line) {
+        try { playPersona(item.vk, item.say || line, { rate: 0.98, from: item.from, to: item.to }); } catch (e) {}
+      }
+    };
+    // Hold the previous scene until the next one actually has a frame to show, so a slow
+    // load reads as a longer beat rather than a flash of black.
+    if (inc.readyState >= 2) reveal();
+    else inc.addEventListener('canplay', reveal, { once: true });
+    const pr = inc.play();
+    if (pr && pr.catch) pr.catch(() => playReel(i + 1, 'auto'));
+    // watchdog: if a clip neither plays nor errors, move on rather than hang
+    reelGuard = setTimeout(() => playReel(i + 1, 'auto'), 34000);
+  }
+  function startReel() {
+    if (!reelWrap) buildReel();
+    syncMuteUI();                               // reflect the persisted mute on the reel button
+    reelWrap.hidden = false;
+    document.body.classList.add('reelOpen');
+    document.addEventListener('keydown', reelKey, true);
+    if (typeof fadeMusicDuck === 'function') fadeMusicDuck(0.35, 700);   // narration sits on top
+    playReel(0);
+  }
+  function endReel() {
+    if (!reelWrap || reelWrap.hidden) return;
+    clearTimeout(reelGuard); reelGuard = null;
+    clearTimeout(reelSwap); reelSwap = null;
+    reelWrap.hidden = true;
+    document.body.classList.remove('reelOpen');
+    document.removeEventListener('keydown', reelKey, true);
+    try { A.stopVoice(); } catch (e) {}                 // never let a line outlive the film
+    if (typeof fadeMusicDuck === 'function') fadeMusicDuck(1, 900);
+    reelVids.forEach(v => {
+      try { v.pause(); v.removeAttribute('src'); v.load(); } catch (e) {}
+      v.classList.remove('on');
+    });
+  }
+  // The reel is driven BOTH ways from the keyboard: Left/Up/Backspace/PageUp step back,
+  // Right/Down/Space/Enter (and any other key) step forward, so a child mashing keys still
+  // moves on. Home and End jump to the first and last clip. Escape closes.
+  function reelKey(e) {
+    const k = e.key;
+    if (k === 'Escape') { e.preventDefault(); e.stopPropagation(); endReel(); return; }
+    e.preventDefault(); e.stopPropagation();
+    if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'Backspace' || k === 'PageUp') {
+      playReel(reelIdx - 1); return;
+    }
+    if (k === 'Home') { playReel(0); return; }
+    if (k === 'End')  { playReel(WATCH_REEL.length - 1); return; }
+    playReel(reelIdx + 1);
+  }
+  { const wb = document.getElementById('watchBtn');
+    if (wb) wb.addEventListener('click', () => { ensureAudio(); startReel(); }); }
+
+  // Haptics on the three home buttons. navigator.vibrate is effectively Android-Chrome
+  // only — iOS Safari has never shipped the Vibration API and a desktop has nothing to
+  // buzz — so this is a no-op on most machines rather than something to rely on.
+  const canBuzz = typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
+  // Chrome refuses navigator.vibrate until the frame has been tapped once and logs a
+  // console error for every blocked call. Hover happens before any tap, so without this
+  // gate the console fills with warnings for buzzes that were never going to fire.
+  let tapped = false;
+  const armHaptics = () => { tapped = true; };
+  document.addEventListener('pointerdown', armHaptics, { once: true, capture: true });
+  document.addEventListener('keydown', armHaptics, { once: true, capture: true });
+  function buzz(ms) { if (canBuzz && tapped) { try { navigator.vibrate(ms); } catch (e) {} } }
+  const HAPTIC_SEL = '.bigChoice, .modeBtn, #startBtn, #storyBtn, #chooseBtn, #chooseStoryBtn,' +
+                     ' .pickBtn, .parentDoor, .groupHead, .flagBtn, .personaBtn';
+  document.querySelectorAll(HAPTIC_SEL).forEach(b => {
+    // pointerenter fires once for the button; mouseover would re-fire on every child span.
+    // Restricted to a real mouse so a touch device does not buzz twice, once on the
+    // synthetic hover and again on the press below.
+    b.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') buzz(12); });
+    // pointerdown itself is the gesture, so arm first and buzz on the same press
+    b.addEventListener('pointerdown', () => { tapped = true; buzz(18); });
+  });
+
+  // The three home icons are painted PNGs. If one ever fails to load — a cold cache on a
+  // flaky connection, or a media cache the service worker has not filled yet — fall back
+  // to the emoji that used to be there rather than showing a broken-image glyph.
+  document.querySelectorAll('.bigChoice .bcIcon').forEach(img => {
+    img.addEventListener('error', () => {
+      const span = document.createElement('span');
+      span.className = 'bcIcon bcIconFallback';
+      span.setAttribute('aria-hidden', 'true');
+      span.textContent = img.dataset.fallback || '⭐';
+      img.replaceWith(span);
+    }, { once: true });
+  });
+
+  // Backdrops advance one view per beat inside a single place, so every question is
+  // asked over a new painting of the same area (pools in data/scene-views.js). The view
+  // is derived from the beat index rather than counted up, so replaying or stepping back
+  // lands on the same picture.
+  let storyArea = null, storyAreaFrom = 0;
+  function areaViews(area) {
+    const V = (window.YAKO_SCENE_VIEWS || {})[area];
+    return (V && V.length) ? V : [area];
+  }
+  function applyStoryView(beatIdx) {
+    if (!storyArea) return;
+    const V = areaViews(storyArea);
+    setStoryScene(V[Math.max(0, (beatIdx | 0) - storyAreaFrom) % V.length]);
+  }
+  function setStoryArea(area, fromBeat) {
+    storyArea = area; storyAreaFrom = fromBeat | 0;
+    applyStoryView(fromBeat | 0);
   }
   if (storyBgEl) storyBgEl.addEventListener('play', () => { try { storyBgEl.playbackRate = 0.40; } catch (e) {} });
 
@@ -3729,6 +5291,26 @@
   function sayStory(key, text, onend) { try { stopAllSounds(); } catch (e) {} if (text || key) playPersona(key, text, { rate: 1.0, onend: onend }); }
   // Narration clip key uses the story's stable `vox` id (its original recording index),
   // so the picker/campaign order can change without remapping the recorded clips.
+  // Companion to beatKey() for the spoken task instruction. Separate clip, separate key,
+  // so changing a prompt never invalidates the recorded narration beside it.
+  function beatAskKey() { return 'styp_' + beatKey().slice(4); }
+  // Draw the eye across the options as the question is asked. Re-adding the class needs
+  // a reflow between removes or the animation will not restart on a replayed beat.
+  let peekTimer = null;
+  function stopPeeking() { clearInterval(peekTimer); peekTimer = null; }
+  function peekOptions() {
+    // every answer type a child picks from: pictures, branches, letter/number keys and
+    // the word tiles. `.used` tiles are already placed, so they sit the round out.
+    const opts = storyTaskEl.querySelectorAll('.stChoice, .stFork, .stKey, .stTile:not(.used)');
+    if (!opts.length) { stopPeeking(); return; }        // nothing to point at on this beat
+    opts.forEach(o => o.classList.remove('peek'));
+    void storyTaskEl.offsetWidth;                        // reflow, or a repeat will not restart it
+    opts.forEach(o => o.classList.add('peek'));
+    // Keep nudging every 4s for a child who is still deciding, counting from the most
+    // recent hop — so the spoken question re-times the cycle rather than fighting it.
+    clearInterval(peekTimer);
+    peekTimer = setInterval(peekOptions, 4000);
+  }
   function beatKey() {
     const v = (curStory && curStory.vox != null) ? curStory.vox : curStoryIdx;
     // Fork-story beats carry a stable `vk` (indices shift when a fork splices beats in);
@@ -3765,26 +5347,40 @@
     clearTimeout(storyTimer);
     storyTimer = setTimeout(() => { curBeat++; renderBeat(); }, ms || 1200);
   }
-  function beatNext() { clearTimeout(storyTimer); curBeat++; renderBeat(); }
+  function beatNext() {
+    clearTimeout(storyTimer);
+    try { stopAllSounds(); } catch (e) {}   // cut this page's line the instant Next is tapped
+    curBeat++; renderBeat();
+  }
 
   // Reveal the answer as a gentle nudge after a couple of wrong taps (kids shouldn't get stuck).
   function maybeHint(correctEl) { if (beatWrongs >= 2 && correctEl) correctEl.classList.add('stHint'); }
 
+  let pageTurnTimer = null;
   function renderBeat() {
+    stopPeeking();
     if (!curStory) return;
     if (curBeat >= curStory.beats.length) { finishStory(); return; }
     const B = curStory.beats[curBeat];
     storyLocked = false; beatWrongs = 0;
+    // a paper wipe on every beat, so moving on feels like turning a page
+    if (storyEl) {
+      storyEl.classList.remove('turning');
+      void storyEl.offsetWidth;                 // restart the animation
+      storyEl.classList.add('turning');
+      clearTimeout(pageTurnTimer);
+      pageTurnTimer = setTimeout(function () { storyEl.classList.remove('turning'); }, 600);
+    }
     renderDots();
-    if (B.scene) setStoryScene(B.scene);
+    if (B.scene) setStoryArea(B.scene, curBeat); else applyStoryView(curBeat);
     if (storyTitleEl) storyTitleEl.textContent = curStory.emoji + ' ' + curStory.title;
     if (storyTextEl) storyTextEl.textContent = B.say || '';
     storyTaskEl.innerHTML = '';
     storyNavEl.innerHTML = '';
-    if (B.fork) { renderFork(B); const kf = beatKey(); setTimeout(() => sayStory(kf, B.say), 260); return; }
+    if (B.fork) { renderFork(B); peekOptions(); const kf = beatKey(); setTimeout(() => sayStory(kf, B.say), 260); return; }
     const task = B.task;
     if (!task) {
-      storyArt(popEmoji(curStory.emoji));
+      storyArt('');                              // narration: the painted scene is the picture
       const last = curBeat >= curStory.beats.length - 1;
       const b = document.createElement('button');
       b.className = 'stNext'; b.type = 'button';
@@ -3805,26 +5401,98 @@
     else if (task.kind === 'choose') renderChoose(task, B);
     else if (task.kind === 'tiles')  renderTiles(task, B);
     const k = beatKey();
-    setTimeout(() => sayStory(k, B.say), 260);
+    const ask = B.task && B.task.prompt;
+    if (ask) {
+      const q = document.createElement('div');
+      q.className = 'stAsk';
+      q.textContent = ask;
+      storyTaskEl.insertBefore(q, storyTaskEl.firstChild);
+    }
+    // The instruction FOLLOWS the narration rather than replacing it: the `say` line sets
+    // the idea up, the prompt tells the child what to do about it.
+    peekOptions();                               // once as the page settles — this is the
+                                                 // only start for find/count/tiles beats,
+                                                 // which carry no spoken prompt...
+    setTimeout(() => sayStory(k, B.say, ask ? () => {
+      peekOptions();                             // ...again on "Find the butterfly!", which
+      playPersona(beatAskKey(), ask, { rate: 1.0 });  // also restarts the 4s cycle
+    } : null), 260);
   }
 
-  function solved() {
+  // cream sparks vanish against the parchment page, so every colour here is saturated
+  // enough to hold its own on #fff7df and the glow carries no white.
+  const FX_COLORS = ['#ffc21a', '#ff7a1a', '#ff3d7f', '#1fb6ff', '#36cf5c', '#a855f7'];
+
+  // Fireworks over `el` -- the thing the child just got right. Three shells, each a ring
+  // flash plus sparks thrown out on their own angles and speeds, so no two bursts look
+  // alike. Positioned in viewport coordinates off the element's own box, which is why a
+  // card that has already scrolled away or been removed is skipped rather than drawn at
+  // the origin. The layer is removed once the longest spark has finished.
+  function burstAt(el) {
+    if (!el || !el.getClientRects || !el.getClientRects().length) return;
+    try { if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; } catch (e) {}
+    const r = el.getBoundingClientRect();
+    const layer = document.createElement('div');
+    layer.className = 'fxBurst';
+    layer.style.left = (r.left + r.width / 2) + 'px';
+    layer.style.top  = (r.top  + r.height / 2) + 'px';
+    const shells = [
+      { n: 18, rad: Math.max(118, r.width * 1.35), dx:  0,              dy: -r.height * 0.10, del: 0    },
+      { n: 12, rad: Math.max(82,  r.width * 0.95), dx: -r.width * 0.55, dy: -r.height * 0.70, del: 0.26 },
+      { n: 12, rad: Math.max(82,  r.width * 0.95), dx:  r.width * 0.55, dy: -r.height * 0.45, del: 0.46 }
+    ];
+    shells.forEach(s => {
+      const sh = document.createElement('div');
+      sh.className = 'fxShell';
+      sh.style.left = s.dx.toFixed(1) + 'px';
+      sh.style.top  = s.dy.toFixed(1) + 'px';
+      const ring = document.createElement('i');
+      ring.className = 'fxRing';
+      ring.style.setProperty('--del', s.del + 's');
+      sh.appendChild(ring);
+      for (let i = 0; i < s.n; i++) {
+        const a = (i / s.n) * Math.PI * 2 + Math.random() * 0.34;
+        const d = s.rad * (0.62 + Math.random() * 0.52);
+        const p = document.createElement('i');
+        p.className = 'fxSpark';
+        p.style.setProperty('--dx', (Math.cos(a) * d).toFixed(1) + 'px');
+        p.style.setProperty('--dy', (Math.sin(a) * d).toFixed(1) + 'px');
+        p.style.setProperty('--c',  FX_COLORS[(i + (Math.random() * 6 | 0)) % FX_COLORS.length]);
+        p.style.setProperty('--sz', (8 + Math.random() * 9).toFixed(1) + 'px');
+        p.style.setProperty('--dur', (0.74 + Math.random() * 0.46).toFixed(2) + 's');
+        p.style.setProperty('--del', (s.del + Math.random() * 0.07).toFixed(2) + 's');
+        sh.appendChild(p);
+      }
+      layer.appendChild(sh);
+    });
+    (document.getElementById('story') || document.body).appendChild(layer);
+    setTimeout(() => { if (layer.parentNode) layer.parentNode.removeChild(layer); }, 1900);
+  }
+
+  function solved(el) {
     storyLocked = true;
+    stopPeeking();                              // answered: stop asking
+    burstAt(el);                                // ...and set off the fireworks over it
     storyAward();
     advanceSoon(1250);
   }
 
   // A story fork: tap a path; its branch beats splice in after this one, then play on.
   function renderFork(B) {
-    storyArt(popEmoji(curStory.emoji));
-    (B.fork.options || []).forEach((opt) => {
+    storyArt('');                                // fork: no floating mascot over the art
+    (B.fork.options || []).forEach((opt, i) => {
       const b = document.createElement('button');
       b.className = 'stFork'; b.type = 'button';
-      b.innerHTML = '<span class="stForkEmoji">' + (opt.emoji || '▶') + '</span><span class="stForkLabel">' + opt.label + '</span>';
+      b.innerHTML = '<span class="stNum" aria-hidden="true">' + (i + 1) + '</span>' +
+                    '<span class="stForkEmoji">' + (opt.emoji || '▶') + '</span>' +
+                    '<span class="stForkLabel">' + opt.label + '</span>';
+      b.setAttribute('aria-label', (i + 1) + '. ' + opt.label);
+      b.style.setProperty('--n', i);
       b.addEventListener('click', () => {
         if (storyLocked) return;
         storyLocked = true;
         b.classList.add('right');
+        burstAt(b);
         curStory.beats.splice(curBeat + 1, 0, ...(opt.beats || []));
         try { playChime(); } catch (e) {}
         advanceSoon(650);
@@ -3840,13 +5508,14 @@
     const pool = (isDigit ? '0123456789' : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ').split('').filter(c => c !== ans);
     const opts = shuffle(shuffle(pool).slice(0, 3).concat(ans));
     const correctBtns = [];
-    opts.forEach(c => {
+    opts.forEach((c, i) => {
       const b = document.createElement('button');
       b.className = 'stKey'; b.type = 'button'; b.textContent = c;
+      b.style.setProperty('--n', i);
       if (c === ans) correctBtns.push(b);
       b.addEventListener('click', () => {
         if (storyLocked) return;
-        if (c === ans) { b.classList.add('right'); solved(); }
+        if (c === ans) { b.classList.add('right'); solved(b); }
         else { b.classList.add('wrong'); beatWrongs++; storyTry(); setTimeout(() => b.classList.remove('wrong'), 450); maybeHint(correctBtns[0]); }
       });
       storyTaskEl.appendChild(b);
@@ -3861,10 +5530,11 @@
     for (let k = 1; k <= maxN; k++) {
       const b = document.createElement('button');
       b.className = 'stKey'; b.type = 'button'; b.textContent = String(k);
+      b.style.setProperty('--n', k - 1);
       if (k === n) correctBtn = b;
       b.addEventListener('click', () => {
         if (storyLocked) return;
-        if (k === n) { b.classList.add('right'); solved(); }
+        if (k === n) { b.classList.add('right'); solved(b); }
         else { b.classList.add('wrong'); beatWrongs++; storyTry(); setTimeout(() => b.classList.remove('wrong'), 450); maybeHint(correctBtn); }
       });
       storyTaskEl.appendChild(b);
@@ -3872,16 +5542,20 @@
   }
 
   function renderChoose(task, B) {
-    storyArt(popEmoji('❓'));
+    storyArt('');                                // choose: the options themselves are the picture
     let correctBtn = null;
-    shuffle(task.options.slice()).forEach(o => {
+    shuffle(task.options.slice()).forEach((o, i) => {
       const b = document.createElement('button');
-      b.className = 'stChoice'; b.type = 'button'; b.textContent = o.emoji;
+      b.className = 'stChoice'; b.type = 'button';
+      b.innerHTML = '<span class="stNum" aria-hidden="true">' + (i + 1) + '</span>' +
+                    '<span class="stPic">' + o.emoji + '</span>';
+      b.setAttribute('aria-label', (i + 1) + '. ' + (o.label || ''));
+      b.style.setProperty('--n', i);
       if (o.label) b.title = o.label;
       if (o.correct) correctBtn = b;
       b.addEventListener('click', () => {
         if (storyLocked) return;
-        if (o.correct) { b.classList.add('right'); solved(); }
+        if (o.correct) { b.classList.add('right'); solved(b); }
         else { b.classList.add('wrong'); beatWrongs++; storyTry(); setTimeout(() => b.classList.remove('wrong'), 450); maybeHint(correctBtn); }
       });
       storyTaskEl.appendChild(b);
@@ -3889,22 +5563,23 @@
   }
 
   function renderTiles(task, B) {
-    storyArt(popEmoji('💬'));
+    storyArt('');                                // tiles: the words are on the paper
     const target = task.target;
     let filled = 0;
     const slotsWrap = document.createElement('div'); slotsWrap.className = 'stSlots';
     const slots = target.map(() => { const s = document.createElement('div'); s.className = 'stSlot'; slotsWrap.appendChild(s); return s; });
     const tilesWrap = document.createElement('div'); tilesWrap.className = 'stTiles'; tilesWrap.style.display = 'flex';
     tilesWrap.style.flexWrap = 'wrap'; tilesWrap.style.gap = 'clamp(8px,1vw,14px)'; tilesWrap.style.justifyContent = 'center';
-    const tileBtns = shuffle(target.map((w, i) => ({ w, i }))).map(({ w }) => {
+    const tileBtns = shuffle(target.map((w, i) => ({ w, i }))).map(({ w }, i) => {
       const b = document.createElement('button');
       b.className = 'stTile'; b.type = 'button'; b.textContent = w; b.dataset.word = w;
+      b.style.setProperty('--n', i);
       b.addEventListener('click', () => {
         if (storyLocked || b.classList.contains('used')) return;
         if (w === target[filled]) {
           slots[filled].textContent = w; slots[filled].classList.add('filled');
           b.classList.add('used'); b.classList.remove('stHint'); filled++;
-          if (filled >= target.length) { speak(target.join(' '), { rate: 1.0 }); solved(); }
+          if (filled >= target.length) { speak(target.join(' '), { rate: 1.0 }); solved(slotsWrap); }
         } else {
           b.classList.add('wrong'); beatWrongs++; storyTry(); setTimeout(() => b.classList.remove('wrong'), 450);
           if (beatWrongs >= 2) { const nb = tileBtns.find(t => t.dataset.word === target[filled] && !t.classList.contains('used')); if (nb) nb.classList.add('stHint'); }
@@ -3920,20 +5595,27 @@
   function finishStory() {
     clearTimeout(storyTimer);
     storyLocked = true;
+    storyArt('');                                   // don't leave the last beat's art behind the end card
     try { stopAllSounds(); } catch (e) {}
     try { localStorage.setItem('yako_story_done_' + curStory.id, '1'); } catch (e) {}
     const nextIdx = curStoryIdx + 1;
-    const moreInCampaign = storyCampaign && nextIdx < STORIES.length;
-    if (storyCampaign) setNum('yako_story', nextIdx < STORIES.length ? nextIdx : 0);
-    const allDone = storyCampaign && nextIdx >= STORIES.length;
+    const hasNext = nextIdx < STORIES.length;
+    if (storyCampaign) setNum('yako_story', hasNext ? nextIdx : 0);
+    const allDone = storyCampaign && !hasNext;
     const title = allDone ? '🏆 You finished every story!' : 'The End 🌟';
     const msg = allDone ? "What a wonderful storyteller you are!" : 'Great reading with Yako and his puppy!';
+    // Going on to the next adventure is offered however the story was started — picking a
+    // single story from the list used to dead-end on "Back to the beach".
+    storyDefaultAct = hasNext ? 'nextstory' : 'home';
     let buttons = '';
-    if (moreInCampaign) buttons += '<button class="winBtn" data-act="nextstory">▶ Next story: ' + STORIES[nextIdx].title + '</button>';
+    if (hasNext) buttons += '<button class="winBtn" data-act="nextstory">▶ Next story: ' + STORIES[nextIdx].title + '<b class="winCd" aria-hidden="true"></b></button>';
+    // Only on a one-off story: the campaign finale is a trophy card and stays a single
+    // clean action, and after it there is no "next" left to choose anyway.
+    else if (!allDone) buttons += '<button class="winBtn alt" data-act="pickstory">📖 Choose a story</button>';
     buttons += '<button class="winBtn alt" data-act="home">🏖️ Back to the beach</button>';
     storyWinEl.innerHTML =
       '<div class="winCard">' +
-        '<img class="winYako" src="yako_cheer.png" alt="" onerror="this.style.display=\'none\'">' +
+        '<video class="winYako" src="video/cheer.mp4" poster="yako_cheer.png" muted loop playsinline autoplay preload="auto" aria-hidden="true"></video>' +
         '<div class="winTitle">' + title + '</div>' +
         '<div class="winStars">★★★★★</div>' +
         '<div class="winVerdict">' + msg + '</div>' +
@@ -3942,19 +5624,138 @@
     storyWinEl.classList.add('show');
     storyWinEl.querySelectorAll('.winBtn').forEach(b =>
       b.addEventListener('click', e => { e.stopPropagation(); storyWinAct(b.dataset.act, nextIdx); }));
-    confetti(); showBuddy(); try { playChime(); } catch (e) {} try { playApplause(4.5); } catch (e) {}
+    confetti(); showBuddy('last'); try { playChime(); } catch (e) {} try { playApplause(4.5); } catch (e) {}
     playPersonaChain(['level', 'verdict_perfect'], title + ' ' + msg, { rate: 1.0 });
     clearTimeout(storyTimer);
-    storyTimer = setTimeout(() => storyWinAct(moreInCampaign ? 'nextstory' : 'home', nextIdx), 13000);
+    if (hasNext) startStoryCd(4, nextIdx);          // ticking pill, same as Play / Explore
+    else storyTimer = setTimeout(() => storyWinAct('home', nextIdx), 13000);
+  }
+  function stopStoryCd() { clearInterval(storyCdTimer); storyCdTimer = null; }
+  // The visible 4-second count on the end card, mirroring the "Next ▶" pill on the Play
+  // and Explore pages: a gold badge on the button itself, counting down to the action the
+  // button would perform. Paused while the tab is hidden so a backgrounded game never
+  // starts a story nobody is watching.
+  function startStoryCd(seconds, nextIdx) {
+    stopStoryCd();
+    const badge = storyWinEl.querySelector('.winCd');
+    let left = seconds;
+    if (badge) badge.textContent = String(left);
+    storyCdTimer = setInterval(() => {
+      if (document.hidden) return;
+      left--;
+      if (badge) badge.textContent = String(left > 0 ? left : 0);
+      if (left > 0) return;
+      stopStoryCd();
+      storyWinAct('nextstory', nextIdx);
+    }, 1000);
   }
   function storyWinAct(act, nextIdx) {
     clearTimeout(storyTimer);
+    stopStoryCd();
     storyWinEl.classList.remove('show');
-    if (act === 'nextstory') { openStory(nextIdx, true); return; }
+    // Carry the mode forward instead of forcing campaign: chaining stories from a one-off
+    // play must not start writing the campaign pointer.
+    if (act === 'nextstory') { openStory(nextIdx, storyCampaign); return; }
+    if (act === 'pickstory') { storyHome(); openStoryPicker(); return; }
     storyHome();
   }
 
+  // ---------- Intro films ----------
+  // Short painted Yako clips introduce a story and the Count Sheep activity.
+  // They are decoration, never instruction: any tap or key skips instantly, the
+  // film auto-continues when it ends, and a missing/al broken file falls straight
+  // through to the game. Shown once per story per session so replays stay quick.
+  const INTRO_FOR = {
+    'leash-walk': 'leash',  'ranch-morning': 'ranch',   'bigsur-cliffs': 'bigsur',
+    'valley-picnic': 'valley', 'pebble-whales': 'beach', 'grove-butterflies': 'village',
+    'bay-otters': 'bay',    'tell-me-what-you-need': 'village',
+    'countsheep': 'ranch',
+    // lesson families reuse the cut sub-scenes
+    'lesson_basics':  'clip_street_walk',  'lesson_match':   'clip_picnic',
+    'lesson_reading': 'village',           'lesson_counting': 'scene_sandcastle',
+    'lesson_lang':    'clip_family_map',
+    // NOTE: was 'clip_sunset' — that clip's last two seconds are a map covered in
+    // garbled AI-generated text, so it must not be used anywhere.
+    'lesson_music':   'scene_lobos_cove',  'lesson_fun':     'clip_binoculars',
+    'lesson_free':    'scene_beach_shell'
+  };
+  let introWrap = null, introVideo = null, introFinish = null, introGuard = null;
+
+  function introSeen(k) { try { return sessionStorage.getItem('yk_intro_' + k) === '1'; } catch (e) { return false; } }
+  function introMark(k) { try { sessionStorage.setItem('yk_intro_' + k, '1'); } catch (e) {} }
+
+  function buildIntro() {
+    introWrap = document.createElement('div');
+    introWrap.id = 'introFilm';
+    introWrap.hidden = true;
+    introVideo = document.createElement('video');
+    introVideo.muted = true; introVideo.playsInline = true;
+    introVideo.setAttribute('playsinline', ''); introVideo.setAttribute('muted', '');
+    introVideo.preload = 'auto';
+    const skip = document.createElement('button');
+    skip.type = 'button'; skip.className = 'introSkip';
+    skip.textContent = 'Skip ▶';
+    skip.addEventListener('click', e => { e.stopPropagation(); endIntro(); });
+    introWrap.appendChild(introVideo);
+    introWrap.appendChild(skip);
+    introWrap.addEventListener('click', endIntro);            // tap anywhere skips
+    introVideo.addEventListener('ended', endIntro);
+    introVideo.addEventListener('error', endIntro);           // missing file must never block play
+    document.body.appendChild(introWrap);
+  }
+
+  function endIntro() {
+    if (!introWrap || introWrap.hidden) return;
+    clearTimeout(introGuard); introGuard = null;
+    introWrap.hidden = true;
+    document.removeEventListener('keydown', introKey, true);
+    try { introVideo.pause(); introVideo.removeAttribute('src'); introVideo.load(); } catch (e) {}
+    try { A.stopVoice(); } catch (e) {}      // don't let the intro line run under the story
+    const go = introFinish; introFinish = null;
+    if (typeof fadeMusicDuck === 'function') fadeMusicDuck(1, 400);
+    if (go) { try { go(); } catch (e) {} }
+  }
+  function introKey(e) { e.preventDefault(); e.stopPropagation(); endIntro(); }
+
+  // `always` films replay on every visit; the rest show once per session so a
+  // child replaying the same lesson three times is not made to sit through it.
+  const ALWAYS_PLAY = /^(leash-walk|ranch-morning|bigsur-cliffs|valley-picnic|pebble-whales|grove-butterflies|bay-otters|tell-me-what-you-need)$/;
+  function playIntro(key, done) {
+    const name = INTRO_FOR[key];
+    const always = ALWAYS_PLAY.test(key);
+    if (!name || (!always && introSeen(key))) { done(); return; }
+    if (!always) introMark(key);
+    if (!introWrap) buildIntro();
+    introFinish = done;
+    introVideo.poster = 'video/' + name + '.jpg';
+    introVideo.src = 'video/' + name + '.mp4';
+    introWrap.hidden = false;
+    document.addEventListener('keydown', introKey, true);      // any key skips
+    if (typeof fadeMusicDuck === 'function') fadeMusicDuck(0.25, 300);
+    // Watchdog: if the video never starts or never fires `ended`, move on anyway.
+    clearTimeout(introGuard);
+    introGuard = setTimeout(endIntro, 34000);
+    const pr = introVideo.play();
+    if (pr && pr.catch) pr.catch(endIntro);                    // autoplay refused -> skip, never strand
+    // The films are silent by design, so the narrator sets the scene over them.
+    // Story content is English-only (see expectedEnglishOnly in tools/check-voices.mjs),
+    // so the intro line is English too rather than switching language mid-story.
+    const sIntro = STORIES.filter(x => x.id === key)[0];
+    if (sIntro && sIntro.intro) {
+      setTimeout(() => {
+        if (!introWrap || introWrap.hidden) return;            // already skipped
+        playPersonaLang('en', 'sintro_' + sIntro.vox, sIntro.intro, { rate: 0.98 });
+      }, 400);
+    }
+  }
+
+  // Wrapper: the film plays, then the real opener runs.
   function openStory(idx, campaign) {
+    const st = STORIES[Math.max(0, Math.min(idx, STORIES.length - 1))];
+    playIntro(st ? st.id : '', () => openStoryNow(idx, campaign));
+  }
+
+  function openStoryNow(idx, campaign) {
     if (!STORIES.length) return;
     curStoryIdx = Math.max(0, Math.min(idx, STORIES.length - 1));
     const src = STORIES[curStoryIdx];
@@ -3972,17 +5773,21 @@
     { const pw = document.getElementById('profileWrap'); if (pw) pw.style.display = 'none'; }
     storyWinEl.classList.remove('show');
     storyEl.classList.add('show');
+    document.body.classList.add('playing');
     if (storyStarsEl) storyStarsEl.textContent = '⭐ ' + totalStars;
     if (typeof fadeMusicDuck === 'function') fadeMusicDuck(0.45, 800);   // dip music under the narration
     if (typeof updateThemeMusic === 'function') updateThemeMusic();
-    setStoryScene(curStory.scene);
+    setStoryArea(curStory.scene, 0);
     renderBeat();
   }
   function storyHome() {
     clearTimeout(storyTimer);
+    stopStoryCd();
+    stopPeeking();
     try { stopAllSounds(); } catch (e) {}
     storyEl.classList.remove('show');
     storyWinEl.classList.remove('show');
+    document.body.classList.remove('playing');
     try { storyBgEl.pause(); } catch (e) {}
     { const pw = document.getElementById('profileWrap'); if (pw) pw.style.display = ''; }
     startScreen.style.display = 'flex';
@@ -3998,7 +5803,9 @@
   // word when there's nothing to type; Enter/Space advances narration and the ending card.
   function storyKey(e) {
     if (storyWinEl.classList.contains('show')) {          // ending card
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const b = storyWinEl.querySelector('.winBtn'); if (b) b.click(); }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault();
+        const b = storyWinEl.querySelector('.winBtn[data-act="' + storyDefaultAct + '"]') || storyWinEl.querySelector('.winBtn');
+        if (b) b.click(); }
       return;
     }
     if (e.key === 'Escape') { e.preventDefault(); storyHome(); return; }
@@ -4016,7 +5823,7 @@
     if (hit) { hit.click(); return; }
     // 2) otherwise a digit picks the Nth picture (choose) or word (tiles)
     if (/[1-9]/.test(e.key)) {
-      const opts = Array.from(storyTaskEl.querySelectorAll('.stChoice, .stTile:not(.used)'));
+      const opts = Array.from(storyTaskEl.querySelectorAll('.stChoice, .stFork, .stTile:not(.used)'));
       const pickEl = opts[parseInt(e.key, 10) - 1];
       if (pickEl) pickEl.click();
     }
@@ -4052,7 +5859,7 @@
   const FREE_WORD_MAXLEN = Math.max(3, ...[...FREE_WORDS].map(w => w.length));
   let freeBuffer = '';
   function announceSpelled(w) {
-    confetti(); sprinkleEmojis(10); showBuddy();
+    confetti(); sprinkleEmojis(10); showBuddy('big');   // free play has no level to pace against
     // read the word back in the recorded voice, then the completion clip
     setTimeout(() => { playPersonaChain(w.split('').map(ch => 'name_' + ch).concat('done_spell'), L().doneSpell(w), { rate: 1.0 }); playApplause(2.2); }, 700);
   }
@@ -4083,7 +5890,12 @@
   }
 
   // ---------- Key handling ----------
+  const ranchEl = document.getElementById('ranch');
+  const ranchOpen = () => { const r = ranchEl || document.getElementById('ranch'); return !!(r && !r.hidden); };
+  const introOpen = () => { const f = document.getElementById('introFilm'); return !!(f && !f.hidden); };
   document.addEventListener('keydown', function (e) {
+    if (introOpen()) return;                                                     // an intro film owns the keyboard: any key just skips it
+    if (ranchOpen()) return;                                                     // Mission Ranch owns the keyboard (incl. Tab/Enter/Space)
     if (storyEl && storyEl.classList.contains('show')) { storyKey(e); return; }   // Story Time owns the keyboard
     if (e.key === 'Escape') { backToMenu(); return; }
     if (startScreen.style.display !== 'none') return;
@@ -4094,11 +5906,32 @@
     tryAnswer(e.key);
   }, true);
   window.addEventListener('keydown', e => {
+    if (introOpen()) return;                                                     // ditto during an intro film
+    if (ranchOpen()) return;                                                     // never swallow keys during the Ranch activity
     if (startScreen.style.display === 'none' && e.key !== 'Escape') e.preventDefault();
   }, true);
 
   // ---------- Start / menu ----------
+  // Each lesson family gets its own painted intro, drawn from the sub-scenes cut
+  // out of the Yako films. Keyed by family (not by all 26 modes) so a child who
+  // plays three letter lessons in a row sees the film once, not three times.
+  const MODE_FAMILY = {
+    letters:'basics', numbers:'basics', both:'basics',
+    shapes:'match', colors:'match', animals:'match', objects:'match',
+    spelling:'reading', sentences:'reading', sounds:'reading', listen:'reading',
+    earmatch:'reading',
+    counting:'counting', countobj:'counting', math:'counting',
+    hello:'lang', wordsafari:'lang', colormix:'lang', countlang:'lang',
+    guesslang:'lang', samediff:'lang',
+    pitchtrain:'music', pitchlisten:'music', chords:'music', melody:'music', notefind:'music',
+    free:'free'
+  };
   function startGame(m) {
+    const fam = MODE_FAMILY[m] || 'fun';
+    playIntro('lesson_' + fam, () => startGameNow(m));
+  }
+
+  function startGameNow(m) {
     mode = m;
     touchStreak();                 // count today's play toward the daily streak
     checkStickers();               // unlock any streak stickers earned by playing today
@@ -4121,6 +5954,7 @@
     speak(" ");
     startScreen.style.display = 'none';
     game.style.display = 'flex';
+    document.body.classList.add('playing');       // reveal the shared sound + music player
     lastTarget = null;
     locked = false; clearTimeout(roundTimer); clearTimeout(leaveTimer);   // never carry a lock/celebration timer into a new game
     choicesEl.innerHTML = '';
@@ -4153,7 +5987,9 @@
         if (fb) { try { fb.currentTime = 0; } catch (e) {} fb.play().catch(() => {}); }
       } else {
         const gb = document.getElementById('gameBg');   // desktop: the living painted scene
-        if (gb) { gb.play().catch(() => {}); }
+        // preload="none" in the markup keeps 4.5 MB off a first page load; the poster
+        // paints instantly and the loop is fetched only once a lesson actually starts.
+        if (gb) { gb.preload = 'auto'; gb.play().catch(() => {}); }
       }
       level = 1; levelStars = 0; levelElapsed = 0; levelMistakes = 0;
       if (mode === 'sentences') sentIdx = 0;   // start the sentence-stories from the beginning
@@ -4199,6 +6035,7 @@
     game.style.background = '';
     game.classList.remove('free-mode');
     startScreen.style.display = 'flex';
+    document.body.classList.remove('playing');
     targetEl.textContent = '';
     if (typeof refreshStartSub === 'function') refreshStartSub();   // START shows where the campaign resumes
     if (typeof refreshProfileChip === 'function') refreshProfileChip();   // updated star total for the returning player
@@ -4210,21 +6047,26 @@
   // Native `loop` never stalls (unlike a rAF ping-pong, which pauses on mobile when
   // backgrounded). A watchdog re-starts whichever background should be visible right now.
   (function loopBackgrounds() {
-    const RATE = 0.40;                                        // 40% speed, as before
+    // The painted scene loops are ambient drift and look best slowed right down.
+    // home_bg.mp4 is different: it is a 30s PERFORMANCE (Yako waves, laughs, plays
+    // with the puppy, points at the menu), so it must run at its authored speed.
+    const SLOW = 0.40, NORMAL = 1.0;
+    const PERFORMANCE = { bgvid: 1, freeBg: 1 };              // both play home_bg.mp4
+    const rateFor = v => (PERFORMANCE[v.id] ? NORMAL : SLOW);
     const vids = [document.getElementById('bgvid'), document.getElementById('freeBg'), document.getElementById('gameBg'), document.getElementById('sceneBg'), document.getElementById('storyBg')].filter(Boolean);
     // NOTE: offsetParent is always null for position:fixed elements — use
     // getClientRects() to test real visibility (it also sees hidden ancestors).
     const showing = v => v.getClientRects().length > 0;
     vids.forEach(v => {
       v.loop = true; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', '');
-      try { v.playbackRate = RATE; } catch (e) {}
-      v.addEventListener('play',   () => { try { v.playbackRate = RATE; } catch (e) {} });
+      try { v.playbackRate = rateFor(v); } catch (e) {}
+      v.addEventListener('play',   () => { try { v.playbackRate = rateFor(v); } catch (e) {} });
       v.addEventListener('pause',  () => { if (showing(v)) v.play().catch(() => {}); });  // resist stalls
     });
     function kick() {
       vids.forEach(v => {
         if (!showing(v)) return;                              // not currently visible → leave it
-        try { v.playbackRate = RATE; } catch (e) {}
+        try { v.playbackRate = rateFor(v); } catch (e) {}
         if (v.paused || v.ended) { v.play().catch(() => {}); }
       });
     }
@@ -4235,10 +6077,10 @@
   })();
 
   // ---------- Music player: a playlist that plays softly on the home menu ----------
-  // Playlist lives in data/music.js (window.YAKO_MUSIC). The current song LOOPS on
-  // repeat; only the ⏭ next button switches songs (never auto-advances). Controls
-  // live in the foot ribbon; ⏸/▶ pauses the music (separate from the sound button,
-  // which still mutes everything). Music only ever sounds on the home menu.
+  // Playlist lives in data/music.js (window.YAKO_MUSIC). Songs play ONE AFTER ANOTHER:
+  // when a track ends the player moves to the next one, so the same song never plays
+  // twice in a row. ⏭ skips ahead early. Controls live in the foot ribbon; ⏸/▶ pauses
+  // the music (separate from the sound button, which still mutes everything).
   const MUSIC = (window.YAKO_MUSIC && window.YAKO_MUSIC.length) ? window.YAKO_MUSIC
                                                                 : [{ title: 'Yako by the Sea', src: 'theme.mp3' }];
   const SECRET = (window.YAKO_MUSIC_SECRET && window.YAKO_MUSIC_SECRET.length) ? window.YAKO_MUSIC_SECRET : [];
@@ -4253,7 +6095,7 @@
   try { const v = parseFloat(localStorage.getItem('yako_music_vol')); if (!isNaN(v)) musicVol = Math.min(1, Math.max(0, v)); } catch (e) {}
   const themeMusic = new Audio();
   themeMusic.volume = musicVol;
-  themeMusic.loop = true;                                        // each song repeats until Next is pressed
+  themeMusic.loop = false;                                       // songs advance instead of repeating (see 'ended' below)
   themeMusic.src = MUSIC[trackIdx].src;
   const mPlayEl  = document.getElementById('mPlay');
   const mNextEl  = document.getElementById('mNext');
@@ -4287,12 +6129,25 @@
     if (musicShouldPlay()) themeMusic.play().catch(() => {});
     updateMusicUI();
   }
-  function nextTrack() {
-    if (list().length <= 1) return;
+  function advanceTrack() {
     trackIdx = (trackIdx + 1) % list().length;
     if (!secretMode) { try { localStorage.setItem('yako_track', String(trackIdx)); } catch (e) {} }
     loadCurrent();
   }
+  function nextTrack() {
+    if (list().length <= 1) return;                              // nothing to skip to
+    advanceTrack();
+  }
+  // A finished song hands over to the next one. A one-song playlist has nowhere to go,
+  // so it restarts instead — otherwise the music would simply stop and never come back.
+  themeMusic.addEventListener('ended', () => {
+    if (list().length <= 1) {
+      themeMusic.currentTime = 0;
+      if (musicShouldPlay()) themeMusic.play().catch(() => {});
+      return;
+    }
+    advanceTrack();
+  });
   function toggleMusicPause() {
     musicPaused = !musicPaused;
     try { localStorage.setItem('yako_music_paused', musicPaused ? '1' : '0'); } catch (e) {}
@@ -4321,8 +6176,11 @@
   ['pointerdown', 'touchstart', 'keydown', 'click', 'wheel'].forEach(ev =>
     document.addEventListener(ev, tryStartMusic, { passive: true }));
   // keep the music playing continuously across every page — resume if the browser stalls it
-  setInterval(() => { if (musicShouldPlay() && themeMusic.paused) themeMusic.play().catch(() => {}); }, 3000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && musicShouldPlay() && themeMusic.paused) themeMusic.play().catch(() => {}); });
+  // `!themeMusic.ended` matters: a track that has just finished is also "paused", and
+  // calling play() on it rewinds it to 0 — the watchdog would replay the song the
+  // 'ended' handler is in the middle of advancing past. Let the handler do its job.
+  setInterval(() => { if (musicShouldPlay() && themeMusic.paused && !themeMusic.ended) themeMusic.play().catch(() => {}); }, 3000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && musicShouldPlay() && themeMusic.paused && !themeMusic.ended) themeMusic.play().catch(() => {}); });
   if (mNextEl) mNextEl.addEventListener('click', nextTrack);
   if (mPlayEl) mPlayEl.addEventListener('click', toggleMusicPause);
   if (footShellEl) footShellEl.addEventListener('click', e => { e.stopPropagation(); toggleSecret(); });
@@ -4370,7 +6228,15 @@
     });
   });
   document.querySelectorAll('.modeBtn').forEach(btn => {
-    btn.addEventListener('click', () => { playMode = 'practice'; startGame(btn.dataset.mode); });
+    btn.addEventListener('click', () => {
+      // Count Sheep is not a keyboard lesson — it is the Mission Ranch activity in
+      // js/ranch.js. Reuse the home button's path so the intro film, audio unlock and
+      // progress refresh all behave identically wherever it is launched from.
+      if (btn.dataset.mode === 'ranch') {
+        if (typeof window.YAKO_START_RANCH === 'function') { window.YAKO_START_RANCH(); return; }
+      }
+      playMode = 'practice'; startGame(btn.dataset.mode);
+    });
   });
   // START = play every lesson in order (resumes where the child left off)
   const startBtnEl = document.getElementById('startBtn'), chooseBtnEl = document.getElementById('chooseBtn');
@@ -4386,17 +6252,20 @@
     startGame(LESSONS[idx][0]);
   });
   const lhTitleEl = document.getElementById('lhTitle');
-  // Parity: the Just-for-Fun tile only appears when there's an odd number of lesson groups
-  // (so the square grid always ends up even).
-  { const realGroups = document.querySelectorAll('.lgroup:not(.lgroupFun)').length;
+  // The Just-for-Fun tile is the ONLY route to Free Play, so it must never be hidden.
+  // It used to be hidden whenever the group count was even, purely to keep the 2-column
+  // grid square — which meant adding a sixth section silently removed Free Play from the
+  // game. Instead it now always shows, and spans the full width when it would otherwise
+  // be left alone on the last row.
+  { const tiles = document.querySelectorAll('.lgroup').length;
     const funTile = document.querySelector('.lgroupFun');
-    if (funTile) funTile.hidden = (realGroups % 2 === 0); }
+    if (funTile) { funTile.hidden = false; funTile.classList.toggle('spanWide', tiles % 2 === 1); } }
   // Level 1 = the square category tiles. Level 2 = one group's sub-lessons (card.subOpen).
   function showCategories() {
     const card = document.querySelector('.homeCard');
     card.classList.remove('subOpen');
     document.querySelectorAll('.lgroup.open').forEach(o => { o.classList.remove('open'); const oh = o.querySelector('.groupHead'); if (oh) oh.setAttribute('aria-expanded', 'false'); });
-    if (lhTitleEl) lhTitleEl.textContent = '📚 Pick a lesson';
+    if (lhTitleEl) lhTitleEl.textContent = '📚 Pick a game';
     card.scrollTop = 0;
   }
   function openGroup(g) {
@@ -4408,17 +6277,61 @@
     const nm = g.querySelector('.ghName'); if (lhTitleEl && nm) lhTitleEl.textContent = nm.textContent;
     card.scrollTop = 0;
   }
+  // ---- "Next": a 5-second countdown in the top-right of a chooser page that starts
+  //      whatever the page's big button would start. It exists so a child who cannot read
+  //      the list still ends up playing. It stands down on ANY deliberate interaction, never
+  //      runs inside a drill-down or while the tab is hidden, and is skipped entirely for
+  //      reduced-motion users (auto-navigating is exactly what that setting asks us not to do).
+  function makeCountdown(btnId, numId, pageClass, launch) {
+    const btn = document.getElementById(btnId), num = document.getElementById(numId);
+    let timer = null, left = 0;
+    function render() {
+      if (!btn) return;
+      btn.classList.toggle('counting', left > 0);
+      if (num) num.textContent = left > 0 ? String(left) : '';
+    }
+    function stop() { clearInterval(timer); timer = null; left = 0; render(); }
+    function start() {
+      stop();
+      const card = document.querySelector('.homeCard');
+      if (!btn || !card || !card.classList.contains(pageClass) || card.classList.contains('subOpen')) return;
+      try { if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; } catch (e) {}
+      left = 3; render();          // 3s on both the Play and Explore pages
+      timer = setInterval(() => {
+        if (document.hidden) return;              // a backgrounded tab must not launch anything
+        left--;
+        if (left > 0) { render(); return; }
+        stop(); launch();
+      }, 1000);
+    }
+    if (btn) btn.addEventListener('click', () => { stop(); launch(); });
+    ['pointerdown', 'keydown', 'wheel', 'touchmove'].forEach(evt =>
+      document.addEventListener(evt, e => {
+        if (!timer) return;
+        if (btn && e.target && e.target.closest && e.target.closest('#' + btnId)) return;
+        stop();
+      }, true));
+    return { start: start, stop: stop };
+  }
+  // Games page -> exactly what START GAME does. Explore Carmel -> what STORY TIME does.
+  const pickCd  = makeCountdown('pickNext',  'pickNextN',  'lessonsOpen',
+                                () => { const b = document.getElementById('startBtn'); if (b) b.click(); });
+  const storyCd = makeCountdown('storyNext', 'storyNextN', 'storiesOpen',
+                                () => { const b = document.getElementById('storyBtn'); if (b) b.click(); });
+  const startPickCountdown = pickCd.start, stopPickCountdown = pickCd.stop;
+
   if (chooseBtnEl) chooseBtnEl.addEventListener('click', () => {
     const card = document.querySelector('.homeCard');
     card.classList.remove('storiesOpen');                // only one page open at a time
     const open = card.classList.toggle('lessonsOpen');   // swaps the card to the lessons page
     chooseBtnEl.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if (open) showCategories();
+    if (open) { showCategories(); startPickCountdown(); } else stopPickCountdown();
   });
   { const lb = document.getElementById('lessonsBack');
     if (lb) lb.addEventListener('click', () => {
       const card = document.querySelector('.homeCard');
       if (card.classList.contains('subOpen')) { showCategories(); return; }   // Level 2 → back to the tiles
+      stopPickCountdown();
       card.classList.remove('lessonsOpen');                                   // Level 1 → back to the main menu
       if (chooseBtnEl) chooseBtnEl.setAttribute('aria-expanded', 'false');
       card.scrollTop = 0;
@@ -4467,12 +6380,28 @@
     card.classList.remove('lessonsOpen', 'subOpen');   // only one page open at a time
     const open = card.classList.toggle('storiesOpen');
     chooseStoryBtnEl.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if (open) { buildStoryList(); card.scrollTop = 0; }
+    if (open) { buildStoryList(); card.scrollTop = 0; storyCd.start(); } else storyCd.stop();
   });
+  // Deterministic opener for the story list, used by the end card. It sets the page
+  // rather than toggling it, and leaves the auto-launch countdown DISARMED: arriving here
+  // from "The End" is a child choosing for themselves, not the Explore page offering to
+  // start Story Time for them.
+  function openStoryPicker() {
+    const card = document.querySelector('.homeCard');
+    if (!card) return;
+    card.classList.remove('lessonsOpen', 'subOpen', 'parentOpen');
+    card.classList.add('storiesOpen');
+    if (chooseStoryBtnEl) chooseStoryBtnEl.setAttribute('aria-expanded', 'true');
+    buildStoryList();                 // re-read so the story just finished shows as played
+    card.scrollTop = 0;
+    storyCd.stop();
+  }
+
   { const sb = document.getElementById('storiesBack');
     if (sb) sb.addEventListener('click', () => {
       const card = document.querySelector('.homeCard');
       card.classList.remove('storiesOpen');
+      storyCd.stop();
       if (chooseStoryBtnEl) chooseStoryBtnEl.setAttribute('aria-expanded', 'false');
       card.scrollTop = 0;
     }); }
@@ -4487,17 +6416,38 @@
   // ---- Travel: tap the place pill for a dropdown of every Monterey location ----
   const placeTagEl  = document.getElementById('placeTag');
   const placePopEl  = document.getElementById('placePop');
+  // Painted moving scenes for the location cards, cut from the Yako films.
+  // A place with no entry just keeps its still.
+  const PLACE_FILM = {
+    mission:      'scene_ranch_meadow',   // the meadow and farmhouse, no characters
+    pebble:       'scene_pelican_rocks',  // pelicans on the rocks
+    montereybay:  'scene_wharf_otters',   // otters off the wharf
+    pacificgrove: 'scene_lobos_cove',     // the cove with sea lions
+    bigsur:       'bigsur_bridge',        // under the arch, looking up - a different
+                                          // angle from the distant bridge in scenes/bigsur.mp4
+    carmelvalley: 'scenes/carmelvalley'   // quail, rabbits and a deer roaming the valley
+  };
   const placeCardEl = document.getElementById('placeCard');
-  const placeAudio = new Audio();                    // Mom-voice location narration (played once per card open)
+  // Place-card prose is authored in English on the PLACES entry and translated per
+  // language in vocab.js PLACE_T; any language without a line falls back to English.
+  function placeLine(p, k) {
+    const lp = langPrefix();
+    const t = lp !== 'en' && MONT.PLACE_T && MONT.PLACE_T[p.id] && MONT.PLACE_T[p.id][lp];
+    return (t && t[k]) || p[k] || '';
+  }
   if (placePopEl) MONT.PLACES.forEach((p, i) => {
     const b = document.createElement('button');
     b.type = 'button';
-    b.innerHTML = '<img class="pThumb" src="' + p.scene + '" alt="" loading="lazy">' + p.name;
+    // p.scene is a ~2.5 MB painting; six of them in a small dropdown pulled 14.6 MB.
+    // scenes/thumbs/*.jpg are 320px, ~14 KB each, with the full painting as a fallback.
+    b.innerHTML = '<img class="pThumb" src="scenes/thumbs/' + p.id + '.jpg" alt="" loading="lazy">' + p.name;
+    { const ti = b.querySelector('.pThumb'); ti.onerror = () => { ti.onerror = null; ti.src = p.scene; }; }
     b.addEventListener('click', e => { e.stopPropagation(); hidePlacePop(); goPlace(i); });
     placePopEl.appendChild(b);
   });
   function hidePlacePop() { if (placePopEl) placePopEl.classList.remove('open'); }
-  function hidePlaceCard() { if (placeCardEl && !placeCardEl.hidden) { placeCardEl.hidden = true; try { placeAudio.pause(); } catch (e) {} stopAllSounds(); } }
+  // stopAllSounds() bumps the narrator token, so it also cuts the place-card clip chain short
+  function hidePlaceCard() { if (placeCardEl && !placeCardEl.hidden) { placeCardEl.hidden = true; stopAllSounds(); } }
   // Traveling somewhere shows Yako + his puppy with a fun fact and what he loves to do there.
   function goPlace(i) {
     showPlace(i);
@@ -4506,27 +6456,50 @@
     const card = p.scene.replace(/\.png$/, '_card.png');       // a different painted view for the card
     img.onerror = () => { img.onerror = null; img.src = p.scene; };  // fall back to the backdrop still
     img.src = card;
+    // Some places have a moving painted scene cut from the Yako films. It plays
+    // over the still; if it cannot load, the still is simply what stays visible.
+    const film = PLACE_FILM[p.id];
+    let pv = placeCardEl.querySelector('.pcSceneVid');
+    if (!pv) {
+      pv = document.createElement('video');
+      pv.className = 'pcSceneVid';
+      pv.muted = true; pv.loop = true; pv.playsInline = true;
+      pv.setAttribute('playsinline', ''); pv.setAttribute('muted', '');
+      pv.setAttribute('aria-hidden', 'true');
+      pv.addEventListener('error', () => { pv.hidden = true; });
+      img.parentNode.insertBefore(pv, img.nextSibling);
+    }
+    if (film) {
+      pv.hidden = false;
+      pv.src = (film.indexOf('/') >= 0 ? film : 'video/' + film) + '.mp4';
+      const pp = pv.play(); if (pp && pp.catch) pp.catch(() => { pv.hidden = true; });
+    } else {
+      pv.hidden = true;
+      try { pv.pause(); pv.removeAttribute('src'); pv.load(); } catch (e) {}
+    }
     // a different Yako-and-puppy pose per place (hug, fetch, walk, scratch…); falls back to the cheer art
     const yk = placeCardEl.querySelector('.pcYako');
     const ykSrc = p.scene.replace(/\.png$/, '_yako.png') + '?v=2';   // ?v bump = fetch the new character art past the cache-first MEDIA cache
     yk.onerror = () => { yk.onerror = null; yk.src = 'yako_cheer.png'; };
-    yk.style.display = '';
+    // A card that plays a film already has Yako and Zoe moving in it. Layering the
+    // static cutout on top as well reads as a second, half-cropped child, so the
+    // cutout is only used on cards that show the still.
+    yk.style.display = PLACE_FILM[p.id] ? 'none' : '';
     yk.src = ykSrc;
+    const fact = placeLine(p, 'fact'), loves = placeLine(p, 'loves');
+    // Hebrew prose opens with the Latin place name, so `dir=auto` would guess LTR and
+    // strand the sentence-final period on the wrong side — set the direction explicitly.
+    const dir = langPrefix() === 'he' ? 'rtl' : 'ltr';
     placeCardEl.querySelector('.pcPlace').textContent = p.name;
-    placeCardEl.querySelector('.pcFact').textContent  = p.fact  || '';
-    placeCardEl.querySelector('.pcLoves').textContent = p.loves || '';
+    const factEl = placeCardEl.querySelector('.pcFact'), lovesEl = placeCardEl.querySelector('.pcLoves');
+    factEl.dir = lovesEl.dir = dir;
+    factEl.textContent  = fact;
+    lovesEl.textContent = loves;
     placeCardEl.hidden = false;
     stopAllSounds();
-    // Narrate the place ONCE, in the recorded Mom voice (synth fallback if the clip is missing/blocked)
-    try { placeAudio.pause(); placeAudio.currentTime = 0; } catch (e) {}
-    if (!A.isMuted()) {
-      const say = () => speak((p.fact || '') + ' ' + (p.loves || ''), { rate: 1.0 });
-      placeAudio.src = 'voice/place/' + p.id + '.mp3';
-      placeAudio.volume = A.getVolume();
-      placeAudio.onerror = say;
-      const pl = placeAudio.play();
-      if (pl && pl.catch) pl.catch(say);
-    }
+    // Narrate the two lines in the child's language and chosen narrator; the synth
+    // reads the same localized text if a clip is missing or blocked.
+    playPersonaChain(['pfact_' + p.id, 'ploves_' + p.id], (fact + ' ' + loves).trim(), { rate: 1.0 });
   }
   if (placeTagEl) placeTagEl.addEventListener('click', e => {
     e.stopPropagation();
@@ -4592,12 +6565,24 @@
   function syncMuteUI() {
     const m = A.isMuted();
     soundBtn.classList.toggle('muted', m);
+    if (reelSoundEl) reelSoundEl.classList.toggle('muted', m);
     if (volMuteEl) { volMuteEl.classList.toggle('muted', m); volMuteEl.textContent = m ? '🔇 Sound off' : '🔊 Sound on'; }
   }
   [soundBtn, volPopEl].forEach(el => { if (!el) return;
     el.addEventListener('mouseenter', showVolPop);
     el.addEventListener('mouseleave', hideVolPopSoon); });
   soundBtn.addEventListener('click', e => { e.stopPropagation(); if (volPopEl) volPopEl.classList.toggle('show'); });  // tap opens the mixer (mobile)
+  // The mixer opens upward from the speaker and can sit over the last few answer
+  // keys. Any attempt to actually PLAY closes it, so it can never block a child
+  // mid-answer — the only way it stays open is if nobody is playing.
+  document.addEventListener('keydown', () => {
+    if (volPopEl && volPopEl.classList.contains('show')) volPopEl.classList.remove('show');
+  }, true);
+  document.addEventListener('pointerdown', e => {
+    if (!volPopEl || !volPopEl.classList.contains('show')) return;
+    if (e.target.closest && (e.target.closest('#volPop') || e.target.closest('#sound'))) return;
+    volPopEl.classList.remove('show');
+  }, true);
   if (volMuteEl) volMuteEl.addEventListener('click', () => { A.setMuted(!A.isMuted()); syncMuteUI(); updateThemeMusic(); });
   syncMuteUI();        // reflect the persisted mute on load
 
@@ -4605,13 +6590,26 @@
   const PERSONA_EMOJI = { mom: '👩', dad: '👨', grandpa: '👴', grandma: '👵' };
   const langValEl = document.getElementById('langVal');
   const personaValEl = document.getElementById('personaVal');
-  function flagFor(lang) { const b = document.querySelector('.flagBtn[data-lang="' + lang + '"]'); return b ? b.textContent : '🇬🇧'; }
+  // Only the flag glyph: the buttons also carry a .flagName label for the menu,
+  // and including it here rendered "🇬🇧English" at the pill's emoji font size.
+  function flagFor(lang) {
+    const b = document.querySelector('.flagBtn[data-lang="' + lang + '"]');
+    if (!b) return '🇬🇧';
+    const n = b.firstChild;
+    return (n && n.nodeType === 3 ? n.textContent : b.textContent).trim() || '🇬🇧';
+  }
+  function langNameFor(lang) {
+    const b = document.querySelector('.flagBtn[data-lang="' + lang + '"]');
+    const n = b && b.querySelector('.flagName');
+    return n ? n.textContent.trim() : '';
+  }
   function bump(el) { if (!el) return; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
   function refreshVoiceUI() {
     const lang = I.getLang(), per = A.getPersona();
     document.querySelectorAll('.flagBtn').forEach(b => b.classList.toggle('sel', b.dataset.lang === lang));
     document.querySelectorAll('.personaBtn').forEach(b => b.classList.toggle('sel', b.dataset.persona === per));
     if (langValEl) langValEl.textContent = flagFor(lang);
+    { const ln = document.getElementById('langName'); if (ln) ln.textContent = langNameFor(lang); }
     if (personaValEl) personaValEl.textContent = PERSONA_EMOJI[per] || '👩';
   }
   // Compact pickers: tap to open a popover, tap an option to choose (with a bounce + voice preview).
@@ -4976,6 +6974,146 @@
     try { localStorage.setItem('yako_a11y_dys', on ? '1' : '0'); } catch (e) {}
   });
   initA11y();
+
+  // ---------- Phase 1 home: three big choices + a grown-ups page ----------
+  // The old controls are RELOCATED, never duplicated: moving the live nodes keeps
+  // every listener already bound to them, so lessons and stories behave exactly
+  // as before while the child now sees one clear choice at a time.
+  (function initHomePhase1() {
+    const card = document.querySelector('.homeCard');
+    const pPage = document.getElementById('parentPage');
+    if (!card || !pPage) return;
+    const R = () => (window.YAKO && window.YAKO.ranch) || null;
+
+    const nameRow = card.querySelector('.nameRow');
+    const pickRow = card.querySelector('.pickRow');
+    const note = pPage.querySelector('.ppNote');
+    // The name field is a grown-up concern, so it lives on the parent page...
+    if (nameRow) pPage.insertBefore(nameRow, note ? note.nextSibling : pPage.firstChild);
+    // ...but Language and Narrator stay on the main menu, where a parent can
+    // reach them in one tap without going through the grown-ups door.
+    const choices = card.querySelector('.homeChoices');
+    const door = document.getElementById('parentBtn');
+    if (pickRow && choices) choices.insertBefore(pickRow, door || null);
+
+    const lg = document.querySelector('.lessonGroups');
+    const storyTop = document.getElementById('storyTop');
+    const startB = document.getElementById('startBtn');
+    const storyB = document.getElementById('storyBtn');
+    const chooseB = document.getElementById('chooseBtn');
+    const chooseS = document.getElementById('chooseStoryBtn');
+    // The campaign lives at the top of Explore; "play all stories" at the top of
+    // Stories. #storyList is rebuilt with innerHTML, hence the separate .storyTop.
+    if (lg && startB) lg.insertBefore(startB, lg.firstChild);
+    if (storyTop && storyB) storyTop.appendChild(storyB);
+    const ctrls = card.querySelector('.homeControls');
+    if (ctrls) ctrls.style.display = 'none';      // still in the DOM → still clickable
+
+    function openParent(on) {
+      card.classList.remove('lessonsOpen', 'subOpen', 'storiesOpen');
+      card.classList.toggle('parentOpen', !!on);
+      if (on) refreshParent();
+    }
+    const pBtn = document.getElementById('parentBtn');
+    const pBack = document.getElementById('parentBack');
+    if (pBtn) pBtn.addEventListener('click', () => openParent(true));
+    if (pBack) pBack.addEventListener('click', () => openParent(false));
+
+    const exploreB = document.getElementById('exploreBtn');
+    if (exploreB) exploreB.addEventListener('click', () => { openParent(false); if (chooseB) chooseB.click(); });
+    const storiesB = document.getElementById('storiesBtn');
+    if (storiesB) storiesB.addEventListener('click', () => { openParent(false); if (chooseS) chooseS.click(); });
+
+    // Count Sheep is reached from the Counting & Numbers section of Play, not from a
+    // home card. One launcher so the intro film, audio unlock and progress refresh
+    // behave identically wherever it is started from.
+    window.YAKO_START_RANCH = function () {
+      openParent(false);
+      const r = R();
+      if (!r) { if (startB) startB.click(); return; }   // module absent → old campaign, never a dead button
+      ensureAudio();
+      playIntro('countsheep', () => {
+        r.open({ onLeave(reason) { if (reason === 'explore' && chooseB) chooseB.click(); refreshPlaySub(); } });
+      });
+    };
+
+    // The home card that showed "Keep going - Counting" is gone; this is now a no-op
+    // guard so the ranch's onLeave callbacks stay valid.
+    function refreshPlaySub() {
+      const sub = document.getElementById('playSub'), r = R();
+      if (!sub || !r) return;
+      const p = r.progress();
+      const t = (L().ranch) || {};
+      const STAGE_LBL = [t.stageCount, t.stageAdd, t.stageSub, t.stageMul];
+      const stage = STAGE_LBL[p.stage ? ['count','add','sub','mul'].indexOf(p.stage) : p.stageIdx];
+      sub.textContent = r.hasProgress()
+        ? ((t.round ? '' : '') + 'Keep going · ' + (stage || ('1–' + p.span)))
+        : 'Count the sheep at Mission Ranch';
+    }
+
+    const tierWrap = document.getElementById('ppTiers');
+    function refreshTiers() {
+      const r = R(); if (!r || !tierWrap) return;
+      const cur = r.progress().tier;
+      tierWrap.querySelectorAll('.ppTier').forEach(b =>
+        b.setAttribute('aria-pressed', String(b.dataset.tier === cur)));
+    }
+    if (tierWrap) tierWrap.addEventListener('click', e => {
+      const b = e.target.closest ? e.target.closest('.ppTier') : null;
+      const r = R(); if (!b || !r) return;
+      r.setTier(b.dataset.tier); refreshTiers(); refreshPlaySub();
+    });
+
+    // Mirror the in-game faders rather than moving them, so volume stays
+    // reachable both here and mid-lesson. Dispatching 'input' reuses their logic.
+    function mirror(srcId, dstId) {
+      const src = document.getElementById(srcId), dst = document.getElementById(dstId);
+      if (!src || !dst) return;
+      dst.value = src.value;
+      dst.addEventListener('input', () => {
+        src.value = dst.value;
+        src.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+    }
+    mirror('volVoice', 'ppVoice');
+    mirror('volMusic', 'ppMusic');
+
+    const seeP = document.getElementById('ppSeeProgress');
+    if (seeP) seeP.addEventListener('click', () => { const b = document.getElementById('pmProgress'); if (b) b.click(); });
+    // Remove every key this game owns. "Switch player" only forgets the nickname, so
+    // without this there was no way to honour the deletion right privacy.html promises.
+    const wipe = document.getElementById('ppWipe');
+    if (wipe) wipe.addEventListener('click', () => {
+      if (!window.confirm("Delete this child's saved name, stars, progress and stickers on this device?\n\nThis cannot be undone.")) return;
+      try {
+        const doomed = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && /^(yako_|kbfun_)/.test(k)) doomed.push(k);
+        }
+        doomed.forEach(k => localStorage.removeItem(k));
+      } catch (e) {}
+      location.reload();
+    });
+
+    const abt = document.getElementById('ppAbout');
+    if (abt) abt.addEventListener('click', () => { const b = document.getElementById('pmAbout'); if (b) b.click(); });
+
+    function refreshParent() {
+      refreshTiers();
+      const line = document.getElementById('ppProgressLine'), r = R();
+      if (!line || !r) return;
+      const p = r.progress();
+      line.textContent = p.rounds
+        ? 'Practicing numbers 1–' + p.span + ' · ' + p.rounds + ' rounds played'
+        : 'No practice yet.';
+    }
+
+    refreshPlaySub();
+    refreshTiers();
+    window.YAKO_HOME = { refreshPlaySub: refreshPlaySub, openParent: openParent };
+  })();
+
 
   const pmSwitchEl = document.getElementById('pmSwitch');
   if (pmSwitchEl) pmSwitchEl.addEventListener('click', () => {

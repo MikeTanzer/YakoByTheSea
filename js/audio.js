@@ -290,7 +290,17 @@ window.YAKO.audio = (function () {
     return null;
   }
   const isNum = ch => /^[0-9]$/.test(String(ch));
-  function stopVoice() { VOICE.token++; try { VOICE.a.pause(); } catch (e) {} }
+  // VOICE.a is ONE shared <audio> reused by every line. A segment play leaves a
+  // timeupdate/loadedmetadata handler and a stop timer on it, and if those survived into
+  // the next call they would cut an unrelated line short at the previous line's end time.
+  // Every entry point therefore resets the element before it sets anything up.
+  let voiceStopT = null;
+  function resetVoiceEl() {
+    if (voiceStopT) { clearTimeout(voiceStopT); voiceStopT = null; }
+    const a = VOICE.a;
+    a.onended = null; a.onerror = null; a.ontimeupdate = null; a.onloadedmetadata = null;
+  }
+  function stopVoice() { VOICE.token++; resetVoiceEl(); try { VOICE.a.pause(); } catch (e) {} }
   function playClips(ids, fallback, opts) {
     const my = VOICE.token; let i = 0; const a = VOICE.a;
     function step() {
@@ -320,9 +330,38 @@ window.YAKO.audio = (function () {
     const key = Array.isArray(keys) ? keys[(Math.random() * keys.length) | 0] : keys;
     stopVoice();
     const my = ++VOICE.token, a = VOICE.a;
+    // A clip can be played as a SEGMENT rather than in full: opts.from / opts.to are
+    // seconds into the file. The four personas read the same line at different speeds, so
+    // both accept either a number or a { mom, dad, grandpa, grandma } map — a single
+    // number across all four drifts by most of a second on a six-second line.
+    const atPersona = v => (v && typeof v === 'object') ? v[voicePersona] : v;
+    const from = atPersona(opts.from), to = atPersona(opts.to);
     a.src = VOICE.dir + I().langPrefix() + '/' + voicePersona + '/' + key + '.mp3';
-    a.onended = () => { if (my === VOICE.token && opts.onend) { try { opts.onend(); } catch (e) {} } };
-    a.onerror = () => { if (my === VOICE.token && fallback) speakName(fallback, opts); };
+    const finish = () => {
+      if (voiceStopT) { clearTimeout(voiceStopT); voiceStopT = null; }
+      if (my !== VOICE.token) return;
+      if (to != null) { try { a.pause(); } catch (e) {} }     // a full play has already ended
+      if (opts.onend) { try { opts.onend(); } catch (e) {} }
+    };
+    a.onended = () => { if (my === VOICE.token) finish(); };
+    a.onerror = () => {
+      if (voiceStopT) { clearTimeout(voiceStopT); voiceStopT = null; }
+      if (my === VOICE.token && fallback) speakName(fallback, opts);
+    };
+    if (from != null || to != null) {
+      a.onloadedmetadata = () => {
+        if (my !== VOICE.token) return;
+        if (from != null) { try { a.currentTime = from; } catch (e) {} }
+        if (to != null) {
+          // timeupdate only fires ~4x a second, which can overshoot the cut by 250ms, so a
+          // timer makes the cut and timeupdate is the backstop if the timer is throttled.
+          const ms = Math.max(0, ((to - (from || 0)) * 1000) / (a.playbackRate || 1));
+          if (voiceStopT) clearTimeout(voiceStopT);
+          voiceStopT = setTimeout(finish, ms);
+        }
+      };
+      if (to != null) a.ontimeupdate = () => { if (my === VOICE.token && a.currentTime >= to) finish(); };
+    }
     const p = a.play();
     if (p && p.catch) p.catch(() => { if (my === VOICE.token && fallback) speakName(fallback, opts); });
   }

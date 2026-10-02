@@ -4,11 +4,12 @@ const path = require('path');
 const root = path.resolve(__dirname, '..');
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.mp4': 'video/mp4', '.mp3': 'audio/mpeg', '.wav': 'audio/wav',
-  '.webmanifest': 'application/manifest+json', '.json': 'application/json' };
+  '.webmanifest': 'application/manifest+json', '.json': 'application/json', '.webp': 'image/webp' };
 const server = http.createServer((req, res) => {
   let p;
   try { p = decodeURIComponent(req.url.split('?')[0]); } catch (e) { res.writeHead(400); res.end('Bad request'); return; }
   if (p === '/') p = '/keyboard-fun.html';
+  else if (p.endsWith('/')) p += 'index.html';   // folders serve their index, as GitHub Pages does
   // SECURITY: this server is reachable from the whole LAN (phone play), so the
   // resolved path must stay inside the project and never expose dot-dirs
   // (.git, .claude, .ssh via traversal, etc.).

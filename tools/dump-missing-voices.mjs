@@ -79,17 +79,35 @@ function expectedClips(lang) {
   clips['hello'] = VOC.HELLO[lang] || VOC.HELLO.en;
   clips['count_any'] = c.countAny;
   for (const pl of MON.PLACES) clips[`place_${pl.id}`] = fmt(VOC.WELCOME[lang] || VOC.WELCOME.en, { p: pl.name });
+  // Place-card blurbs — only for languages that actually have the translated prose (vocab.js `t`).
+  for (const pl of MON.PLACES) {
+    const t = lang === 'en' ? { fact: pl.fact, loves: pl.loves }
+                            : (MON.PLACE_T && MON.PLACE_T[pl.id] && MON.PLACE_T[pl.id][lang]);
+    if (!t) continue;
+    // The card keeps its em-dash on screen; the narrator gets a comma, which TTS paces correctly.
+    const spoken = s => s.replace(/\s*—\s*/g, ', ');
+    clips[`pfact_${pl.id}`]  = spoken(t.fact);
+    clips[`ploves_${pl.id}`] = spoken(t.loves);
+  }
   for (const key of Object.keys(MON.ANIMALS)) {
     if (key === 'fish') continue;
     const w = VOC.WORDS[cap(key)];
     const word = lang === 'en' ? MON.ANIMALS[key].name : (w ? (w[lang] || w.en) : key).toLowerCase();
     clips[`howmany_${key}`] = fmt(VOC.HOWMANY[lang] || VOC.HOWMANY.en, { w: word });
   }
+  // Mission Ranch activity lines that are NOT templated (the add/sub prompts reuse
+  // the existing math_add_*/math_sub_* recordings, so they are not repeated here).
+  if (c.ranch) {
+    if (c.ranch.nice)        clips['ranch_nice']    = c.ranch.nice;
+    if (c.ranch.goodbye)     clips['ranch_goodbye'] = c.ranch.goodbye;
+    if (c.ranch.mulAskShort) clips['ranch_mul']     = c.ranch.mulAskShort;
+  }
   return clips;
 }
 function expectedEnglishOnly() {
   const clips = {};
   for (const s of STO) {
+    if (s.intro) clips[`sintro_${s.vox}`] = s.intro;   // narration over the story's intro film
     const walk = beats => beats.forEach((b, i) => {
       if (b.say) clips[`sty_${s.vox}_${b.vk != null ? b.vk : i}`] = b.say;
       if (b.fork) b.fork.options.forEach(o => walk(o.beats));

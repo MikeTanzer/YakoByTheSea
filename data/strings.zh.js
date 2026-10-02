@@ -13,6 +13,7 @@ window.YAKO_STRINGS.zh = {
   next: "真棒！现在来找{key}吧！",
   countIntro: "下一个数字是 {num}。先找到数字 {digit}！",
   sound: "{letter}，{word} 的 {letter}！找到字母 {letter}！",
+  vowel: "字母 {letter} 的发音像 {word} 里的 {sound}。找出 {letter}！",
   howMany: "有多少{creatures}？数一数，然后按数字！",
   countAny: "有多少呀？数一数，然后按数字！",
   mathAddClip: "这里有 {a} 个，又来了 {b} 个！一共有多少个？",
@@ -71,5 +72,34 @@ window.YAKO_STRINGS.zh = {
     Q:{word:'Queen',emoji:'👑'}, R:{word:'Rainbow',emoji:'🌈'}, S:{word:'Sun',emoji:'☀️'}, T:{word:'Tree',emoji:'🌳'},
     U:{word:'Umbrella',emoji:'☂️'}, V:{word:'Violin',emoji:'🎻'}, W:{word:'Whale',emoji:'🐳'}, X:{word:'Fox',emoji:'🦊'},
     Y:{word:'Yo-yo',emoji:'🪀'}, Z:{word:'Zebra',emoji:'🦓'}
+  },
+  // Mission Ranch counting activity (js/ranch.js) - shown on screen AND read aloud.
+  ranch: {
+    intro: "我们和 Yako 一起数一数小羊吧！",
+    count: "每只小羊都点一下，数一数。",
+    total: "数到 {n} 啦！",
+    totalOne: "一只小羊！",
+    which: "哪一个是 {n}？",
+    hint: "点这只小羊！",
+    nice: "你全都数完啦！",
+    round: "第 {r} 轮，一共 {t} 轮",
+    again: "再玩一次",
+    explore: "去看看",
+    finish: "玩好啦",
+    goodbye: "再见啦！下次再来玩哦！",
+    replay: "再听一遍",
+    sheepLbl: "小羊",
+    countedLbl: "数过了",
+    countAsk: "有几只小羊？按数字！",
+    addAsk: "{a}只小羊，又来了{b}只。现在有几只？",
+    subAsk: "{a}只小羊，走了{b}只。还剩几只？",
+    mulAsk: "{g}组小羊，每组{c}只。一共有几只？",
+    typeIt: "按数字！",
+    stageCount: "数一数",
+    stageAdd: "加一加",
+    stageSub: "减一减",
+    stageMul: "分一分",
+    clearLbl: "删除",
+    mulAskShort: "一共有几只？"
   }
 };
