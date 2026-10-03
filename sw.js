@@ -1,5 +1,5 @@
 /* Yako by the Sea — service worker (offline + installable PWA) */
-const CORE = 'yako-core-v163';    // versioned: bumped whenever the code/art below changes
+const CORE = 'yako-core-v164';    // versioned: bumped whenever the code/art below changes
 const MEDIA = 'yako-media';      // persistent: clips + scene stills cached as played (survives version bumps)
 // Retired: fonts are self-hosted and precached in CORE. The name is kept ONLY so the
 // activate handler below keeps deleting the old cache on clients that still carry it.
